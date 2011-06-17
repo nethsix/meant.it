@@ -1,0 +1,31 @@
+<h1>Listing end_points</h1>
+
+<table>
+  <tr>
+    <th>Creatorendpoint</th>
+    <th>Starttime</th>
+    <th>Endtime</th>
+    <th>Nick</th>
+    <th>Status</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @end_points.each do |end_point| %>
+  <tr>
+    <td><%= end_point.creatorEndPoint_id %></td>
+    <td><%= end_point.startTime %></td>
+    <td><%= end_point.endTime %></td>
+    <td><%= end_point.nick %></td>
+    <td><%= end_point.status %></td>
+    <td><%= link_to 'Show', end_point %></td>
+    <td><%= link_to 'Edit', edit_end_point_path(end_point) %></td>
+    <td><%= link_to 'Destroy', end_point, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New End point', new_end_point_path %>

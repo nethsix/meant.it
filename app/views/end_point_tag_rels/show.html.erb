@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Endpoint:</b>
+  <%= @end_point_tag_rel.endPoint_id %>
+</p>
+
+<p>
+  <b>Tag:</b>
+  <%= @end_point_tag_rel.tag_id %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @end_point_tag_rel.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_end_point_tag_rel_path(@end_point_tag_rel) %> |
+<%= link_to 'Back', end_point_tag_rels_path %>

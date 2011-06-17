@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Creatorendpoint:</b>
+  <%= @end_point.creatorEndPoint_id %>
+</p>
+
+<p>
+  <b>Starttime:</b>
+  <%= @end_point.startTime %>
+</p>
+
+<p>
+  <b>Endtime:</b>
+  <%= @end_point.endTime %>
+</p>
+
+<p>
+  <b>Nick:</b>
+  <%= @end_point.nick %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @end_point.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_end_point_path(@end_point) %> |
+<%= link_to 'Back', end_points_path %>

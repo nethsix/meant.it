@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Entity:</b>
+  <%= @entity_end_point_rel.entity_id %>
+</p>
+
+<p>
+  <b>Endpoint:</b>
+  <%= @entity_end_point_rel.endPoint_id %>
+</p>
+
+<p>
+  <b>Verificationtype:</b>
+  <%= @entity_end_point_rel.verificationType %>
+</p>
+
+<p>
+  <b>Verificationdesc:</b>
+  <%= @entity_end_point_rel.verificationDesc %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @entity_end_point_rel.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_entity_end_point_rel_path(@entity_end_point_rel) %> |
+<%= link_to 'Back', entity_end_point_rels_path %>

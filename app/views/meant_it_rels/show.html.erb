@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Srcendpoint:</b>
+  <%= @meant_it_rel.srcEndPoint_id %>
+</p>
+
+<p>
+  <b>Dstendpoint:</b>
+  <%= @meant_it_rel.dstEndPoint_id %>
+</p>
+
+<p>
+  <b>Messagetype:</b>
+  <%= @meant_it_rel.messageType %>
+</p>
+
+<p>
+  <b>Message:</b>
+  <%= @meant_it_rel.message %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @meant_it_rel.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_meant_it_rel_path(@meant_it_rel) %> |
+<%= link_to 'Back', meant_it_rels_path %>

@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Piitype:</b>
+  <%= @pii.piiType %>
+</p>
+
+<p>
+  <b>Piivalue:</b>
+  <%= @pii.piiValue %>
+</p>
+
+<p>
+  <b>Piidesc:</b>
+  <%= @pii.piiDesc %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @pii.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_pii_path(@pii) %> |
+<%= link_to 'Back', piis_path %>

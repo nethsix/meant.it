@@ -1,0 +1,2 @@
+module EntityEndPointRelsHelper
+end

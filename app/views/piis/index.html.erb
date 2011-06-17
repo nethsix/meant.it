@@ -1,0 +1,29 @@
+<h1>Listing piis</h1>
+
+<table>
+  <tr>
+    <th>Piitype</th>
+    <th>Piivalue</th>
+    <th>Piidesc</th>
+    <th>Status</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @piis.each do |pii| %>
+  <tr>
+    <td><%= pii.piiType %></td>
+    <td><%= pii.piiValue %></td>
+    <td><%= pii.piiDesc %></td>
+    <td><%= pii.status %></td>
+    <td><%= link_to 'Show', pii %></td>
+    <td><%= link_to 'Edit', edit_pii_path(pii) %></td>
+    <td><%= link_to 'Destroy', pii, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Pii', new_pii_path %>

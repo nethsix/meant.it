@@ -1,0 +1,33 @@
+<%= form_for(@pii) do |f| %>
+  <% if @pii.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@pii.errors.count, "error") %> prohibited this pii from being saved:</h2>
+
+      <ul>
+      <% @pii.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :piiType %><br />
+    <%= f.text_field :piiType %>
+  </div>
+  <div class="field">
+    <%= f.label :piiValue %><br />
+    <%= f.text_field :piiValue %>
+  </div>
+  <div class="field">
+    <%= f.label :piiDesc %><br />
+    <%= f.text_area :piiDesc %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+    <%= f.text_field :status %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

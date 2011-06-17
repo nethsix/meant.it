@@ -1,0 +1,27 @@
+<h1>Listing end_point_tag_rels</h1>
+
+<table>
+  <tr>
+    <th>Endpoint</th>
+    <th>Tag</th>
+    <th>Status</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @end_point_tag_rels.each do |end_point_tag_rel| %>
+  <tr>
+    <td><%= end_point_tag_rel.endPoint_id %></td>
+    <td><%= end_point_tag_rel.tag_id %></td>
+    <td><%= end_point_tag_rel.status %></td>
+    <td><%= link_to 'Show', end_point_tag_rel %></td>
+    <td><%= link_to 'Edit', edit_end_point_tag_rel_path(end_point_tag_rel) %></td>
+    <td><%= link_to 'Destroy', end_point_tag_rel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New End point tag rel', new_end_point_tag_rel_path %>

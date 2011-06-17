@@ -1,0 +1,29 @@
+<%= form_for(@end_point_tag_rel) do |f| %>
+  <% if @end_point_tag_rel.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@end_point_tag_rel.errors.count, "error") %> prohibited this end_point_tag_rel from being saved:</h2>
+
+      <ul>
+      <% @end_point_tag_rel.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :endPoint_id %><br />
+    <%= f.text_field :endPoint_id %>
+  </div>
+  <div class="field">
+    <%= f.label :tag_id %><br />
+    <%= f.text_field :tag_id %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+    <%= f.text_field :status %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

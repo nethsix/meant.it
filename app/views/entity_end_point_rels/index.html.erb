@@ -1,0 +1,31 @@
+<h1>Listing entity_end_point_rels</h1>
+
+<table>
+  <tr>
+    <th>Entity</th>
+    <th>Endpoint</th>
+    <th>Verificationtype</th>
+    <th>Verificationdesc</th>
+    <th>Status</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @entity_end_point_rels.each do |entity_end_point_rel| %>
+  <tr>
+    <td><%= entity_end_point_rel.entity_id %></td>
+    <td><%= entity_end_point_rel.endPoint_id %></td>
+    <td><%= entity_end_point_rel.verificationType %></td>
+    <td><%= entity_end_point_rel.verificationDesc %></td>
+    <td><%= entity_end_point_rel.status %></td>
+    <td><%= link_to 'Show', entity_end_point_rel %></td>
+    <td><%= link_to 'Edit', edit_entity_end_point_rel_path(entity_end_point_rel) %></td>
+    <td><%= link_to 'Destroy', entity_end_point_rel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Entity end point rel', new_entity_end_point_rel_path %>

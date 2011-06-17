@@ -1,0 +1,41 @@
+<%= form_for(@obj_rel) do |f| %>
+  <% if @obj_rel.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@obj_rel.errors.count, "error") %> prohibited this obj_rel from being saved:</h2>
+
+      <ul>
+      <% @obj_rel.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :srcObj_id %><br />
+    <%= f.text_field :srcObj_id %>
+  </div>
+  <div class="field">
+    <%= f.label :dstObj_id %><br />
+    <%= f.text_field :dstObj_id %>
+  </div>
+  <div class="field">
+    <%= f.label :relType %><br />
+    <%= f.text_field :relType %>
+  </div>
+  <div class="field">
+    <%= f.label :relObjType %><br />
+    <%= f.text_field :relObjType %>
+  </div>
+  <div class="field">
+    <%= f.label :relDesc %><br />
+    <%= f.text_field :relDesc %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+    <%= f.text_field :status %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,31 @@
+<h1>Listing meant_it_rels</h1>
+
+<table>
+  <tr>
+    <th>Srcendpoint</th>
+    <th>Dstendpoint</th>
+    <th>Messagetype</th>
+    <th>Message</th>
+    <th>Status</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @meant_it_rels.each do |meant_it_rel| %>
+  <tr>
+    <td><%= meant_it_rel.srcEndPoint_id %></td>
+    <td><%= meant_it_rel.dstEndPoint_id %></td>
+    <td><%= meant_it_rel.messageType %></td>
+    <td><%= meant_it_rel.message %></td>
+    <td><%= meant_it_rel.status %></td>
+    <td><%= link_to 'Show', meant_it_rel %></td>
+    <td><%= link_to 'Edit', edit_meant_it_rel_path(meant_it_rel) %></td>
+    <td><%= link_to 'Destroy', meant_it_rel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Meant it rel', new_meant_it_rel_path %>

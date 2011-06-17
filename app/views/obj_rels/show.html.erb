@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Srcobj:</b>
+  <%= @obj_rel.srcObj_id %>
+</p>
+
+<p>
+  <b>Dstobj:</b>
+  <%= @obj_rel.dstObj_id %>
+</p>
+
+<p>
+  <b>Reltype:</b>
+  <%= @obj_rel.relType %>
+</p>
+
+<p>
+  <b>Relobjtype:</b>
+  <%= @obj_rel.relObjType %>
+</p>
+
+<p>
+  <b>Reldesc:</b>
+  <%= @obj_rel.relDesc %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @obj_rel.status %>
+</p>
+
+
+<%= link_to 'Edit', edit_obj_rel_path(@obj_rel) %> |
+<%= link_to 'Back', obj_rels_path %>
