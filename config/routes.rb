@@ -1,4 +1,6 @@
 MeantIt::Application.routes.draw do
+  resources :inbound_emails
+
   resources :end_point_tag_rels
 
   resources :tags
@@ -79,6 +81,7 @@ MeantIt::Application.routes.draw do
 
 #  match '/receive_email' => 'emails#receive_email'
   match "/receive_email" => ReceiveEmail
+  match "/send_email" => SendEmail.action(:index)
 
   root :to => "people#index"
 end

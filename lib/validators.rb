@@ -58,4 +58,10 @@ class ObjRelObjTypeValidator < ActiveModel::EachValidator
   end # end def validate_each
 end # end class VerificationTypeValidator
 
-
+class BodyOrSubjectNotNullValidator < ActiveModel::Validator
+  def validate(record)
+    if (record.subject.nil? or record.subject.empty?) and (record.body_text.nil? or record.body_text.empty?)
+      record.errors[:base] << "Either body text or subject must contain something"
+    end # end if (record.subject.nil? ... )
+  end # end def validate(record)
+end # end class BodyOrSubjectNotNullValidator

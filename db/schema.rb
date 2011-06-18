@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110617031146) do
+ActiveRecord::Schema.define(:version => 20110617135014) do
 
   create_table "end_point_tag_rels", :force => true do |t|
     t.integer  "endPoint_id"
@@ -54,6 +54,25 @@ ActiveRecord::Schema.define(:version => 20110617031146) do
   end
 
   add_index "entity_end_point_rels", ["endPoint_id", "entity_id", "verificationType"], :name => "by_endPoint_id_and_entity_id_and_verificationType", :unique => true
+
+  create_table "inbound_emails", :force => true do |t|
+    t.text     "headers",          :null => false
+    t.text     "body_text"
+    t.text     "body_html"
+    t.string   "from",             :null => false
+    t.string   "to",               :null => false
+    t.string   "cc"
+    t.text     "subject"
+    t.text     "dkim"
+    t.text     "spf"
+    t.text     "envelope",         :null => false
+    t.text     "charsets"
+    t.string   "spam_score"
+    t.text     "spam_report"
+    t.integer  "attachment_count", :null => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "meant_it_rels", :force => true do |t|
     t.integer  "srcEndPoint_id", :null => false
