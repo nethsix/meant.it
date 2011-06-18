@@ -40,6 +40,7 @@ class InboundEmailsController < ApplicationController
   # POST /inbound_emails
   # POST /inbound_emails.xml
   def create
+puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     @inbound_email = InboundEmail.new(params[:inbound_email])
 
     respond_to do |format|
