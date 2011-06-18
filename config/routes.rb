@@ -81,7 +81,7 @@ MeantIt::Application.routes.draw do
 
 #  match '/receive_email' => 'emails#receive_email'
   match "/receive_email" => ReceiveEmail
-  match "/send_email" => SendEmail.action(:index)
+#  match "/send_email" => SendEmail.action(:index)
 
   root :to => "people#index"
 end
