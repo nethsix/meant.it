@@ -63,6 +63,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         format.html { redirect_to(@inbound_email, :notice => 'Inbound email was successfully created.') }
         format.xml  { render :xml => @inbound_email, :status => :created, :location => @inbound_email }
       else
+puts "InboundEmail, @inbound_email.errors:#{@inbound_email.errors.inspect}"
         format.html { render :action => "new" }
         format.xml  { render :xml => @inbound_email.errors, :status => :unprocessable_entity }
       end
