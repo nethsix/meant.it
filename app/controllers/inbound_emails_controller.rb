@@ -41,7 +41,22 @@ class InboundEmailsController < ApplicationController
   # POST /inbound_emails.xml
   def create
 puts "InboundEmail, create:#{params[:inbound_email].inspect}"
-    @inbound_email = InboundEmail.new(params[:inbound_email])
+    @inbound_email = InboundEmail.new(
+      :headers => params["headers"],
+      :body_text => params["text"],
+      :body_html => params["html"],
+      :from => params["from"],
+      :to => params["to"],
+      :subject => params["from"],
+      :cc => params["cc"],
+      :dkim => params["dkim"],
+      :spf => params["spf"],
+      :envelope => params["envelope"]
+      :charsets => params["charsets"],
+      :spam_score => params["spam_score"],
+      :spam_report => params["spam_report"],
+      :attachment_count => params["attachment_count"]
+    )
 
     respond_to do |format|
       if @inbound_email.save
