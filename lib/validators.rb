@@ -1,5 +1,7 @@
 class StatusTypeValidator < ActiveModel::EachValidator
-  STATUS_ENUM = ["active", "inactive", "deleted"]
+  STATUS_ACTIVE = "active"
+  STATUS_INACTIVE = "inactive"
+  STATUS_ENUM = [ STATUS_ACTIVE, STATUS_INACTIVE ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{STATUS_ENUM.join('\', \'').strip}'" if value.nil? or STATUS_ENUM.index(value.downcase).nil?
   end # end def validate_each
@@ -24,35 +26,50 @@ class PropertyDocumentIdForeignKeyValidator < ActiveModel::EachValidator
 end # end class DocIdForeignKeylidator
 
 class MeantItMessageTypeValidator < ActiveModel::EachValidator
-  MEANT_IT_MESSAGE_TYPE_ENUM = ["thank", "sympathy", "resent"]
+  MEANT_IT_MESSAGE_THANK = "thank"
+  MEANT_IT_MESSAGE_SYMPATHY = "sympathy"
+  MEANT_IT_MESSAGE_RESENT = "resent"
+  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{MEANT_IT_MESSAGE_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or MEANT_IT_MESSAGE_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class MeantItMessageTypeValidator
 
 class ObjRelTypeValidator < ActiveModel::EachValidator
-  OBJ_REL_TYPE_ENUM = ["alias", "type_of", "in"]
+  OBJ_REL_TYPE_ALIAS = "alias"
+  OBJ_REL_TYPE_TYPE_OF = "type_of"
+  OBJ_REL_TYPE_IN = "in"
+  OBJ_REL_TYPE_ENUM = [ OBJ_REL_TYPE_ALIAS, OBJ_REL_TYPE_TYPE_OF, OBJ_REL_TYPE_IN ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{OBJ_REL_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or OBJ_REL_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class ObjRelTypeValidator
 
 class PiiTypeValidator < ActiveModel::EachValidator
-  PII_TYPE_ENUM = ["passport", "email", "id_card", "ssn"]
+  PII_TYPE_PASSPORT = "passport"
+  PII_TYPE_EMAIL = "email"
+  PII_TYPE_ID_CARD = "id_card"
+  PII_TYPE_SSN = "ssn"
+  PII_TYPE_ENUM = [ PII_TYPE_PASSPORT, PII_TYPE_EMAIL, PII_TYPE_ID_CARD, PII_TYPE_SSN ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{PII_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or PII_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class PiiTypeValidator
 
 class VerificationTypeValidator < ActiveModel::EachValidator
-  VERIFICATION_TYPE_ENUM = ["phone", "physical", "email"]
+  VERIFICATION_TYPE_PHONE = "phone"
+  VERIFICATION_TYPE_PHYSICAL = "physical"
+  VERIFICATION_TYPE_EMAIL = "email"
+  VERIFICATION_TYPE_ENUM = [ VERIFICATION_TYPE_PHONE, VERIFICATION_TYPE_PHYSICAL, VERIFICATION_TYPE_EMAIL ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{VERIFICATION_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or VERIFICATION_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class VerificationTypeValidator
 
 class ObjRelObjTypeValidator < ActiveModel::EachValidator
-  OBJ_REL_OBJ_TYPE_ENUM = ["tag", "end_point"]
+  OBJ_REL_OBJ_TYPE_TAG = "tag"
+  OBJ_REL_OBJ_TYPE_END_POINT = "end_point"
+  OBJ_REL_OBJ_TYPE_ENUM = [ OBJ_REL_OBJ_TYPE_TAG, OBJ_REL_OBJ_TYPE_END_POINT ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{OBJ_REL_OBJ_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or OBJ_REL_OBJ_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each
