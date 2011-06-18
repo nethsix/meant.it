@@ -1,0 +1,2 @@
+module InboundEmailsHelper
+end

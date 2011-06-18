@@ -1,0 +1,75 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Headers:</b>
+  <%= @inbound_email.headers %>
+</p>
+
+<p>
+  <b>Body text:</b>
+  <%= @inbound_email.body_text %>
+</p>
+
+<p>
+  <b>Body html:</b>
+  <%= @inbound_email.body_html %>
+</p>
+
+<p>
+  <b>From:</b>
+  <%= @inbound_email.from %>
+</p>
+
+<p>
+  <b>To:</b>
+  <%= @inbound_email.to %>
+</p>
+
+<p>
+  <b>Cc:</b>
+  <%= @inbound_email.cc %>
+</p>
+
+<p>
+  <b>Subject:</b>
+  <%= @inbound_email.subject %>
+</p>
+
+<p>
+  <b>Dkim:</b>
+  <%= @inbound_email.dkim %>
+</p>
+
+<p>
+  <b>Spf:</b>
+  <%= @inbound_email.spf %>
+</p>
+
+<p>
+  <b>Envelope:</b>
+  <%= @inbound_email.envelope %>
+</p>
+
+<p>
+  <b>Charsets:</b>
+  <%= @inbound_email.charsets %>
+</p>
+
+<p>
+  <b>Spam score:</b>
+  <%= @inbound_email.spam_score %>
+</p>
+
+<p>
+  <b>Spam report:</b>
+  <%= @inbound_email.spam_report %>
+</p>
+
+<p>
+  <b>Attachment count:</b>
+  <%= @inbound_email.attachment_count %>
+</p>
+
+
+<%= link_to 'Edit', edit_inbound_email_path(@inbound_email) %> |
+<%= link_to 'Back', inbound_emails_path %>

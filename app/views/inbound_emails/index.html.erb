@@ -1,0 +1,49 @@
+<h1>Listing inbound_emails</h1>
+
+<table>
+  <tr>
+    <th>Headers</th>
+    <th>Body text</th>
+    <th>Body html</th>
+    <th>From</th>
+    <th>To</th>
+    <th>Cc</th>
+    <th>Subject</th>
+    <th>Dkim</th>
+    <th>Spf</th>
+    <th>Envelope</th>
+    <th>Charsets</th>
+    <th>Spam score</th>
+    <th>Spam report</th>
+    <th>Attachment count</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @inbound_emails.each do |inbound_email| %>
+  <tr>
+    <td><%= inbound_email.headers %></td>
+    <td><%= inbound_email.body_text %></td>
+    <td><%= inbound_email.body_html %></td>
+    <td><%= inbound_email.from %></td>
+    <td><%= inbound_email.to %></td>
+    <td><%= inbound_email.cc %></td>
+    <td><%= inbound_email.subject %></td>
+    <td><%= inbound_email.dkim %></td>
+    <td><%= inbound_email.spf %></td>
+    <td><%= inbound_email.envelope %></td>
+    <td><%= inbound_email.charsets %></td>
+    <td><%= inbound_email.spam_score %></td>
+    <td><%= inbound_email.spam_report %></td>
+    <td><%= inbound_email.attachment_count %></td>
+    <td><%= link_to 'Show', inbound_email %></td>
+    <td><%= link_to 'Edit', edit_inbound_email_path(inbound_email) %></td>
+    <td><%= link_to 'Destroy', inbound_email, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Inbound email', new_inbound_email_path %>

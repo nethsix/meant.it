@@ -1,0 +1,73 @@
+<%= form_for(@inbound_email) do |f| %>
+  <% if @inbound_email.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@inbound_email.errors.count, "error") %> prohibited this inbound_email from being saved:</h2>
+
+      <ul>
+      <% @inbound_email.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :headers %><br />
+    <%= f.text_area :headers %>
+  </div>
+  <div class="field">
+    <%= f.label :body_text %><br />
+    <%= f.text_area :body_text %>
+  </div>
+  <div class="field">
+    <%= f.label :body_html %><br />
+    <%= f.text_area :body_html %>
+  </div>
+  <div class="field">
+    <%= f.label :from %><br />
+    <%= f.text_field :from %>
+  </div>
+  <div class="field">
+    <%= f.label :to %><br />
+    <%= f.text_field :to %>
+  </div>
+  <div class="field">
+    <%= f.label :cc %><br />
+    <%= f.text_field :cc %>
+  </div>
+  <div class="field">
+    <%= f.label :subject %><br />
+    <%= f.text_area :subject %>
+  </div>
+  <div class="field">
+    <%= f.label :dkim %><br />
+    <%= f.text_area :dkim %>
+  </div>
+  <div class="field">
+    <%= f.label :spf %><br />
+    <%= f.text_field :spf %>
+  </div>
+  <div class="field">
+    <%= f.label :envelope %><br />
+    <%= f.text_area :envelope %>
+  </div>
+  <div class="field">
+    <%= f.label :charsets %><br />
+    <%= f.text_area :charsets %>
+  </div>
+  <div class="field">
+    <%= f.label :spam_score %><br />
+    <%= f.text_field :spam_score %>
+  </div>
+  <div class="field">
+    <%= f.label :spam_report %><br />
+    <%= f.text_area :spam_report %>
+  </div>
+  <div class="field">
+    <%= f.label :attachment_count %><br />
+    <%= f.text_field :attachment_count %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
