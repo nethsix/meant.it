@@ -55,7 +55,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       :charsets => params["charsets"],
       :spam_score => params["spam_score"],
       :spam_report => params["spam_report"],
-      :attachment_count => params["attachment_count"]
+      :attachment_count => params["attachments"]
     )
 
     respond_to do |format|
