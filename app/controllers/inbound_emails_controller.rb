@@ -51,7 +51,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       :cc => params["cc"],
       :dkim => params["dkim"],
       :spf => params["spf"],
-      :envelope => params["envelope"]
+      :envelope => params["envelope"],
       :charsets => params["charsets"],
       :spam_score => params["spam_score"],
       :spam_report => params["spam_report"],
