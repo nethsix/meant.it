@@ -58,6 +58,44 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       :attachment_count => params["attachments"]
     )
 
+    sender_str = params["from"]
+    # Clean sender to contain only email within < email >
+    sender_str_match_arr = sender_str.match(/.*<(.*)>/)
+    sender_str = sender_str_match_arr[1] if !sender_str_match_arr.nil?
+    # Create sender EndPoint
+    sender_pii = Pii.find_or_create_by_piiValue_and_piiType(sender_str, 
+    # Look at subject if it's not nil
+    # else use body_text
+    # Decide what to do on nick, pii, message, tags...
+    # Case:
+    # nick (yes) :xxx (no) ;yyy (*) tags (yes): sender (global id-able source)
+    input_str = params["subject"]
+    input_str ||= params["text"]
+    # Determine nick, :xxx, :yyy, tags
+    input_str_arr = input_str.split
+    nick_str = input_str_arr.shift
+    tag_str_arr = Array.new
+    receiver_pii_str = nil
+    message_str = nil
+    input_str_arr.each { |input_str_arr_elem|
+      if input_str_arr_elem[0,1] == ":"
+        receiver_pii_str = input_str_arr_elem
+      elsif input_str_arr_elem[0,1] == ";"
+        message_str = input_str_arr_elem
+      else
+        tag_str_arr.push(input_str_arr_elem)
+      end # end if input_str_arr_elem ...
+    } // end input_str_arr.each ...
+    tag_str_arr = nil if tag_str_arr.empty? 
+    # From nick, receiver_pii, message, tag, create the necesary
+    # database objects
+    endPoint = @EndPoint.find_or_create_by_nick_and_sender(nick_str, sender_str)
+    tag_arr = Array.new
+    tag_str_arr.each { |tag_str_elem|
+      tag = @Tag.find_or_create_by_nick(tag_str_elem)
+      endPoint.endPointTagRels
+    } # end tag_str_arr.each ...
+
     respond_to do |format|
       if @inbound_email.save
         format.html { redirect_to(@inbound_email, :notice => 'Inbound email was successfully created.') }

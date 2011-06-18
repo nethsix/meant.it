@@ -19,4 +19,11 @@ class EndPoint < ActiveRecord::Base
   validates :nick, :presence => true
   validates :startTime, :presence => true
   validates :status, :presence => true, :status_type => true
+
+  after_initialize :default_values
+
+  private
+    def default_values
+      self.status||= "active"
+    end
 end
