@@ -10,7 +10,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110617135014) do
+ActiveRecord::Schema.define(:version => 20110619043704) do
+
+  create_table "appointments", :force => true do |t|
+    t.datetime "app_date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "physician_id"
+    t.integer  "patient_id"
+  end
 
   create_table "end_point_tag_rels", :force => true do |t|
     t.integer  "endPoint_id"
@@ -96,6 +104,18 @@ ActiveRecord::Schema.define(:version => 20110617135014) do
   end
 
   add_index "obj_rels", ["srcObj_id", "dstObj_id", "relType"], :name => "by_srcObj_id_and_dstObj_id_and_relType", :unique => true
+
+  create_table "patients", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "physicians", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "piis", :force => true do |t|
     t.string   "piiType",     :null => false

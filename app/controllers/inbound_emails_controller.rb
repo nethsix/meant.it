@@ -58,12 +58,24 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       :attachment_count => params["attachments"]
     )
 
+    error = false
+    error = true if !@inbound_email.save
     sender_str = params["from"]
     # Clean sender to contain only email within < email >
-    sender_str_match_arr = sender_str.match(/.*<(.*)>/)
-    sender_str = sender_str_match_arr[1] if !sender_str_match_arr.nil?
+    sender_str_match_arr = sender_str.match(/(.*)<(.*)>/)
+    sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
+    sender_str = sender_str_match_arr[2] if !sender_str_match_arr.nil?
+    sender_nick_str ||= sender_str
     # Create sender EndPoint
-    sender_pii = Pii.find_or_create_by_piiValue_and_piiType(sender_str, 
+    sender_pii = Pii.find_or_create_by_piiValue_and_piiType(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
+    sender_endPoint = sender_pii.endPoint
+    @inbound_email.errors += sender_endPoint.errors
+    if !sender_endPoint.nil?
+      sender_endPoint = sender_pii.create_endPoint(:nick => sender_nick_str, :startTime => Time.now)
+      # Save the association
+      sender_endPoint.save
+      @inbound_email.errors =+ sender_endPoint.errors
+    end # end if sender_endPoint.nil?
     # Look at subject if it's not nil
     # else use body_text
     # Decide what to do on nick, pii, message, tags...
@@ -89,15 +101,21 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     tag_str_arr = nil if tag_str_arr.empty? 
     # From nick, receiver_pii, message, tag, create the necesary
     # database objects
-    endPoint = @EndPoint.find_or_create_by_nick_and_sender(nick_str, sender_str)
-    tag_arr = Array.new
-    tag_str_arr.each { |tag_str_elem|
-      tag = @Tag.find_or_create_by_nick(tag_str_elem)
-      endPoint.endPointTagRels
-    } # end tag_str_arr.each ...
+    receiver_endPoint = @EndPoint.find_or_create_by_nick_and_creatorEndPoint_id(nick_str, sender_endPoint.id)
+    @inbound_email.errors =+ receiver_endPoint.errors
+    if !receiver_endPoint.nil?
+      # Add tags that are not yet attached to the receiver_endPoint
+      existing_tag_str_arr = receiver_endPoint.tags.collect { |tag_elem| tag_elem.name }
+      yet_2b_associated_tag_str_arr = (existing_tag_str_arr - tag_str_arr) + (tag_str_arr - existing_tag_str_arr)
+      yet_2b_associated_tag_str_arr.each { |tag_str_elem|
+        new_tag = @Tag.find_or_create_by_name(tag_str_elem)
+        receiver_endPoint.tags.push(new_tag)
+      } # end tag_str_arr.each ...
+      # For existing ones just associate them
+    end # end if !receiver_endPoint.nil?
 
     respond_to do |format|
-      if @inbound_email.save
+    if !error
         format.html { redirect_to(@inbound_email, :notice => 'Inbound email was successfully created.') }
         format.xml  { render :xml => @inbound_email, :status => :created, :location => @inbound_email }
       else

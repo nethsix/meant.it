@@ -1,7 +1,7 @@
 require 'validators'
 
 class EndPointTagRel < ActiveRecord::Base
-  belongs_to :endPoint
+  belongs_to :endPoint, :class_name => "EndPoint", :foreign_key => '"endPoint_id"'
   belongs_to :tag
 
   validates :status, :presence => true, :status_type => true

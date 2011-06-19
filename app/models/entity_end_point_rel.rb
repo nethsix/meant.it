@@ -1,7 +1,7 @@
 require 'validators'
 
 class EntityEndPointRel < ActiveRecord::Base
-  belongs_to :endPoint
+  belongs_to :endPoint, :class_name => "EndPoint", :foreign_key => '"endPoint_id"'
   belongs_to :entity
 
   validates :verificationType, :presence => true, :verification_type => true
