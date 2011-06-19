@@ -1,10 +1,10 @@
 require 'validators'
 
 class Pii < ActiveRecord::Base
-  belongs_to :endPoint
+  belongs_to :endPoint, :class_name => "EndPoint", :foreign_key => "endpoint_id"
 
-  validates :piiType, :presence => true, :pii_type => true
-  validates :piiValue, :presence => true
+  validates :pii_type, :presence => true, :pii_type => true
+  validates :pii_value, :presence => true
   validates :status, :presence => true, :status_type => true
 
   after_initialize :default_values

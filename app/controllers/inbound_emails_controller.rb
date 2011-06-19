@@ -61,18 +61,29 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     error = false
     error = true if !@inbound_email.save
     sender_str = params["from"]
-    # Clean sender to contain only email within < email >
+    message_type_str = params["to"]
+    message_type_str_match_arr = nil
+    message_type_str_match_arr = message_type_str.match /(.*)@.*/ if !message_type_str.nil?
+    if message_type_str_match_arr.nil?
+      message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+    else
+      message_type_str = message_type_str_match_arr[1]
+    end # end if message_type_str.nil? or message_type_str.empty?
+    # Parse sender string to derive nick and email address
     sender_str_match_arr = sender_str.match(/(.*)<(.*)>/)
     sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
     sender_str = sender_str_match_arr[2] if !sender_str_match_arr.nil?
     sender_nick_str ||= sender_str
     # Create sender EndPoint
-    sender_pii = Pii.find_or_create_by_piiValue_and_piiType(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
+    sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
     sender_endPoint = sender_pii.endPoint
     @inbound_email.errors += sender_endPoint.errors
-    if !sender_endPoint.nil?
-      sender_endPoint = sender_pii.create_endPoint(:nick => sender_nick_str, :startTime => Time.now)
+    if sender_endPoint.nil?
+      sender_endPoint = sender_pii.create_endPoint(:nick => sender_nick_str, :start_time => Time.now)
       # Save the association
+      sender_endPoint.pii = sender_pii
+      sender_endPoint.nick = sender_nick_str
+      sender_endPoint.creator_endpoint_id = sender_endPoint.id
       sender_endPoint.save
       @inbound_email.errors =+ sender_endPoint.errors
     end # end if sender_endPoint.nil?
@@ -85,7 +96,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     input_str ||= params["text"]
     # Determine nick, :xxx, :yyy, tags
     input_str_arr = input_str.split
-    nick_str = input_str_arr.shift
+    receiver_nick_str = input_str_arr.shift
     tag_str_arr = Array.new
     receiver_pii_str = nil
     message_str = nil
@@ -101,18 +112,22 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     tag_str_arr = nil if tag_str_arr.empty? 
     # From nick, receiver_pii, message, tag, create the necesary
     # database objects
-    receiver_endPoint = @EndPoint.find_or_create_by_nick_and_creatorEndPoint_id(nick_str, sender_endPoint.id)
+    receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => sender_endPoint.id, :start_time => Time.now)
     @inbound_email.errors =+ receiver_endPoint.errors
     if !receiver_endPoint.nil?
       # Add tags that are not yet attached to the receiver_endPoint
       existing_tag_str_arr = receiver_endPoint.tags.collect { |tag_elem| tag_elem.name }
       yet_2b_associated_tag_str_arr = (existing_tag_str_arr - tag_str_arr) + (tag_str_arr - existing_tag_str_arr)
       yet_2b_associated_tag_str_arr.each { |tag_str_elem|
-        new_tag = @Tag.find_or_create_by_name(tag_str_elem)
-        receiver_endPoint.tags.push(new_tag)
+        new_tag = Tag.find_or_create_by_name(tag_str_elem)
+        receiver_endPoint.tags << new_tag
       } # end tag_str_arr.each ...
-      # For existing ones just associate them
     end # end if !receiver_endPoint.nil?
+    # Create meant_it rel
+    if !sender_endPoint.nil? and !receiver_endPoint.nil?
+      meantItRel = sender_endPoint.srcMeantItRels.create(:message_type => "thank", :src_endpoint_id => sender_endPoint.id, :dst_endpoint_id => receiver_endPoint.id)
+      @inbound_email.errors =+ meantItRel.errors
+    end # end if !sender_endPoint.nil? and !receiver_endPoint.nil?
 
     respond_to do |format|
     if !error
