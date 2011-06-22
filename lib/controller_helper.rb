@@ -5,17 +5,26 @@ module ControllerHelper
     rand(LOGTAG_MAX)
   end # end def gen_logtag
 
-  def self.create_entity_by_name_email(name, email)
+  def self.create_entity_by_name_email(name, email, logtag=nil)
     return_obj = nil
     begin
       # Create propertyId
-      new_person = Person.create(:name => name, :email => email)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, name:#{name}, email:#{email}")
+      new_person = Person.find_by_email(email)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, find_by_email new_person:#{new_person.inspect}")
+      if new_person.nil?
+        new_person = Person.create(:name => name, :email => email)
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, create new_person:#{new_person.inspect}")
+      end # end if new_person.nil?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_person.errors:#{new_person.errors.inspect}")
       return_obj = new_person
-      raise Exception if new_person.errors
+      raise Exception if !new_person.errors.empty?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_person:#{new_person.inspect}")
       # Create entity
       new_entity = Entity.create(:property_document_id => new_person.id)
-      return_obj = new_person
-      raise Exception if new_entity.errors
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_entity:#{new_entity.inspect}")
+      return_obj = new_entity
+      raise Exception if !new_entity.errors.empty?
       new_entity.entityEndPointRels.create(:verification_type => "email")
     rescue Exception => e
     end
