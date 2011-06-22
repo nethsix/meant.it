@@ -34,6 +34,17 @@ class EndPoint < ActiveRecord::Base
 
   after_initialize :default_values
 
+  # Find intersection of tags
+  def EndPoint.tagged(tg, *tgs)
+    tgs = tgs.unshift(*tg)
+    joins(:tags).where("lower(tags.name) = '" + 
+      tgs.uniq.collect{ |t| t.to_s.downcase }.join("' OR lower(tags.name) = '") + 
+      "'").group("end_points.id", "end_points.creator_endpoint_id", 
+      "end_points.nick", "end_points.start_time", "end_points.end_time", 
+      "end_points.created_at", "end_points.updated_at", 
+      "end_points.status").having("count(end_points.id) = #{tgs.count}")
+  end # end def EndPoint.tagged
+
   private
     def default_values
       self.status||= "active"

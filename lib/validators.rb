@@ -78,7 +78,9 @@ end # end class VerificationTypeValidator
 class BodyOrSubjectNotNullValidator < ActiveModel::Validator
   def validate(record)
     if (record.subject.nil? or record.subject.empty?) and (record.body_text.nil? or record.body_text.empty?)
-      record.errors[:base] << "Either body text or subject must contain something"
+#      record.errors[:base] << "Either body text or subject must contain something"
+      record.errors.add :body_text, "Either body text or subject must contain something"
+      record.errors.add :subject, "Either body text or subject must contain something"
     end # end if (record.subject.nil? ... )
   end # end def validate(record)
 end # end class BodyOrSubjectNotNullValidator

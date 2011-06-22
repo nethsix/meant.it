@@ -9,6 +9,21 @@
       <% end %>
       </ul>
     </div>
+  <% else %>
+      <h2>Email successfully saved but not meant.it due to:</h2>
+      <ul>
+        <li><%= raw errors_full_html(@sender_pii, "sender_pii") %></li>
+        <li><%= raw errors_full_html(@sender_endPoint, "sender_endPoint") %></li>
+        <li><%= raw errors_full_html(@entity, "entity") %></li>
+        <li><%= raw errors_full_html(@entityEndPointRel1, "entityEndPointRel1") %></li>
+        <li><%= raw errors_full_html(@receiver_endPoint, "receiver_endPoint") %></li>
+        <li><%= raw errors_full_html(@receiver_pii, "receiver_endPoint") %></li>
+        <li><%= raw errors_full_html(@new_tag, "new_tag") %></li>
+        <li><%= raw errors_full_html(@meantItRel, "meantItRel") %></li>
+      </ul>
+      <div id="flash_message">
+        <strong>Details</strong>: <%= flash[:error] if flash[:error] %></h2>
+      </div>
   <% end %>
 
   <div class="field">
