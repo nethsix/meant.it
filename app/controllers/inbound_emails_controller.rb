@@ -150,15 +150,31 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
     if @sender_endPoint.entities.empty?
+      # Create person
+      @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
+      unless @person.errors.empty?
+        error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
+        return
+      end # end unless @person.errors.empty?
       # Create an entity having property_document with sender email
-      @entity = ControllerHelper.create_entity_by_name_email(sender_nick_str, sender_str)
-
-#AB        error_display("Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{entity.errors}", entity.errors) if !entity.errors.empty?
+#      @entity = ControllerHelper.create_entity_by_name_email(sender_nick_str, sender_str)
+      entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
+      if entity_collection.empty?
+        @entity = Entity.create(:property_document_id => @person.id)
+      else
+        @entity = entity_collection[0]
+      end # end if entity_collection.empty?
       unless @entity.errors.empty?
-#AA          flash[:error] = "Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{entity.errors}"
-        error_display("Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{@entity.errors}", @entity.errors, :error, logtag)
+        error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
         return
       end # end unless @entity.errors.empty?
+#AB        error_display("Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{entity.errors}", entity.errors) if !entity.errors.empty?
+#      unless @entity.errors.empty?
+#AA          flash[:error] = "Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{entity.errors}"
+#        error_display("Error creating entity 'name:#{sender_nick_str}, email:#{sender_str}:#{@entity.errors}", @entity.errors, :error, logtag)
+#        return
+#      end # end unless @entity.errors.empty?
 #        @inbound_email.errors =+ entity.errors
       # Link entity to the @sender_endPoint
       if @entity.errors.empty?

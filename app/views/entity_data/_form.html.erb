@@ -1,0 +1,89 @@
+<%= form_for(@entity_datum) do |f| %>
+  <% if @entity_datum.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@entity_datum.errors.count, "error") %> prohibited this entity_datum from being saved:</h2>
+
+      <ul>
+      <% @entity_datum.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :first_name %><br />
+    <%= f.text_field :first_name %>
+  </div>
+  <div class="field">
+    <%= f.label :last_name %><br />
+    <%= f.text_field :last_name %>
+  </div>
+  <div class="field">
+    <%= f.label :dob_yy %><br />
+    <%= f.text_field :dob_yy %>
+  </div>
+  <div class="field">
+    <%= f.label :dob_mm %><br />
+    <%= f.text_field :dob_mm %>
+  </div>
+  <div class="field">
+    <%= f.label :dob_day %><br />
+    <%= f.text_field :dob_day %>
+  </div>
+  <div class="field">
+    <%= f.label :address_1 %><br />
+    <%= f.text_field :address_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :address_2 %><br />
+    <%= f.text_field :address_2 %>
+  </div>
+  <div class="field">
+    <%= f.label :address_3 %><br />
+    <%= f.text_area :address_3 %>
+  </div>
+  <div class="field">
+    <%= f.label :city %><br />
+    <%= f.text_field :city %>
+  </div>
+  <div class="field">
+    <%= f.label :state %><br />
+    <%= f.text_field :state %>
+  </div>
+  <div class="field">
+    <%= f.label :country %><br />
+    <%= f.text_field :country %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_no_1 %><br />
+    <%= f.text_field :credit_card_no_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_no_2 %><br />
+    <%= f.text_field :credit_card_no_2 %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_no_3 %><br />
+    <%= f.text_field :credit_card_no_3 %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_no_4 %><br />
+    <%= f.text_field :credit_card_no_4 %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_exp_yy %><br />
+    <%= f.text_field :credit_card_exp_yy %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_exp_mm %><br />
+    <%= f.text_field :credit_card_exp_mm %>
+  </div>
+  <div class="field">
+    <%= f.label :credit_card_ccv %><br />
+    <%= f.text_field :credit_card_ccv %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -5,8 +5,8 @@ module ControllerHelper
     rand(LOGTAG_MAX)
   end # end def gen_logtag
 
-  def self.create_entity_by_name_email(name, email, logtag=nil)
-    return_obj = nil
+  def self.find_or_create_person_by_email(name, email, logtag=nil)
+    new_person = nil
     begin
       # Create propertyId
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, name:#{name}, email:#{email}")
@@ -17,20 +17,15 @@ module ControllerHelper
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, create new_person:#{new_person.inspect}")
       end # end if new_person.nil?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_person.errors:#{new_person.errors.inspect}")
-      return_obj = new_person
-      raise Exception if !new_person.errors.empty?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_person:#{new_person.inspect}")
-      # Create entity
-      new_entity = Entity.create(:property_document_id => new_person.id)
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, new_entity:#{new_entity.inspect}")
-      return_obj = new_entity
-      raise Exception if !new_entity.errors.empty?
-      new_entity.entityEndPointRels.create(:verification_type => "email")
-    rescue Exception => e
-    end
-    # Note: return_obj.errors tells the caller what went wrong
-    return return_obj
-  end # end def self.create_entity_by_name_email
+   rescue Exception => e
+      # Usually because couchdb is not there
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:create_entity_by_name_email:#{logtag}, person find/create triggered exception, e.inspect:#{e.inspect}")
+      # Use sql instead of couchdb
+      new_person = EntityDatum.find_or_create_by_email(:email => email)
+   end # end find/create person
+   new_person
+  end # end def self.find_or_create_person_by_email
 end # end module ControllerHelper
 
 class InboundEmailFieldMapperFactory

@@ -15,12 +15,17 @@ class PropertyDocumentIdForeignKeyValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     #20110612 Ensure that doc_id points to a valid doc in couchdb
     # Ensure that propertyDocument_id points to a valid doc in couchdb
-    @conn ||= CouchRest.new("#{COUCHDB_ADDR}:#{COUCHDB_PORT}")
-    @db ||= @conn.database(COUCHDB_ENTITY_PROPERTIES)
     begin
+      @conn ||= CouchRest.new("#{COUCHDB_ADDR}:#{COUCHDB_PORT}")
+      @db ||= @conn.database(COUCHDB_ENTITY_PROPERTIES)
       couchdb_doc = @db.get(value)
     rescue Exception => e
-      record.errors[attribute] << "does not point to a valid doc in couchdb: #{e.inspect}"
+#      record.errors[attribute] << "does not point to a valid doc in couchdb: #{e.inspect}"
+      # Check active record
+      entityData = EntityDatum.find_by_id(value)
+      if !entityData.errors.empty?
+      record.errors[attribute] << "does not point to a valid doc in couchdb: #{e.inspect}, nor point to a valid record in EntityData table"
+      end # end if !entityData.errors.empty?
     end # end @db.get ...
   end # end def validate_each
 end # end class DocIdForeignKeylidator

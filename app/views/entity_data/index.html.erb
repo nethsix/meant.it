@@ -1,0 +1,57 @@
+<h1>Listing entity_data</h1>
+
+<table>
+  <tr>
+    <th>First name</th>
+    <th>Last name</th>
+    <th>Dob yy</th>
+    <th>Dob mm</th>
+    <th>Dob day</th>
+    <th>Address 1</th>
+    <th>Address 2</th>
+    <th>Address 3</th>
+    <th>City</th>
+    <th>State</th>
+    <th>Country</th>
+    <th>Credit card no 1</th>
+    <th>Credit card no 2</th>
+    <th>Credit card no 3</th>
+    <th>Credit card no 4</th>
+    <th>Credit card exp yy</th>
+    <th>Credit card exp mm</th>
+    <th>Credit card ccv</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @entity_data.each do |entity_datum| %>
+  <tr>
+    <td><%= entity_datum.first_name %></td>
+    <td><%= entity_datum.last_name %></td>
+    <td><%= entity_datum.dob_yy %></td>
+    <td><%= entity_datum.dob_mm %></td>
+    <td><%= entity_datum.dob_day %></td>
+    <td><%= entity_datum.address_1 %></td>
+    <td><%= entity_datum.address_2 %></td>
+    <td><%= entity_datum.address_3 %></td>
+    <td><%= entity_datum.city %></td>
+    <td><%= entity_datum.state %></td>
+    <td><%= entity_datum.country %></td>
+    <td><%= entity_datum.credit_card_no_1 %></td>
+    <td><%= entity_datum.credit_card_no_2 %></td>
+    <td><%= entity_datum.credit_card_no_3 %></td>
+    <td><%= entity_datum.credit_card_no_4 %></td>
+    <td><%= entity_datum.credit_card_exp_yy %></td>
+    <td><%= entity_datum.credit_card_exp_mm %></td>
+    <td><%= entity_datum.credit_card_ccv %></td>
+    <td><%= link_to 'Show', entity_datum %></td>
+    <td><%= link_to 'Edit', edit_entity_datum_path(entity_datum) %></td>
+    <td><%= link_to 'Destroy', entity_datum, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Entity datum', new_entity_datum_path %>

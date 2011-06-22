@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110619065300) do
+ActiveRecord::Schema.define(:version => 20110622114412) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -50,6 +50,30 @@ ActiveRecord::Schema.define(:version => 20110619065300) do
   end
 
   add_index "entities", ["id", "property_document_id"], :name => "by_id_and_propertyDocument_id", :unique => true
+
+  create_table "entity_data", :force => true do |t|
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "email"
+    t.integer  "dob_yyyy"
+    t.integer  "dob_mm"
+    t.integer  "dob_dd"
+    t.string   "address_1"
+    t.string   "address_2"
+    t.text     "address_3"
+    t.string   "city"
+    t.string   "state"
+    t.string   "country"
+    t.integer  "credit_card_no_1"
+    t.integer  "credit_card_no_2"
+    t.integer  "credit_card_no_3"
+    t.integer  "credit_card_no_4"
+    t.string   "credit_card_exp_yyyy"
+    t.string   "credit_card_exp_mm"
+    t.integer  "credit_card_ccv"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "entity_end_point_rels", :force => true do |t|
     t.integer  "entity_id"

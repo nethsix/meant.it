@@ -1,4 +1,6 @@
 MeantIt::Application.routes.draw do
+  resources :entity_data
+
   resources :inbound_emails
 
   resources :end_point_tag_rels

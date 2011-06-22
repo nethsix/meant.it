@@ -1,0 +1,2 @@
+module EntityDataHelper
+end
