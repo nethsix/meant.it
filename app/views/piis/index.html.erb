@@ -5,6 +5,7 @@
     <th>Piitype</th>
     <th>Piivalue</th>
     <th>Piidesc</th>
+    <th>Endpoint</th>
     <th>Status</th>
     <th></th>
     <th></th>
@@ -13,9 +14,10 @@
 
 <% @piis.each do |pii| %>
   <tr>
-    <td><%= pii.piiType %></td>
-    <td><%= pii.piiValue %></td>
-    <td><%= pii.piiDesc %></td>
+    <td><%= pii.pii_type %></td>
+    <td><%= pii.pii_value %></td>
+    <td><%= pii.pii_desc %></td>
+    <td><%= pii.endpoint_id %></td>
     <td><%= pii.status %></td>
     <td><%= link_to 'Show', pii %></td>
     <td><%= link_to 'Edit', edit_pii_path(pii) %></td>

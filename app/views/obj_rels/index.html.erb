@@ -15,11 +15,11 @@
 
 <% @obj_rels.each do |obj_rel| %>
   <tr>
-    <td><%= obj_rel.srcObj_id %></td>
-    <td><%= obj_rel.dstObj_id %></td>
-    <td><%= obj_rel.relType %></td>
-    <td><%= obj_rel.relObjType %></td>
-    <td><%= obj_rel.relDesc %></td>
+    <td><%= obj_rel.srcobj_id %></td>
+    <td><%= obj_rel.dstobj_id %></td>
+    <td><%= obj_rel.rel_type %></td>
+    <td><%= obj_rel.rel_obj_type %></td>
+    <td><%= obj_rel.rel_desc %></td>
     <td><%= obj_rel.status %></td>
     <td><%= link_to 'Show', obj_rel %></td>
     <td><%= link_to 'Edit', edit_obj_rel_path(obj_rel) %></td>

@@ -15,9 +15,9 @@
 <% @entity_end_point_rels.each do |entity_end_point_rel| %>
   <tr>
     <td><%= entity_end_point_rel.entity_id %></td>
-    <td><%= entity_end_point_rel.endPoint_id %></td>
-    <td><%= entity_end_point_rel.verificationType %></td>
-    <td><%= entity_end_point_rel.verificationDesc %></td>
+    <td><%= entity_end_point_rel.endpoint_id %></td>
+    <td><%= entity_end_point_rel.verification_type %></td>
+    <td><%= entity_end_point_rel.verification_desc %></td>
     <td><%= entity_end_point_rel.status %></td>
     <td><%= link_to 'Show', entity_end_point_rel %></td>
     <td><%= link_to 'Edit', edit_entity_end_point_rel_path(entity_end_point_rel) %></td>
