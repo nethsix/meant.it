@@ -1,3 +1,5 @@
+require 'validators'
+
 module ControllerHelper
   LOGTAG_MAX = 2**32
 
@@ -40,7 +42,7 @@ class InboundEmailFieldMapperFactory
   def self.set_sendgrid_mapping(field_mapper)
     field_mapper[:body_text] = :text
     field_mapper[:body_html] = :html
-    field_mapper[:attachment_count] = :attachements
+    field_mapper[:attachment_count] = :attachments
   end # end def self.set_sendgrid_mapping
 
   def self.get_inbound_email_field_mapper(name = nil)
