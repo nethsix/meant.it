@@ -9,10 +9,14 @@
       <% end %>
       </ul>
     </div>
+  <% elsif !@error_obj_arr.nil?  # This condition is when a user reaches this page using not /inbound_emails/new, i.e., thru' submission %>
+    <div id="notice_explanation">
+      <h2>Email successfully saved.</h2>
+    </div>
   <% end %>
-  <% if @inbound_email.errors.empty? and !@error_obj_arr.empty? %>
+  <%  if !@error_obj_arr.nil? and !@error_obj_arr.empty? %>
     <div id="other_error_explanation">
-      <h2>Email successfully saved but However meant.it has issues:</h2>
+      <h2>However meant.it has issues:</h2>
       <ul>
         <% for error_obj in @error_obj_arr %>
         <li><%= raw errors_full_html(error_obj, error_obj.class) %></li>
