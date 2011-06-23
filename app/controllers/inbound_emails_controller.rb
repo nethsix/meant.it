@@ -47,6 +47,10 @@ Rails.logger.level = Logger::DEBUG
   # POST /inbound_emails.xml
   def create
     logtag = ControllerHelper.gen_logtag
+     # Stores objs that causes problem except inbound_email
+     # which is handled by different error handler in :action => new
+     # view
+     @error_obj_arr = []
 puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # If the inbound_email was created using the interface then
     # it will keys like "commit", etc and the hash for the inbound_email
@@ -128,6 +132,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
 #AB    error_display("Error creating sender_pii '#{sender_str}':#{sender_pii.errors}", sender_pii.errors) if !sender_pii.errors.empty?
     unless @sender_pii.errors.empty?
+       @error_obj_arr << @sender_pii
 #AA      flash[:error] = "Error creating sender_pii '#{sender_str}':#{sender_pii.errors}"
       error_display("Error creating sender_pii '#{sender_str}':#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
       return
@@ -142,6 +147,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       @sender_endPoint.creator_endpoint_id = @sender_endPoint.id
 #AB      error_display("Error creating sender_endPoint '#{sender_endPoint.inspect}:#{sender_endPoint.errors}", sender_endPoint.errors) if !sender_endPoint.save
       unless @sender_endPoint.save
+       @error_obj_arr << @sender_endPoint
 #AA       flash[:error] = "Error creating sender_endPoint '#{sender_endPoint.inspect}:#{sender_endPoint.errors}"
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
@@ -153,6 +159,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       # Create person
       @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
       unless @person.errors.empty?
+        @error_obj_arr << @person
         error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
         return
       end # end unless @person.errors.empty?
@@ -166,6 +173,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         @entity = entity_collection[0]
       end # end if entity_collection.empty?
       unless @entity.errors.empty?
+        @error_obj_arr << @entity
         error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
         return
       end # end unless @entity.errors.empty?
@@ -184,6 +192,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         @entityEndPointRel1.endpoint_id = @sender_endPoint.id
 #AB          error_display("Error creating entityEndPointRel 'entity:#{entity.name} relate sender_endPoint:#{sender_endPoint.id}':#{entityEndPointRel1.errors}", entityEndPointRel1.errors) if !entityEndPointRel1.save
         unless @entityEndPointRel1.save
+          @error_obj_arr << @entityEndPointRel1
 #AA            flash[:error] = "Error creating entityEndPointRel 'entity:#{entity.name} relate sender_endPoint:#{sender_endPoint.id}':#{entityEndPointRel1.errors}"
           error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
           return
@@ -238,6 +247,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     if @receiver_endPoint.pii
       # Ensure the existing pii is the same otherwise flag error
       unless @receiver_endPoint.pii.pii_value == receiver_pii_str
+        @error_obj_arr << @receiver_endPoint
         error_display("receiver_endPoint '@receiver_endPoint.nick' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end if @receiver_endPoint.pii != ...
@@ -245,17 +255,20 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       # Create receiver pii if it does not possess one
       @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL)
       unless @receiver_pii.errors.empty?
+        @error_obj_arr << @receiver_pii
         error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
         return
       end # end unless @receiver_pii.errors.empty?
       @receiver_endPoint.pii = @receiver_pii
       unless @receiver_endPoint.save
+        @error_obj_arr << @receiver_endPoint
         error_display("Error saving receiver_pii '#{receiver_pii.inspect}' to receiver_endPoint '{receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end unless @receiver_endPoint.save
     end # end if @receiver_endPoint.pii
 #AB    error_display("Error creating receiver_endPoint '#{receiver_endPoint.inspect}':#{receiver_endPoint.errors}", receiver_endPoint.errors) if !receiver_endPoint.errors.empty?
     unless @receiver_endPoint.errors.empty?
+      @error_obj_arr << @receiver_endPoint
 #AA      flash[:error] = "Error creating receiver_endPoint '#{receiver_endPoint.inspect}':#{receiver_endPoint.errors}"
       error_display("Error creating @receiver_endPoint '#{@receiver_endPoint.inspect}':#{@receiver_endPoint.errors}", @receiver_endPoint.errors, :error, logtag)
       return
@@ -269,6 +282,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         @new_tag = Tag.find_or_create_by_name(tag_str_elem)
 #AB        error_display("Error creating new_tag '#{tag_str_elem}':#{new_tag.errors}", new_tag.errors) if !new_tag.errors.empty?
         unless @new_tag.errors.empty?
+          @error_obj_arr << @new_tag
 #AA          flash[:error] = "Error creating new_tag '#{tag_str_elem}':#{new_tag.errors}"
           error_display("Error creating new_tag '#{tag_str_elem}':#{@new_tag.errors}", @new_tag.errors, :error, logtag)
           return
@@ -281,6 +295,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id)
 #AB      error_display("Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{meantItRel.errors}", meantItRel.errors) if !meantItRel.errors.empty?
       unless @meantItRel.errors.empty?
+        @error_obj_arr << @meantItRel
 #AA        flash[:error] = "Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{meantItRel.errors}"
         error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
         return

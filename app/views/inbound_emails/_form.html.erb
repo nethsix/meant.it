@@ -9,22 +9,19 @@
       <% end %>
       </ul>
     </div>
-  <% else %>
-      <h2>Email successfully saved but not meant.it due to:</h2>
+  <% end %>
+  <% if @inbound_email.errors.empty? and !@error_obj_arr.empty? %>
+    <div id="other_error_explanation">
+      <h2>Email successfully saved but However meant.it has issues:</h2>
       <ul>
-        <li><%= raw errors_full_html(@sender_pii, "sender_pii") %></li>
-        <li><%= raw errors_full_html(@sender_endPoint, "sender_endPoint") %></li>
-        <li><%= raw errors_full_html(@person, "person") %></li>
-        <li><%= raw errors_full_html(@entity, "entity") %></li>
-        <li><%= raw errors_full_html(@entityEndPointRel1, "entityEndPointRel1") %></li>
-        <li><%= raw errors_full_html(@receiver_endPoint, "receiver_endPoint") %></li>
-        <li><%= raw errors_full_html(@receiver_pii, "receiver_endPoint") %></li>
-        <li><%= raw errors_full_html(@new_tag, "new_tag") %></li>
-        <li><%= raw errors_full_html(@meantItRel, "meantItRel") %></li>
+        <% for error_obj in @error_obj_arr %>
+        <li><%= raw errors_full_html(error_obj, error_obj.class) %></li>
+        <% end %>
       </ul>
       <div id="flash_message">
         <strong>Details</strong>: <%= flash[:error] if flash[:error] %></h2>
       </div>
+    </div>
   <% end %>
 
   <div class="field">
