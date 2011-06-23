@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110622114412) do
+ActiveRecord::Schema.define(:version => 20110623093401) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -74,6 +74,8 @@ ActiveRecord::Schema.define(:version => 20110622114412) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "entity_data", ["email"], :name => "by_email", :unique => true
 
   create_table "entity_end_point_rels", :force => true do |t|
     t.integer  "entity_id"

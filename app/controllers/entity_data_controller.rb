@@ -3,6 +3,7 @@ class EntityDataController < ApplicationController
   # GET /entity_data.xml
   def index
     @entity_data = EntityDatum.all
+#logger.info "#{File.basename(__FILE__)}.index:#{@entity_data.inspect}"
 
     respond_to do |format|
       format.html # index.html.erb
