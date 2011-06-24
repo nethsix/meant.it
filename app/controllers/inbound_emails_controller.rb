@@ -109,8 +109,8 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       error_display("Error creating inbound_email:#{@inbound_email.errors}", @inbound_email.errors, :error, logtag) 
       return
     end # end unless @inbound_email ...
-    sender_str = inbound_email_params[:from]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class},create:#{logtag}, sender_str = inbound_email_params[:from]:#{inbound_email_params[:from]}")
+    sender_str = inbound_email_params[field_mapper[:from]]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class},create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
     # Parse sender string to derive nick and email address
     sender_str_match_arr = sender_str.match(/(.*)<(.*)>/)
     sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
@@ -118,14 +118,14 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     sender_nick_str ||= sender_str
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_str:#{sender_str}")
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_nick_str:#{sender_nick_str}")
-    message_type_str = inbound_email_params[:to]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str = inbound_email_params[:to]:#{inbound_email_params[:to]}")
+    message_type_str = inbound_email_params[field_mapper[:to]]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str = inbound_email_params[field_mapper[:to]]:#{inbound_email_params[field_mapper[:to]]}")
     message_type_str_match_arr = nil
     message_type_str_match_arr = message_type_str.match /(.*)@.*/ if !message_type_str.nil?
     if message_type_str_match_arr.nil?
       message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
     else
-      message_type_str = message_type_str_match_arr[1]
+      message_type_str = MessageTypeMapper.get_message_type(message_type_str_match_arr[1])
     end # end if message_type_str.nil? or message_type_str.empty?
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str:#{message_type_str}")
     # Create sender EndPoint
@@ -202,9 +202,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     end # end if @sender_endPoint.entities.empty?
     # Look at subject if it's not nil
     # else use body_text
-    input_str = inbound_email_params[:subject]
+    input_str = inbound_email_params[field_mapper[:subject]]
     if input_str.nil? or input_str.empty?
-      input_str = inbound_email_params[:body_text]
+      input_str = inbound_email_params[field_mapper[:body_text]]
     end # end if input_str.nil? or input_str.empty?
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, input_str:#{input_str}")
     # Decide what to do on nick, pii, message, tags...
@@ -246,9 +246,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
     if @receiver_endPoint.pii
       # Ensure the existing pii is the same otherwise flag error
-      unless @receiver_endPoint.pii.pii_value == receiver_pii_str
+      unless @receiver_endPoint.pii.pii_value == receiver_pii_str or receiver_pii_str.nil? or receiver_pii_str.empty?
         @error_obj_arr << @receiver_endPoint
-        error_display("receiver_endPoint '@receiver_endPoint.nick' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
+        error_display("receiver_endPoint '#{@receiver_endPoint.nick}' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end if @receiver_endPoint.pii != ...
     else
@@ -293,11 +293,11 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # Create meant_it rel
     if !@sender_endPoint.nil? and !@receiver_endPoint.nil?
       @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id)
-#AB      error_display("Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{meantItRel.errors}", meantItRel.errors) if !meantItRel.errors.empty?
+#AB      error_display("Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{meantItRel.errors}", meantItRel.errors) if !meantItRel.errors.empty?
       unless @meantItRel.errors.empty?
         @error_obj_arr << @meantItRel
-#AA        flash[:error] = "Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{meantItRel.errors}"
-        error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, received_endPoint.id#{received_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
+#AA        flash[:error] = "Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{meantItRel.errors}"
+        error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
         return
       end # end unless @meantItRel.errors.empty?
 #      @inbound_email.errors =+ meantItRel.errors

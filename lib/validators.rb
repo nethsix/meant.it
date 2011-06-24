@@ -34,9 +34,12 @@ class MeantItMessageTypeValidator < ActiveModel::EachValidator
   MEANT_IT_MESSAGE_THANK = "thank"
   MEANT_IT_MESSAGE_SYMPATHY = "sympathy"
   MEANT_IT_MESSAGE_RESENT = "resent"
+  MEANT_IT_MESSAGE_OTHER= "other"
   MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT ]
   def validate_each(record, attribute, value)
-    record.errors[attribute] << "permits only '#{MEANT_IT_MESSAGE_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or MEANT_IT_MESSAGE_TYPE_ENUM.index(value.downcase).nil?
+    msg_type_downcase = value.downcase
+    normalized_msg_type_downcase = MessageTypeMapper.get_message_type(msg_type_downcase)
+    record.errors[attribute] << "permits only '#{MessageTypeMapper.get_all_message_types.join('\', \'').strip}'" if normalized_msg_type_downcase.nil?
   end # end def validate_each
 end # end class MeantItMessageTypeValidator
 

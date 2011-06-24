@@ -30,6 +30,38 @@ module ControllerHelper
   end # end def self.find_or_create_person_by_email
 end # end module ControllerHelper
 
+# This is to help meant_it_rels message_type DRY
+# Note this is not intended to keep message_type in MEANT_IT_MESSAGE_OTHER
+# DRY.  For those we sort them based on class mood.
+class MessageTypeMapper
+  @@msg_type_map_hash ||= {}
+  @@msg_type_map_hash["thanks"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+  @@msg_type_map_hash["thx"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+  @@msg_type_map_hash["thks"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+  @@msg_type_map_hash["sympathize"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["sympathizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["consoles"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["console"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["other"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["others"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+
+  def self.get_all_message_types
+    @@msg_type_map_hash.keys
+  end # end def self.get_all_message_types
+
+  def self.get_message_type(message_type)
+    msg_type_downcase = message_type.downcase
+    final_msg_type = nil
+    # Don't need to map if it's in the 
+    if MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.index(msg_type_downcase).nil?
+      final_msg_type = @@msg_type_map_hash[msg_type_downcase]
+    else
+      final_msg_type = msg_type_downcase
+    end # end if MEANT_IT_MESSAGE_TYPE_ENUM.index(msg_type_downcase).nil?
+    final_msg_type
+  end # end def self.get_message_type(message_type)
+end # end class MessageTypeMapper
+
 class InboundEmailFieldMapperFactory
   SENDGRID = :sendgrid
   def self.set_default_mapping(field_mapper)
