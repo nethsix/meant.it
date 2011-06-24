@@ -254,7 +254,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     else
       # Create receiver pii if it does not possess one
       @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL)
-      unless @receiver_pii.errors.empty?
+      unless @receiver_pii.errors.empty? or receiver_pii_str.nil? or receiver_pii_str.empty?
         @error_obj_arr << @receiver_pii
         error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
         return
