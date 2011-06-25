@@ -1,0 +1,93 @@
+<% headers = "headers#{Time.now.to_i}" %>
+<% envelope = "envelope#{Time.now.to_i}" %>
+nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty0 lawson0 hakusan0 ;thank you for great service0;
+  to: thank@meant.it
+  from: mama0@gmail.com
+  attachment_count: 0
+nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty1 lawson1 hakusan1
+  to: thank@meant.it
+  from: mama1@gmail.com
+  attachment_count: 0
+nick_y_xxx_n_yyy_y_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty2 ;thank you for great service2;
+  to: thank@meant.it
+  from: mama2@gmail.com
+  attachment_count: 0
+nick_y_xxx_n_yyy_n_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty3
+  to: thank@meant.it
+  from: mama3@gmail.com
+  attachment_count: 0
+nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty4 hakusan4 lawson4 ;thank you for the great service4; :hello_kitty4@yahoo.co.jp
+  to: thank@meant.it
+  from: mama4@gmail.com
+  attachment_count: 0
+nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty5 hakusan5 lawson5 :hello_kitty5@yahoo.co.jp
+  to: thank@meant.it
+  from: mama5@gmail.com
+  attachment_count: 0
+nick_y_xxx_y_yyy_y_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty6 ;thank you for the great service6; :hello_kitty6@yahoo.co.jp
+  to: thank@meant.it
+  from: mama6@gmail.com
+  attachment_count: 0
+nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty7 :hello_kitty7@yahoo.co.jp
+  to: thank@meant.it
+  from: mama7@gmail.com
+  attachment_count: 0
+nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hakusan8 lawson8 ;thank you for the great service8; :hello_kitty8@yahoo.co.jp
+  to: thank@meant.it
+  from: mama8@gmail.com
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hakusan9 lawson9 :hello_kitty9@yahoo.co.jp
+  to: thank@meant.it
+  from: mama9@gmail.com
+  attachment_count: 0
+nick_n_xxx_y_yyy_y_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ;thank you for the great service10; :hello_kitty10@yahoo.co.jp
+  to: thank@meant.it
+  from: mama10@gmail.com
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: :hello_kitty11@yahoo.co.jp
+  to: thank@meant.it
+  from: mama11@gmail.com
+  attachment_count: 0
+nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: hello_kitty5 hakusan5 lawson5 ;thank you for the great service5; :hello_kitty5@yahoo.co.jp
+  to: thank@meant.it
+  from: mama5@gmail.com
+  attachment_count: 0

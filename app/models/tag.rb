@@ -5,6 +5,8 @@ class Tag < ActiveRecord::Base
   has_many :objRels, :as => "dstObj"
   has_many :endPointTagRels
   has_many :endPoints, :through => :endPointTagRels, :foreign_key => '"endPoint_id"'
+  has_many :meantItMoodTagRels
+  has_many :meantItMoodRels, :through => :meantItMoodTagRels, :foreign_key => "meant_it_rel_id"
 
   validates :name, :presence => true, :uniqueness => true
   validates :status, :presence => true, :status_type => true
@@ -13,6 +15,6 @@ class Tag < ActiveRecord::Base
 
   private
     def default_values
-      self.status||= "active"
+      self.status||= StatusTypeValidator::STATUS_ACTIVE
     end
 end

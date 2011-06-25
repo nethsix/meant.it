@@ -13,6 +13,6 @@ class EntityEndPointRel < ActiveRecord::Base
 
   private
     def default_values
-      self.status||= "active"
+      self.status||= StatusTypeValidator::STATUS_ACTIVE
     end
 end

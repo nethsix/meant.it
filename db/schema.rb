@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110623093401) do
+ActiveRecord::Schema.define(:version => 20110625035930) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -108,15 +108,29 @@ ActiveRecord::Schema.define(:version => 20110623093401) do
     t.datetime "updated_at"
   end
 
+  create_table "meant_it_mood_tag_rels", :force => true do |t|
+    t.integer  "meant_it_rel_id"
+    t.integer  "tag_id"
+    t.string   "reasoner",        :null => false
+    t.string   "status",          :null => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "meant_it_mood_tag_rels", ["meant_it_rel_id", "tag_id", "reasoner"], :name => "by_meant_it_rel_id_and_tag_id_and_reasoner", :unique => true
+
   create_table "meant_it_rels", :force => true do |t|
-    t.integer  "src_endpoint_id", :null => false
-    t.integer  "dst_endpoint_id", :null => false
-    t.string   "message_type",    :null => false
+    t.integer  "src_endpoint_id",  :null => false
+    t.integer  "dst_endpoint_id",  :null => false
+    t.string   "message_type",     :null => false
     t.text     "message"
     t.string   "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "inbound_email_id"
   end
+
+  add_index "meant_it_rels", ["inbound_email_id"], :name => "by_inbound_email_id", :unique => true
 
   create_table "obj_rels", :force => true do |t|
     t.integer  "srcobj_id",    :null => false

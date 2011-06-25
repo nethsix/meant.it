@@ -1,0 +1,27 @@
+<h1>Listing meant_it_mood_tag_rels</h1>
+
+<table>
+  <tr>
+    <th>Meant it rel</th>
+    <th>Tag</th>
+    <th>Reasoner</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @meant_it_mood_tag_rels.each do |meant_it_mood_tag_rel| %>
+  <tr>
+    <td><%= meant_it_mood_tag_rel.meant_it_rel_id %></td>
+    <td><%= meant_it_mood_tag_rel.tag_id %></td>
+    <td><%= meant_it_mood_tag_rel.reasoner %></td>
+    <td><%= link_to 'Show', meant_it_mood_tag_rel %></td>
+    <td><%= link_to 'Edit', edit_meant_it_mood_tag_rel_path(meant_it_mood_tag_rel) %></td>
+    <td><%= link_to 'Destroy', meant_it_mood_tag_rel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Meant it mood tag rel', new_meant_it_mood_tag_rel_path %>

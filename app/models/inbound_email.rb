@@ -1,6 +1,8 @@
 require 'validators'
 
 class InboundEmail < ActiveRecord::Base
+  has_one :meantItRel
+
   validates :headers, :presence => true
   validates :from, :presence => true
   validates :to, :presence => true

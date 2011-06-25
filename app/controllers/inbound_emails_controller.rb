@@ -214,35 +214,11 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # Don't manipulate the original input_str since it is used
     # to re-populate form on failures
     input_str_dup = input_str.dup
-    # Determine nick, :xxx, :yyy, tags
-    # Get those strings enclosed with quotes ' or "
-    # NOTE: scan returns [['abc'], ['def']... thus we use collect
-    # to convert to [abc, def, ...]
-    # Nick is the first tag, no spaces are allowed for nick
-    # Message is enclosed within ;
-    message_str_arr = input_str_dup.scan(/;(.*);/).collect { |elem| elem[0] }
-    message_str = message_str_arr[0]
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_str:#{message_str}")
-    message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{msg_elem};/, '') }
-    receiver_pii_str_arr = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
-    receiver_pii_str = receiver_pii_str_arr[0]
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
-    receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}/, '') }
-    single_quote_tag_arr = input_str_dup.scan(/'(.*?)'/).collect { |elem| elem[0] }
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, single_quote_tag_arr.inspect:#{single_quote_tag_arr.inspect}")
-    # Remove those quoted tags since we've processed them
-    single_quote_tag_arr.each { |tag_elem| input_str_dup.sub!(/'#{tag_elem}'/, '') }
-    double_quotes_tag_arr = input_str_dup.scan(/"(.*?)"/).collect { |elem| elem[0] }
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, double_quotes_tag_arr.inspect:#{double_quotes_tag_arr.inspect}")
-    double_quotes_tag_arr.each { |tag_elem| input_str_dup.sub!(/"#{tag_elem}"/, '') }
-    tag_str_arr = single_quote_tag_arr + double_quotes_tag_arr
-    input_str_arr = input_str_dup.split
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, stripped input_str_arr.inspect:#{input_str_arr.inspect}")
-    receiver_nick_str = input_str_arr.shift
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, receiver_nick_str:#{receiver_nick_str}")
-    tag_str_arr += input_str_arr
-    tag_str_arr.uniq!
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, tag_str_arr.inspect:#{tag_str_arr.inspect}")
+    meantItInput_hash = ControllerHelper.parse_meant_it_input(input_str_dup, logtag)
+    message_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_MESSAGE]
+    receiver_pii_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_nick_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    tag_str_arr = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
     @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
     if @receiver_endPoint.pii
       # Ensure the existing pii is the same otherwise flag error
@@ -291,8 +267,8 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       } # end tag_str_arr.each ...
     end # end if !@receiver_endPoint.nil?
     # Create meant_it rel
-    if !@sender_endPoint.nil? and !@receiver_endPoint.nil?
-      @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id)
+    if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
+      @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id, :inbound_email_id => @inbound_email.id)
 #AB      error_display("Error creating meantItRel 'sender_endPoint.id:#{sender_endPoint.id}, message_type:#{meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{meantItRel.errors}", meantItRel.errors) if !meantItRel.errors.empty?
       unless @meantItRel.errors.empty?
         @error_obj_arr << @meantItRel

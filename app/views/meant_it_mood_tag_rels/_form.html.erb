@@ -1,0 +1,29 @@
+<%= form_for(@meant_it_mood_tag_rel) do |f| %>
+  <% if @meant_it_mood_tag_rel.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@meant_it_mood_tag_rel.errors.count, "error") %> prohibited this meant_it_mood_tag_rel from being saved:</h2>
+
+      <ul>
+      <% @meant_it_mood_tag_rel.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :meant_it_rel_id %><br />
+    <%= f.text_field :meant_it_rel_id %>
+  </div>
+  <div class="field">
+    <%= f.label :tag_id %><br />
+    <%= f.text_field :tag_id %>
+  </div>
+  <div class="field">
+    <%= f.label :reasoner %><br />
+    <%= f.text_field :reasoner %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

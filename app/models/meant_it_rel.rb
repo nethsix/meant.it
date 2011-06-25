@@ -1,10 +1,13 @@
 require 'validators'
 
 class MeantItRel < ActiveRecord::Base
+  has_many :meantItMoodTagRels
+  has_many :meantItMoodTags, :through => :meantItMoodTagRels, :foreign_key => "tag_id"
 #  belongs_to :srcEndPoint, :class_name => "EndPoint"
   belongs_to :src_endpoint, :class_name => "EndPoint"
 #  belongs_to :dstEndPoint, :class_name => "EndPoint"
   belongs_to :dst_endpoint, :class_name => "EndPoint"
+  belongs_to :inboundEmail
 
 #  validates :messageType, :presence => true, :meant_it_message_type => true
   validates :message_type, :presence => true, :meant_it_message_type => true
@@ -14,6 +17,6 @@ class MeantItRel < ActiveRecord::Base
 
   private
     def default_values
-      self.status||= "active"
+      self.status||= StatusTypeValidator::STATUS_ACTIVE
     end
 end

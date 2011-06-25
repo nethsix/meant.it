@@ -1,0 +1,2 @@
+module MeantItMoodTagRelsHelper
+end

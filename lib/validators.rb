@@ -92,3 +92,11 @@ class BodyOrSubjectNotNullValidator < ActiveModel::Validator
     end # end if (record.subject.nil? ... )
   end # end def validate(record)
 end # end class BodyOrSubjectNotNullValidator
+
+class MoodReasonerValidator < ActiveModel::EachValidator
+  MOOD_REASONER_DEFAULT = "mood_processor"
+  MOOD_REASONER_ENUM = [ MOOD_REASONER_DEFAULT ]
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{MOOD_REASONER_ENUM.join('\', \'').strip}'" if value.nil? or MOOD_REASONER_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class MoodValidator
