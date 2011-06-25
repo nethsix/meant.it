@@ -52,7 +52,6 @@ class InboundEmailsControllerTest < ActionController::TestCase
       assert_not_nil inbound_email_from_db
 
       # Check that sender Pii
-#AA      sender_pii = Pii.find_by_pii_value(@inbound_email.from)
       sender_pii = Pii.find_by_pii_value(email_elem.from)
       assert_not_nil sender_pii
 
@@ -75,9 +74,7 @@ class InboundEmailsControllerTest < ActionController::TestCase
       assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
 
       # Check receiver_endPoint
-#AA    input_str = @inbound_email.subject
       input_str = email_elem.subject
-#AA    input_str ||= @inbound_email.body_text
       input_str ||= email_elem.body_text
       meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
       receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK])
@@ -104,6 +101,20 @@ class InboundEmailsControllerTest < ActionController::TestCase
       # Check that MeantItRel is related to email
       assert_equal inbound_email_from_db.id, sender_endPoint.srcMeantItRels[0].inbound_email_id
       assert_equal inbound_email_from_db.id, receiver_endPoint.dstMeantItRels[0].inbound_email_id
+      # Check meantIt type
+      message_type_str = ControllerHelper.parse_message_type_from_email_addr(email_elem.to)
+      assert_equal message_type_str, sender_endPoint.srcMeantItRels[0].message_type
+      # Check mood tags
+      if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+        # CODE!!!! Check with reaonser
+      else
+        meantItMoodTags = sender_endPoint.srcMeantItRels[0].tags
+        meantItMoodTag = meantItMoodTags[0]
+        assert_equal 1, meantItMoodTags.size
+        assert_equal MeantItMoodTagRel::MOOD_TAG_TYPE, meantItMoodTag.desc
+        assert_equal message_type_str, meantItMoodTag.name
+      end # end if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+      
     } # end all_fixture_inbound_emails.each ...
     
   end # end test "should create inbound_email nick_y_xxx_n_yyy_any_tags_y_sender_id-able" do

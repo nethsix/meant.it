@@ -1,8 +1,9 @@
 require 'validators'
 
 class MeantItMoodTagRel < ActiveRecord::Base
+  MOOD_TAG_TYPE = "mood"
+  belongs_to :meantItRel
   belongs_to :tag
-  belongs_to :meant_it_rel
   validates :reasoner, :presence => true, :mood_reasoner => true
   validates :status, :presence => true, :status_type => true
 

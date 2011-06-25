@@ -6,7 +6,7 @@ class Tag < ActiveRecord::Base
   has_many :endPointTagRels
   has_many :endPoints, :through => :endPointTagRels, :foreign_key => '"endPoint_id"'
   has_many :meantItMoodTagRels
-  has_many :meantItMoodRels, :through => :meantItMoodTagRels, :foreign_key => "meant_it_rel_id"
+  has_many :meantItRels, :through => :meantItMoodTagRels
 
   validates :name, :presence => true, :uniqueness => true
   validates :status, :presence => true, :status_type => true

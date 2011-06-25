@@ -12,6 +12,18 @@ module ControllerHelper
     rand(LOGTAG_MAX)
   end # end def gen_logtag
 
+  def self.parse_message_type_from_email_addr(email_addr, logtag = nil)
+    message_type_str = nil
+    email_addr_match_arr = nil
+    email_addr_match_arr = email_addr.match /(.*)@.*/ if !email_addr.nil?
+    if email_addr_match_arr.nil?
+      message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+    else
+      message_type_str = MessageTypeMapper.get_message_type(email_addr_match_arr[1])
+    end # end if email_addr_match_arr.nil?
+    message_type_str
+  end # end def self.parse_message_type_from_email
+
   def self.parse_meant_it_input(input_str, logtag = nil)
     input_str_dup = input_str.dup
     result_hash = {}

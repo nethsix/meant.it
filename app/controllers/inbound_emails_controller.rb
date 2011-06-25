@@ -118,15 +118,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     sender_nick_str ||= sender_str
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_str:#{sender_str}")
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_nick_str:#{sender_nick_str}")
-    message_type_str = inbound_email_params[field_mapper[:to]]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str = inbound_email_params[field_mapper[:to]]:#{inbound_email_params[field_mapper[:to]]}")
-    message_type_str_match_arr = nil
-    message_type_str_match_arr = message_type_str.match /(.*)@.*/ if !message_type_str.nil?
-    if message_type_str_match_arr.nil?
-      message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
-    else
-      message_type_str = MessageTypeMapper.get_message_type(message_type_str_match_arr[1])
-    end # end if message_type_str.nil? or message_type_str.empty?
+    sender_email_addr = inbound_email_params[field_mapper[:to]]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_email_addr = inbound_email_params[field_mapper[:to]]:#{inbound_email_params[field_mapper[:to]]}")
+    message_type_str = ControllerHelper.parse_message_type_from_email_addr(sender_email_addr, logtag)
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str:#{message_type_str}")
     # Create sender EndPoint
     @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
@@ -277,7 +271,22 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         return
       end # end unless @meantItRel.errors.empty?
 #      @inbound_email.errors =+ meantItRel.errors
-    end # end if !@sender_endPoint.nil? and !@receiver_endPoint.nil?
+      if @meantItRel.errors.empty?
+        if message_type_str == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+          # Call mood reasoner
+          # CODE!!!!! Implement this in ControllerHelper
+        else
+          logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}: creating mood using message_type_str:#{message_type_str}")
+          @new_mood_tag = Tag.find_or_create_by_name_and_desc(message_type_str, MeantItMoodTagRel::MOOD_TAG_TYPE)
+          unless @new_mood_tag.errors.empty?
+            @error_obj_arr << @new_mood_tag
+            error_display("Error creating new_mood_tag '#{message_type_str}':#{@new_mood_tag.errors}", @new_mood_tag.errors, :error, logtag)
+            return
+          end # end unless @new_mood_tag.errors.empty?
+          @meantItRel.tags << @new_mood_tag
+        end # end if message_type_str == MeantItMessageTypeValidator:: ...
+      end # end if @meantItRel.errors.empty?
+    end # end if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
 
     respond_to do |format|
 #    if !error

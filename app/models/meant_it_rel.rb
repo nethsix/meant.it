@@ -2,7 +2,7 @@ require 'validators'
 
 class MeantItRel < ActiveRecord::Base
   has_many :meantItMoodTagRels
-  has_many :meantItMoodTags, :through => :meantItMoodTagRels, :foreign_key => "tag_id"
+  has_many :tags, :through => :meantItMoodTagRels
 #  belongs_to :srcEndPoint, :class_name => "EndPoint"
   belongs_to :src_endpoint, :class_name => "EndPoint"
 #  belongs_to :dstEndPoint, :class_name => "EndPoint"
