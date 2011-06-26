@@ -3,7 +3,8 @@ require 'test_helper'
 class InboundEmailsControllerTest < ActionController::TestCase
   setup do
 # To use inbound_emails() we need to use fixtures(?)
-    @inbound_email = inbound_emails(:nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email)
+#    @inbound_email = inbound_emails(:nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email)
+    @inbound_email = InboundEmail.first
   end
 
   test "should get index" do
@@ -34,16 +35,52 @@ class InboundEmailsControllerTest < ActionController::TestCase
     all_fixture_inbound_emails.each { |email_elem|
 
       p "testing inbound_email.inspect:#{email_elem.inspect}"
-      # Check that one InboundEmail is created
-      # Check that two EndPoints are created
+
+      input_str = email_elem.subject
+      input_str ||= email_elem.body_text
+      meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+      p "meantItRel_hash.inspect:#{meantItRel_hash.inspect}"
+      receiver_pii_count = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII].nil? ? 0 : 1
+      message_type_str = ControllerHelper.parse_message_type_from_email_addr(email_elem.to)
+p "email_elem.to:#{email_elem.to}"
+p "message_type_str:#{message_type_str}"
+      endpoint_tag_arr = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_TAGS].dup
+      # Check each tag for existance
+      non_exist_endpoint_tag_arr = []
+      endpoint_tag_arr.each { |tag_elem|
+        non_exist_endpoint_tag_arr << tag_elem if !Tag.exists?(:name => tag_elem)
+      }  # end input_tag_arr.each ...
+      mood_tag_arr = []
+      if message_type_str == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+        # CODE!!!! Get mood tags using reasoner
+        # mood_tag_arr += ...
+      else
+        mood_tag_arr << message_type_str
+      end # end if message_type_str == MeantItMessageTypeValidator:: ...
+      p "mood_tag_arr:#{mood_tag_arr.inspect}"
+      non_exist_mood_tag_arr = []
+      mood_tag_arr.each { |tag_elem|
+        non_exist_mood_tag_arr << tag_elem if !Tag.exists?(:name => tag_elem)
+      }  # end mood_tag_arr.each ...
+      p "#AAAA non_exist_mood_tag_arr.inspect:#{non_exist_mood_tag_arr.inspect}"
+
       assert_differences([
         ['InboundEmail.count', 1],
         ['EndPoint.count', 2],
-        ['Pii.count', 1],
+        ['Pii.count', 1+receiver_pii_count],
         ['Entity.count', 1],
+        ['EntityDatum.count', 1],
+        ['EntityEndPointRel.count', 1],
+        ['Tag.count', non_exist_endpoint_tag_arr.size + non_exist_mood_tag_arr.size],
+        ['EndPointTagRel.count', endpoint_tag_arr.size],
+        ['MeantItRel.count', 1],
+        ['MeantItMoodTagRel.count', 1],
         ]) do
-      post :create, :inbound_email => email_elem.attributes
+        post :create, :inbound_email => email_elem.attributes
       end
+
+p "MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
+p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
 
       assert_redirected_to inbound_email_path(assigns(:inbound_email))
 
@@ -74,16 +111,16 @@ class InboundEmailsControllerTest < ActionController::TestCase
       assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
 
       # Check receiver_endPoint
-      input_str = email_elem.subject
-      input_str ||= email_elem.body_text
-      meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
       receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK])
       assert_not_nil receiver_endPoint
       assert_nil receiver_endPoint.pii
 
       # Check receiver_endPoint tags
+      p "meantItRel_hash.inspect:#{meantItRel_hash.inspect}"
       tag_str_arr = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
+      p "tag_str_arr:#{tag_str_arr}"
       tagged_endPoints = EndPoint.tagged(tag_str_arr)
+      p "tagged_endPoints.inspect:#{tagged_endPoints.inspect}"
       tagged_endPoint = tagged_endPoints[0]
       if tag_str_arr.nil? or tag_str_arr.empty?
         assert_equal 0, tagged_endPoints.size
@@ -102,7 +139,6 @@ class InboundEmailsControllerTest < ActionController::TestCase
       assert_equal inbound_email_from_db.id, sender_endPoint.srcMeantItRels[0].inbound_email_id
       assert_equal inbound_email_from_db.id, receiver_endPoint.dstMeantItRels[0].inbound_email_id
       # Check meantIt type
-      message_type_str = ControllerHelper.parse_message_type_from_email_addr(email_elem.to)
       assert_equal message_type_str, sender_endPoint.srcMeantItRels[0].message_type
       # Check mood tags
       if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
@@ -115,9 +151,18 @@ class InboundEmailsControllerTest < ActionController::TestCase
         assert_equal message_type_str, meantItMoodTag.name
       end # end if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
       
+p "#AAAAA MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
+p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
+
     } # end all_fixture_inbound_emails.each ...
     
-  end # end test "should create inbound_email nick_y_xxx_n_yyy_any_tags_y_sender_id-able" do
+  end # end test "should create inbound_email" do
+
+  test "should create inbound_email but not sender endpoint" do
+    # Send the same message twice
+    # Same sender but different receiver, pii is increased by one
+    # Different sender but same receiver, pii is specified, new receiver_endPoint but no new pii
+  end # end test "should create inbound_email but not sender endpoint" do
 
   test "should show inbound_email" do
     get :show, :id => @inbound_email.to_param

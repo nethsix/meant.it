@@ -84,10 +84,3 @@ nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
   to: thank@meant.it
   from: mama11@gmail.com
   attachment_count: 0
-nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
-  headers: <%= headers.to_s %>
-  envelope: <%= envelope.to_s %>
-  body_text: hello_kitty5 hakusan5 lawson5 ;thank you for the great service5; :hello_kitty5@yahoo.co.jp
-  to: thank@meant.it
-  from: mama5@gmail.com
-  attachment_count: 0

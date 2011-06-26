@@ -61,7 +61,7 @@ module ControllerHelper
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, tag_str_arr.inspect:#{tag_str_arr.inspect}")
     result_hash[MEANT_IT_INPUT_TAGS] = tag_str_arr
     result_hash
-  end # end def.parseMeantItText
+  end # end def.parse_meant_it_text
 
   def self.find_person_by_id(person_id, logtag=nil)
     person = nil

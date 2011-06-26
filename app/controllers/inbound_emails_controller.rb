@@ -71,44 +71,27 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, field_mapper_type:#{field_mapper_type}")
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, field_mapper:#{field_mapper.inspect}")
     @inbound_email = InboundEmail.new(
-#AD      :headers => params["headers"],
       :headers => inbound_email_params[field_mapper[:headers]],
-#AD      :body_text => params["text"],
       :body_text => inbound_email_params[field_mapper[:body_text]],
-#AD      :body_html => inbound_email_params["html"],
       :body_html => inbound_email_params[field_mapper[:body_html]],
-#AD      :from => params["from"],
       :from => inbound_email_params[field_mapper[:from]],
-#AD      :to => params["to"],
       :to => inbound_email_params[field_mapper[:to]],
-#AD      :subject => params["subject"],
       :subject => inbound_email_params[field_mapper[:subject]],
-#AD      :cc => params["cc"],
       :cc => inbound_email_params[field_mapper[:cc]],
-#AD      :dkim => params["dkim"],
       :dkim => inbound_email_params[field_mapper[:dkim]],
-#AD      :spf => params["spf"],
       :spf => inbound_email_params[field_mapper[:spf]],
-#AD      :envelope => params["envelope"],
       :envelope => inbound_email_params[field_mapper[:envelope]],
-#AD      :charsets => params["charsets"],
       :charsets => inbound_email_params[field_mapper[:charsets]],
-#AD      :spam_score => params["spam_score"],
       :spam_score => inbound_email_params[field_mapper[:spam_score]],
-#AD      :spam_report => params["spam_report"],
       :spam_report => inbound_email_params[field_mapper[:spam_report]],
-#AD      :attachment_count => params["attachments"]
       :attachment_count => inbound_email_params[field_mapper[:attachment_count]]
     )
 
-#    error = false
-#    error = true if !@inbound_email.save
-#AB    error_display("Error creating inbound_email:#{@inbound_email.errors}", @inbound_email.errors) if !@inbound_email.save
     unless @inbound_email.save
-#AA      flash[:error] = "Error creating inbound_email:#{@inbound_email.errors}"
       error_display("Error creating inbound_email:#{@inbound_email.errors}", @inbound_email.errors, :error, logtag) 
       return
     end # end unless @inbound_email ...
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created inbound_email with id:#{@inbound_email.id}")
     sender_str = inbound_email_params[field_mapper[:from]]
     logger.debug("#{File.basename(__FILE__)}:#{self.class},create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
     # Parse sender string to derive nick and email address
@@ -123,30 +106,27 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     message_type_str = ControllerHelper.parse_message_type_from_email_addr(sender_email_addr, logtag)
     logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str:#{message_type_str}")
     # Create sender EndPoint
-    @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL)
-#AB    error_display("Error creating sender_pii '#{sender_str}':#{sender_pii.errors}", sender_pii.errors) if !sender_pii.errors.empty?
+    @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created sender_pii")
+    end # end Pii.find_or_create_by_pii ...
     unless @sender_pii.errors.empty?
        @error_obj_arr << @sender_pii
-#AA      flash[:error] = "Error creating sender_pii '#{sender_str}':#{sender_pii.errors}"
       error_display("Error creating sender_pii '#{sender_str}':#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
       return
     end # unless @sender_pii.errors.empty?
     @sender_endPoint = @sender_pii.endPoint
     if @sender_endPoint.nil?
-#      @inbound_email.errors += @sender_endPoint.errors
       @sender_endPoint = @sender_pii.create_endPoint(:nick => sender_nick_str, :start_time => Time.now)
       # Save the association
       @sender_endPoint.pii = @sender_pii
       @sender_endPoint.nick = sender_nick_str
       @sender_endPoint.creator_endpoint_id = @sender_endPoint.id
-#AB      error_display("Error creating sender_endPoint '#{sender_endPoint.inspect}:#{sender_endPoint.errors}", sender_endPoint.errors) if !sender_endPoint.save
       unless @sender_endPoint.save
        @error_obj_arr << @sender_endPoint
-#AA       flash[:error] = "Error creating sender_endPoint '#{sender_endPoint.inspect}:#{sender_endPoint.errors}"
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
       end # end unless @sender_endPoint.save
-#      @inbound_email.errors =+ sender_endPoint.errors
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
     if @sender_endPoint.entities.empty?
@@ -158,7 +138,6 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         return
       end # end unless @person.errors.empty?
       # Create an entity having property_document with sender email
-#      @entity = ControllerHelper.create_entity_by_name_email(sender_nick_str, sender_str)
       entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
       if entity_collection.empty?
@@ -213,7 +192,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     receiver_pii_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
     receiver_nick_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
     tag_str_arr = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
-    @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
+    @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now) do |ep_obj|
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_endPoint")
+    end # end EndPoint.find_or_create_by ...
     if @receiver_endPoint.pii
       # Ensure the existing pii is the same otherwise flag error
       unless @receiver_endPoint.pii.pii_value == receiver_pii_str or receiver_pii_str.nil? or receiver_pii_str.empty?
@@ -223,7 +204,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       end # end if @receiver_endPoint.pii != ...
     else
       # Create receiver pii if it does not possess one
-      @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL)
+      @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
+        logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_pii")
+      end # end Pii.find_or_create_by_pii ...
       unless @receiver_pii.errors.empty? or receiver_pii_str.nil? or receiver_pii_str.empty?
         @error_obj_arr << @receiver_pii
         error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
@@ -249,8 +232,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       existing_tag_str_arr = @receiver_endPoint.tags.collect { |tag_elem| tag_elem.name }
       yet_2b_associated_tag_str_arr = (existing_tag_str_arr - tag_str_arr) + (tag_str_arr - existing_tag_str_arr)
       yet_2b_associated_tag_str_arr.each { |tag_str_elem|
-        @new_tag = Tag.find_or_create_by_name(tag_str_elem)
-#AB        error_display("Error creating new_tag '#{tag_str_elem}':#{new_tag.errors}", new_tag.errors) if !new_tag.errors.empty?
+        @new_tag = Tag.find_or_create_by_name(tag_str_elem) do |tag_obj|
+          logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created tag:#{tag_str_elem}")
+        end # end Tag.find_or_create_by ...
         unless @new_tag.errors.empty?
           @error_obj_arr << @new_tag
 #AA          flash[:error] = "Error creating new_tag '#{tag_str_elem}':#{new_tag.errors}"
@@ -277,7 +261,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
           # CODE!!!!! Implement this in ControllerHelper
         else
           logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}: creating mood using message_type_str:#{message_type_str}")
-          @new_mood_tag = Tag.find_or_create_by_name_and_desc(message_type_str, MeantItMoodTagRel::MOOD_TAG_TYPE)
+          @new_mood_tag = Tag.find_or_create_by_name_and_desc(message_type_str, MeantItMoodTagRel::MOOD_TAG_TYPE) do |tag_obj|
+            logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created mood_tag:#{message_type_str}")
+          end # end Tag.find_or_create_by ...
           unless @new_mood_tag.errors.empty?
             @error_obj_arr << @new_mood_tag
             error_display("Error creating new_mood_tag '#{message_type_str}':#{@new_mood_tag.errors}", @new_mood_tag.errors, :error, logtag)
