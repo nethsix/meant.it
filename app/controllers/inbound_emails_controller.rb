@@ -1,4 +1,4 @@
-require 'controller_helper'
+require 'validators'
 
 class InboundEmailsController < ApplicationController
   include ControllerHelper
