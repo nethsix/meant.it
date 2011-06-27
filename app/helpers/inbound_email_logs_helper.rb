@@ -1,0 +1,2 @@
+module InboundEmailLogsHelper
+end

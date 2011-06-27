@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Param Txt:</b>
+  <%= @inbound_email_log.params_txt %>
+</p>
+
+<p>
+  <b>Error Msgs:</b>
+  <%= @inbound_email_log.error_msgs %>
+</p>
+
+<p>
+  <b>Error Objs:</b>
+  <%= @inbound_email_log.error_objs %>
+</p>
+
+
+<%= link_to 'Edit', edit_inbound_email_log_path(@inbound_email_log) %> |
+<%= link_to 'Back', inbound_email_logs_path %>

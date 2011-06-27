@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110625035930) do
+ActiveRecord::Schema.define(:version => 20110627013130) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -89,6 +89,14 @@ ActiveRecord::Schema.define(:version => 20110625035930) do
 
   add_index "entity_end_point_rels", ["endpoint_id", "entity_id", "verification_type"], :name => "by_endPoint_id_and_entity_id_and_verificationType", :unique => true
 
+  create_table "inbound_email_logs", :force => true do |t|
+    t.text     "params_txt"
+    t.text     "error_msgs"
+    t.text     "error_objs"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "inbound_emails", :force => true do |t|
     t.text     "headers",          :null => false
     t.text     "body_text"
@@ -106,6 +114,8 @@ ActiveRecord::Schema.define(:version => 20110625035930) do
     t.integer  "attachment_count", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "error_msgs"
+    t.text     "error_objs"
   end
 
   create_table "meant_it_mood_tag_rels", :force => true do |t|
@@ -178,5 +188,12 @@ ActiveRecord::Schema.define(:version => 20110625035930) do
   end
 
   add_index "tags", ["name"], :name => "by_name", :unique => true
+
+  create_table "yes_emails", :force => true do |t|
+    t.text     "response"
+    t.integer  "inbound_email_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end

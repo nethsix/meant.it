@@ -5,6 +5,6 @@ class ReceiveEmail
 #    params = CGI:parse(env['QUERY_STRING'])
 #    output = "text:#{params['text']}, html:#{params['html']}, to:#{params['to']}, from:#{params['from']}, subject:#{params['subject']}"
 puts "ReceiveEmail: #{env.inspect}"
-    [200, {}, [env.inspect]]
+    [200, {}, ["Thanks!"]]
   end # end def self.call
 end

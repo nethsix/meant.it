@@ -39,6 +39,9 @@ module ControllerHelper
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, message_str:#{message_str}")
     message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{msg_elem};/, '') }
     receiver_pii_str_arr = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
+    if receiver_pii_str_arr.empty?
+      receiver_pii_str_arr = input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
+    end # end if receiver_pii_str_arr.nil?
     receiver_pii_str = receiver_pii_str_arr[0]
     result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")

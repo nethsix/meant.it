@@ -1,4 +1,8 @@
 MeantIt::Application.routes.draw do
+  resources :inbound_email_logs
+
+  resources :yes_emails
+
   resources :meant_it_mood_tag_rels
 
   resources :entity_data
@@ -85,6 +89,7 @@ MeantIt::Application.routes.draw do
 
 #  match '/receive_email' => 'emails#receive_email'
   match "/receive_email" => ReceiveEmail
+  match "/inbound_emails_200" => "inbound_emails#create", :defaults => { :format => 'xml' }
 #  match "/send_email" => SendEmail.action(:index)
 
   root :to => "people#index"

@@ -1,0 +1,29 @@
+<%= form_for(@inbound_email_log) do |f| %>
+  <% if @inbound_email_log.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@inbound_email_log.errors.count, "error") %> prohibited this inbound_email_log from being saved:</h2>
+
+      <ul>
+      <% @inbound_email_log.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :params_txt %><br />
+    <%= f.text_area :params_txt %>
+  </div>
+  <div class="field">
+    <%= f.label :error_msgs %><br />
+    <%= f.text_area :error_msgs %>
+  </div>
+  <div class="field">
+    <%= f.label :error_objs %><br />
+    <%= f.text_area :error_objs %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

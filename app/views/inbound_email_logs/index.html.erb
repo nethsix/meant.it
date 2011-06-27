@@ -1,0 +1,27 @@
+<h1>Listing inbound_email_logs</h1>
+
+<table>
+  <tr>
+    <th>Params Txt</th>
+    <th>Error Msgs</th>
+    <th>Error Objs</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @inbound_email_logs.each do |inbound_email_log| %>
+  <tr>
+    <td><%= inbound_email_log.params_txt %></td>
+    <td><%= inbound_email_log.error_msgs %></td>
+    <td><%= inbound_email_log.error_objs %></td>
+    <td><%= link_to 'Show', inbound_email_log %></td>
+    <td><%= link_to 'Edit', edit_inbound_email_log_path(inbound_email_log) %></td>
+    <td><%= link_to 'Destroy', inbound_email_log, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Inbound email log', new_inbound_email_log_path %>

@@ -162,7 +162,78 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     # Send the same message twice
     # Same sender but different receiver, pii is increased by one
     # Different sender but same receiver, pii is specified, new receiver_endPoint but no new pii
+    # Add nick later to pii
   end # end test "should create inbound_email but not sender endpoint" do
+
+  test "should generate inbound_email_log but response success" do
+    first_inbound_email = InboundEmail.first
+    # Create error condition
+    first_inbound_email.attachment_count = nil
+p "#### first_inbound_email:#{first_inbound_email.inspect}"
+    assert_differences([
+      ['InboundEmailLog.count', 1]
+      ]) do
+      # We accept that inbound_emails_200 will lead to action
+      # create here.  We do this testing elsewhere.
+      # See "/inbound_emails_200 should lead to create action and xml"
+      @request.path = "/inbound_emails_200"
+      post :create, :inbound_email => first_inbound_email.attributes
+    end
+    inbound_email_log_last = InboundEmailLog.last
+    assert_match /#{first_inbound_email.to}/, inbound_email_log_last.params_txt
+    assert_match /#{first_inbound_email.from}/, inbound_email_log_last.params_txt
+    assert_match /#{first_inbound_email.body_text}/, inbound_email_log_last.params_txt
+    assert_match /attachment/, inbound_email_log_last.error_msgs
+    assert_match /attachment/, inbound_email_log_last.error_objs
+    assert_response :success
+  end # end test "should generate inbound_email_log but response success" do
+
+  test "should generate error field in inbound_email but response success" do
+    first_inbound_email = inbound_emails(:nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)
+    input_str = first_inbound_email.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    receiver_pii = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1]
+      ]) do
+      # We accept that inbound_emails_200 will lead to action
+      # create here.  We do this testing elsewhere.
+      # See "/inbound_emails_200 should lead to create action and xml"
+      @request.path = "/inbound_emails_200"
+      post :create, :inbound_email => first_inbound_email.attributes
+    end
+    p "#### inbound_email_last #1:#{InboundEmail.last.body_text}"
+
+    # Create error condition
+    # Change receiver_pii in body_text
+    body_text = first_inbound_email.body_text
+p "#AAAAAAA b4 body_text:#{body_text}"
+    body_text.sub!(receiver_pii, "#{receiver_pii}_mutated") if !body_text.nil? and !receiver_pii.nil?
+p "#AAAAAAA after body_text:#{body_text}"
+    first_inbound_email.body_text = body_text
+
+    assert_differences([
+      ['InboundEmail.count', 1]
+      ]) do
+      # We accept that inbound_emails_200 will lead to action
+      # create here.  We do this testing elsewhere.
+      # See "/inbound_emails_200 should lead to create action and xml"
+      @request.path = "/inbound_emails_200"
+      post :create, :inbound_email => first_inbound_email.attributes
+    end
+    inbound_email_last = InboundEmail.last
+    p "#### inbound_email_last #2:#{InboundEmail.last.body_text}"
+    p "#### inbound_email_last #2:#{InboundEmail.last.error_msgs}"
+    p "#### inbound_email_last #2:#{InboundEmail.last.error_objs}"
+    assert_match /already has pii_value '#{receiver_pii}'/, inbound_email_last.error_msgs
+    assert_match /OrderedHash/, inbound_email_last.error_objs
+    assert_response :success
+    
+  end # end test "should generate error field in inbound_email but response success" do
+
+  test "should populate error field in inbound_email" do
+  end # end test "should populate error field in inbound_email" do
 
   test "should show inbound_email" do
     get :show, :id => @inbound_email.to_param
@@ -185,5 +256,9 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     end
 
     assert_redirected_to inbound_emails_path
+  end
+
+  test "/inbound_emails_200 should lead to create action and xml" do
+    assert_generates("/inbound_emails_200", {:controller => "inbound_emails", :action => "create", :format => "xml" })
   end
 end
