@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110627013130) do
+ActiveRecord::Schema.define(:version => 20110627075222) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(:version => 20110627013130) do
     t.integer  "creator_endpoint_id"
     t.datetime "start_time",          :null => false
     t.datetime "end_time"
-    t.string   "nick",                :null => false
+    t.string   "nick"
     t.string   "status",              :null => false
     t.datetime "created_at"
     t.datetime "updated_at"

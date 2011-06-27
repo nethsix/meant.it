@@ -113,7 +113,12 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # Check receiver_endPoint
       receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK])
       assert_not_nil receiver_endPoint
-      assert_nil receiver_endPoint.pii
+      receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+      if receiver_pii_str.nil? or receiver_pii_str.empty?
+        assert_nil receiver_endPoint.pii
+      else # else if !receiver_pii_str.nil? and !receiver_pii_str.empty?
+        assert_equal receiver_pii_str, receiver_endPoint.pii.pii_value
+      end # end # else if !receiver_pii_str.nil? and !receiver_pii_str.empty?
 
       # Check receiver_endPoint tags
       p "meantItRel_hash.inspect:#{meantItRel_hash.inspect}"
@@ -230,7 +235,6 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_match /already has pii_value '#{receiver_pii}'/, inbound_email_last.error_msgs
     assert_match /OrderedHash/, inbound_email_last.error_objs
     assert_response :success
-    
   end # end test "should generate error field in inbound_email but response success" do
 
   test "should populate error field in inbound_email" do
@@ -259,7 +263,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_redirected_to inbound_emails_path
   end
 
-  test "/inbound_emails_200 should lead to create action and xml" do
-    assert_generates("/inbound_emails_200", {:controller => "inbound_emails", :action => "create", :format => "xml" })
+  test "inbound_emails_200 should lead to create action and xml" do
+    assert_recognizes({:controller => "inbound_emails", :action => "create", :format => "xml"}, {:path => '/inbound_emails_200', :method => :post})
   end
 end

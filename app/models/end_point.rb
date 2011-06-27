@@ -27,7 +27,7 @@ class EndPoint < ActiveRecord::Base
 
   belongs_to :creatorEndPoint, :class_name => "EndPoint"
 
-  validates :nick, :presence => true
+#  validates :nick, :presence => true
 #  validates :startTime, :presence => true
   validates :start_time, :presence => true
   validates :status, :presence => true, :status_type => true
