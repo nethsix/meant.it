@@ -26,14 +26,67 @@ class InboundEmailsControllerTest < ActionController::TestCase
 #    assert_redirected_to inbound_email_path(assigns(:inbound_email))
 #  end
 
-  # Tests for source that is global id-able, i.e., email
+  test "nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email"
 
-  # nick (yes) :xxx (no) ;yyy; (*) bla (yes): sender (id-able source)
-  test "should create inbound_email" do
-    all_fixture_inbound_emails = InboundEmail.find(:all)
-    p "all_fixture_inbound_emails.inspect:#{all_fixture_inbound_emails.inspect}"
-    all_fixture_inbound_emails.each { |email_elem|
+  test "nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email"
 
+  test "nick_y_xxx_n_yyy_y_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_n_yyy_y_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_n_yyy_y_tags_n_sender_idable_inbound_email"
+
+  test "nick_y_xxx_n_yyy_n_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_n_yyy_n_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_n_yyy_n_tags_n_sender_idable_inbound_email"
+
+  test "nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email"
+
+  test "nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email"
+
+  test "nick_y_xxx_y_yyy_y_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_y_yyy_y_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_y_yyy_y_tags_n_sender_idable_inbound_email"
+
+  test "nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email"
+
+  test "nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email"
+
+  test "nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email"
+
+  test "nick_n_xxx_y_yyy_y_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_n_xxx_y_yyy_y_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_n_xxx_y_yyy_y_tags_n_sender_idable_inbound_email"
+
+  test "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email" do
+   email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email)
+   common_code(email_elem)
+  end # end "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email"
+
+  def common_code(email_elem)
       p "testing inbound_email.inspect:#{email_elem.inspect}"
 
       input_str = email_elem.subject
@@ -45,6 +98,7 @@ class InboundEmailsControllerTest < ActionController::TestCase
 p "email_elem.to:#{email_elem.to}"
 p "message_type_str:#{message_type_str}"
       endpoint_tag_arr = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_TAGS].dup
+      p "BBBBBBBB #{email_elem.body_text} BBBBBBB endpoint_tag_arr:#{endpoint_tag_arr.inspect}"
       # Check each tag for existance
       non_exist_endpoint_tag_arr = []
       endpoint_tag_arr.each { |tag_elem|
@@ -158,17 +212,153 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       
 p "#AAAAA MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
 p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
+  end # end def common_code
 
-    } # end all_fixture_inbound_emails.each ...
-    
-  end # end test "should create inbound_email" do
+  # Tests for source that is global id-able, i.e., email
+
+  # nick (yes) :xxx (no) ;yyy; (*) bla (yes): sender (id-able source)
+#12345     test "should create inbound_email" do
+#12345       all_fixture_inbound_emails = InboundEmail.find(:all)
+#12345       p "all_fixture_inbound_emails.inspect:#{all_fixture_inbound_emails.inspect}"
+#12345       all_fixture_inbound_emails.each { |email_elem|
+#12345         p "testing inbound_email.inspect:#{email_elem.inspect}"
+#12345   
+#12345         input_str = email_elem.subject
+#12345         input_str ||= email_elem.body_text
+#12345         meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+#12345         p "meantItRel_hash.inspect:#{meantItRel_hash.inspect}"
+#12345         receiver_pii_count = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII].nil? ? 0 : 1
+#12345         message_type_str = ControllerHelper.parse_message_type_from_email_addr(email_elem.to)
+#12345   p "email_elem.to:#{email_elem.to}"
+#12345   p "message_type_str:#{message_type_str}"
+#12345         endpoint_tag_arr = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_TAGS].dup
+#12345         p "BBBBBBBB #{email_elem.body_text} BBBBBBB endpoint_tag_arr:#{endpoint_tag_arr.inspect}"
+#12345         # Check each tag for existance
+#12345         non_exist_endpoint_tag_arr = []
+#12345         endpoint_tag_arr.each { |tag_elem|
+#12345           non_exist_endpoint_tag_arr << tag_elem if !Tag.exists?(:name => tag_elem)
+#12345         }  # end input_tag_arr.each ...
+#12345         mood_tag_arr = []
+#12345         if message_type_str == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+#12345           # CODE!!!! Get mood tags using reasoner
+#12345           # mood_tag_arr += ...
+#12345         else
+#12345           mood_tag_arr << message_type_str
+#12345         end # end if message_type_str == MeantItMessageTypeValidator:: ...
+#12345         p "mood_tag_arr:#{mood_tag_arr.inspect}"
+#12345         non_exist_mood_tag_arr = []
+#12345         mood_tag_arr.each { |tag_elem|
+#12345           non_exist_mood_tag_arr << tag_elem if !Tag.exists?(:name => tag_elem)
+#12345         }  # end mood_tag_arr.each ...
+#12345         p "#AAAA non_exist_mood_tag_arr.inspect:#{non_exist_mood_tag_arr.inspect}"
+#12345   
+#12345         assert_differences([
+#12345           ['InboundEmail.count', 1],
+#12345           ['EndPoint.count', 2],
+#12345           ['Pii.count', 1+receiver_pii_count],
+#12345           ['Entity.count', 1],
+#12345           ['EntityDatum.count', 1],
+#12345           ['EntityEndPointRel.count', 1],
+#12345           ['Tag.count', non_exist_endpoint_tag_arr.size + non_exist_mood_tag_arr.size],
+#12345           ['EndPointTagRel.count', endpoint_tag_arr.size],
+#12345           ['MeantItRel.count', 1],
+#12345           ['MeantItMoodTagRel.count', 1],
+#12345           ]) do
+#12345           post :create, :inbound_email => email_elem.attributes
+#12345         end
+#12345   
+#12345   p "MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
+#12345   p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
+#12345   
+#12345         assert_redirected_to inbound_email_path(assigns(:inbound_email))
+#12345   
+#12345         # Check that email is created
+#12345         inbound_email_from_db = InboundEmail.find_by_id(assigns(:inbound_email)["id"])
+#12345         assert_not_nil inbound_email_from_db
+#12345   
+#12345         # Check that sender Pii
+#12345         sender_pii = Pii.find_by_pii_value(email_elem.from)
+#12345         assert_not_nil sender_pii
+#12345   
+#12345         # Check that sender EndPoint is created
+#12345         sender_endPoint = sender_pii.endPoint
+#12345         assert_not_nil sender_endPoint
+#12345   
+#12345         # Check that sender Entity is created
+#12345         sender_entities = sender_endPoint.entities
+#12345         assert_equal 1, sender_entities.size
+#12345         sender_entity = sender_entities[0]
+#12345         assert_not_nil sender_entity
+#12345         # Check that sender Entity has the same pii
+#12345         person = ControllerHelper.find_person_by_id(sender_entity.property_document_id)
+#12345         assert_equal person.email, sender_pii.pii_value
+#12345   
+#12345         # Check that verification_type is email
+#12345         assert_equal 1, sender_entity.entityEndPointRels.size
+#12345         sender_entity_entityEndPointRel = sender_entity.entityEndPointRels[0]
+#12345         assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
+#12345   
+#12345         # Check receiver_endPoint
+#12345         receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK])
+#12345         assert_not_nil receiver_endPoint
+#12345         receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+#12345         if receiver_pii_str.nil? or receiver_pii_str.empty?
+#12345           assert_nil receiver_endPoint.pii
+#12345         else # else if !receiver_pii_str.nil? and !receiver_pii_str.empty?
+#12345           assert_equal receiver_pii_str, receiver_endPoint.pii.pii_value
+#12345         end # end # else if !receiver_pii_str.nil? and !receiver_pii_str.empty?
+#12345   
+#12345         # Check receiver_endPoint tags
+#12345         p "meantItRel_hash.inspect:#{meantItRel_hash.inspect}"
+#12345         tag_str_arr = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
+#12345         p "tag_str_arr:#{tag_str_arr}"
+#12345         tagged_endPoints = EndPoint.tagged(tag_str_arr)
+#12345         p "tagged_endPoints.inspect:#{tagged_endPoints.inspect}"
+#12345         tagged_endPoint = tagged_endPoints[0]
+#12345         if tag_str_arr.nil? or tag_str_arr.empty?
+#12345           assert_equal 0, tagged_endPoints.size
+#12345         else
+#12345           assert_equal 1, tagged_endPoints.size
+#12345           assert_equal receiver_endPoint, tagged_endPoint
+#12345         end # end if tag_str_arr.nil? ...
+#12345       
+#12345         # Check that MeantItRel is related to sender_endPoint and receiver_endPoint
+#12345         assert_equal 1, sender_endPoint.srcMeantItRels.size
+#12345         assert_equal receiver_endPoint.id, sender_endPoint.srcMeantItRels[0].dst_endpoint.id
+#12345         assert_equal 1, receiver_endPoint.dstMeantItRels.size
+#12345         assert_equal sender_endPoint.id, receiver_endPoint.dstMeantItRels[0].src_endpoint.id
+#12345         assert_equal sender_endPoint.srcMeantItRels[0], receiver_endPoint.dstMeantItRels[0]
+#12345         # Check that MeantItRel is related to email
+#12345         assert_equal inbound_email_from_db.id, sender_endPoint.srcMeantItRels[0].inbound_email_id
+#12345         assert_equal inbound_email_from_db.id, receiver_endPoint.dstMeantItRels[0].inbound_email_id
+#12345         # Check meantIt type
+#12345         assert_equal message_type_str, sender_endPoint.srcMeantItRels[0].message_type
+#12345         # Check mood tags
+#12345         if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+#12345           # CODE!!!! Check with reaonser
+#12345         else
+#12345           meantItMoodTags = sender_endPoint.srcMeantItRels[0].tags
+#12345           meantItMoodTag = meantItMoodTags[0]
+#12345           assert_equal 1, meantItMoodTags.size
+#12345           assert_equal MeantItMoodTagRel::MOOD_TAG_TYPE, meantItMoodTag.desc
+#12345           assert_equal message_type_str, meantItMoodTag.name
+#12345         end # end if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+#12345         
+#12345   p "#AAAAA MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
+#12345   p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
+#12345   
+#12345       } # end all_fixture_inbound_emails.each ...
+#12345       
+#12345     end # end test "should create inbound_email" do
 
   test "should create inbound_email but not sender endpoint" do
+    # CODE!!!
     # Send the same message twice
     # Same sender but different receiver, pii is increased by one
     # Different sender but same receiver, pii is specified, new receiver_endPoint but no new pii
     # Same sender same receiver but no pii
     # Add nick later to pii
+    # Test all four cases of nick/pii empty/yes
   end # end test "should create inbound_email but not sender endpoint" do
 
   test "should generate inbound_email_log but response success" do
@@ -232,7 +422,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     p "#### inbound_email_last #2:#{InboundEmail.last.body_text}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_msgs}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_objs}"
-    assert_match /already has pii_value '#{receiver_pii}'/, inbound_email_last.error_msgs
+    assert_match /conflicts with receiver_pii 'pii:#{receiver_pii}/, inbound_email_last.error_msgs
     assert_match /OrderedHash/, inbound_email_last.error_objs
     assert_response :success
   end # end test "should generate error field in inbound_email but response success" do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110627075222) do
+ActiveRecord::Schema.define(:version => 20110627095106) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -138,6 +138,7 @@ ActiveRecord::Schema.define(:version => 20110627075222) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "inbound_email_id"
+    t.text     "norm_message"
   end
 
   add_index "meant_it_rels", ["inbound_email_id"], :name => "by_inbound_email_id", :unique => true
@@ -185,6 +186,8 @@ ActiveRecord::Schema.define(:version => 20110627075222) do
     t.string   "status",     :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "norm_name"
+    t.text     "norm_desc"
   end
 
   add_index "tags", ["name"], :name => "by_name", :unique => true
