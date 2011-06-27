@@ -568,12 +568,13 @@ p "WARN2222222222222"
       flash[message_type] = message
       respond_to do |format|
         format.html { render :action => "new" }
-        format.xml  { render :xml => errors, :status => :unprocessable_entity }
         # Things that require 200 otherwise they'll keep resending, e.g.
         # sendgrid
 p "###### self.request.path:#{self.request.path}"
         if self.request.path.match(/inbound_emails_200/)
           format.xml  { render :xml => errors, :status => 200 }
+        else
+          format.xml  { render :xml => errors, :status => :unprocessable_entity }
         end # end if self.request.path.match(/inbound_emails_200/)
       end # respond_to
     end # end def error_display

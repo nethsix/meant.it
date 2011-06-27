@@ -162,6 +162,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     # Send the same message twice
     # Same sender but different receiver, pii is increased by one
     # Different sender but same receiver, pii is specified, new receiver_endPoint but no new pii
+    # Same sender same receiver but no pii
     # Add nick later to pii
   end # end test "should create inbound_email but not sender endpoint" do
 
