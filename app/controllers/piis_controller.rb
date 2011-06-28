@@ -1,3 +1,5 @@
+require 'controller_helper'
+
 class PiisController < ApplicationController
   # GET /piis
   # GET /piis.xml
@@ -78,6 +80,30 @@ class PiisController < ApplicationController
     respond_to do |format|
       format.html { redirect_to(piis_url) }
       format.xml  { head :ok }
+    end
+  end
+
+  def find
+    respond_to do |format|
+      format.html # find.html.erb
+      format.xml  { render :xml => @pii }
+    end
+  end
+
+  def show_by_pii
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii:#{logtag}, params[:pii_value_input]:#{params[:pii_value_input]}")
+    pii_value_input = params[:pii_value_input]
+    decoded_pii_input = URI::decode(pii_value_input)
+    decoded_pii_input.chomp!
+    decoded_pii_input.strip!
+    @pii = nil
+    @pii = Pii.find_by_pii_value(decoded_pii_input) if !decoded_pii_input.nil?
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii:#{logtag}, @pii:#{@pii.inspect}")
+
+    respond_to do |format|
+      format.html { render "show_pii_details" }
+      format.xml  { render :xml => @pii }
     end
   end
 end

@@ -23,7 +23,12 @@ MeantIt::Application.routes.draw do
 
   resources :entities
 
-  resources :piis
+  resources :piis do
+    collection do
+      get 'find'
+      get 'show_by_pii'
+    end
+  end
 
   resources :people
 

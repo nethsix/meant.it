@@ -648,12 +648,13 @@ p "\nHUH!!!!?!??! NORMAL!!!\n"
       existing_tag_str_arr = @receiver_endPoint.tags.collect { |tag_elem| tag_elem.name }
       yet_2b_associated_tag_str_arr = (existing_tag_str_arr - tag_str_arr) + (tag_str_arr - existing_tag_str_arr)
       yet_2b_associated_tag_str_arr.each { |tag_str_elem|
-        @new_tag = Tag.find_or_create_by_name(tag_str_elem) do |tag_obj|
-          logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created tag:#{tag_str_elem}")
+        norm_tag_str_elem = tag_str_elem.downcase
+        @new_tag = Tag.find_or_create_by_name(norm_tag_str_elem) do |tag_obj|
+          logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created tag:#{norm_tag_str_elem}")
         end # end Tag.find_or_create_by ...
         unless @new_tag.errors.empty?
           @error_obj_arr << @new_tag
-          error_display("Error creating new_tag '#{tag_str_elem}':#{@new_tag.errors}", @new_tag.errors, :error, logtag)
+          error_display("Error creating new_tag '#{norm_tag_str_elem}':#{@new_tag.errors}", @new_tag.errors, :error, logtag)
           return
         end # end unless @new_tag.errors.empty?
         @receiver_endPoint.tags << @new_tag

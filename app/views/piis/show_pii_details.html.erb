@@ -1,0 +1,72 @@
+<p id="notice"><%= notice %></p>
+
+<% endPoint = @pii.endPoint %>
+<% srcMeantItRels = endPoint.srcMeantItRels %>
+<% srcMeantItRelDstUniqs = [] %>
+<% srcMeantItRelDstUniqs = srcMeantItRels.collect { |elem| elem.dst_endpoint } %>
+<% srcMeantItRelDstUniqs.compact! %>
+<% srcMeantItRelDstUniqs.uniq! %>
+<% dstMeantItRels = endPoint.dstMeantItRels %>
+<% dstMeantItRelDstUniqs = [] %>
+<% dstMeantItRelDstUniqs = dstMeantItRels.collect { |elem| elem.src_endpoint } %>
+<% dstMeantItRelDstUniqs.compact! %>
+<% dstMeantItRelDstUniqs.uniq! %>
+
+<p>
+  <b>Piivalue:</b>
+  <%= @pii.pii_value %>
+</p>
+
+<p>
+  <b>Endpoint nick:</b>
+  <% if !endPoint.nil? %>
+    <%= endPoint.nick %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt Out:</b>
+  <% if !srcMeantItRels.nil? %>
+    <%= srcMeantItRels.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt Out List:</b>
+  <%= render :partial => "shared/meant_it_rel", :collection => srcMeantItRels %>
+</p>
+
+<p>
+  <b>MeantIt Out (Uniq receiver):</b>
+  <% if !srcMeantItRelDstUniqs.nil? %>
+    <%= srcMeantItRelDstUniqs.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt Out (Uniq receiver) List:</b>
+  <%= render :partial => "shared/endpoint", :collection => srcMeantItRelDstUniqs %> 
+</p>
+
+<p>
+  <b>MeantIt In:</b>
+  <% if !dstMeantItRels.nil? %>
+    <%= dstMeantItRels.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt In List:</b>
+  <%= render :partial => "shared/meant_it_rel", :collection => dstMeantItRels %>
+</p>
+
+<p>
+  <b>MeantIt Out (Uniq receiver):</b>
+  <% if !dstMeantItRelDstUniqs.nil? %>
+    <%= dstMeantItRelDstUniqs.size %>
+  <% end %>
+</p>
+<p>
+  <b>MeantIt In (Uniq receiver) List:</b>
+  <%= render :partial => "shared/endpoint", :collection => dstMeantItRelDstUniqs %> 
+</p>
