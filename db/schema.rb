@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110627075222) do
+ActiveRecord::Schema.define(:version => 20110628123736) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -38,6 +38,7 @@ ActiveRecord::Schema.define(:version => 20110627075222) do
     t.string   "status",              :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "pii_id"
   end
 
   add_index "end_points", ["nick", "creator_endpoint_id"], :name => "by_nick_and_creatorEndPoint_id", :unique => true

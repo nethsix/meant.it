@@ -44,303 +44,6 @@ Rails.logger.level = Logger::DEBUG
     @inbound_email = InboundEmail.find(params[:id])
   end
 
-#ABCDE    def create_common
-#ABCDE      logtag = ControllerHelper.gen_logtag
-#ABCDE       # Stores objs that causes problem except inbound_email
-#ABCDE       # which is handled by different error handler in :action => new
-#ABCDE       # view
-#ABCDE       @error_obj_arr = []
-#ABCDE  puts "InboundEmail, create:#{params[:inbound_email].inspect}"
-#ABCDE      # If the inbound_email was created using the interface then
-#ABCDE      # it will keys like "commit", etc and the hash for the inbound_email
-#ABCDE      # is stored using :inbound_email key
-#ABCDE      inbound_email_params = params[:inbound_email]
-#ABCDE      # If inbound_email was created using external mechanims, e.g.,
-#ABCDE      # sendgrid, then there is no :inbound_email key so we
-#ABCDE      # use the params directly
-#ABCDE      inbound_email_params ||= params
-#ABCDE      # We can also based on certain values, e.g., smtp ip or header
-#ABCDE      # fields decide which field_mapper to get, but we need at least
-#ABCDE      # one field that is guarateed there, for sendgrid, we can use headers
-#ABCDE      field_mapper_type = nil
-#ABCDE      if inbound_email_params[:headers].match /sendgrid.meant.it/
-#ABCDE        field_mapper_type = InboundEmailFieldMapperFactory::SENDGRID
-#ABCDE      end # end if inbound_email_params ...
-#ABCDE      field_mapper = InboundEmailFieldMapperFactory.get_inbound_email_field_mapper(field_mapper_type)
-#ABCDE      logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, field_mapper_type:#{field_mapper_type}")
-#ABCDE      logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, field_mapper:#{field_mapper.inspect}")
-#ABCDE      @inbound_email = InboundEmail.new(
-#ABCDE        :headers => inbound_email_params[field_mapper[:headers]],
-#ABCDE        :body_text => inbound_email_params[field_mapper[:body_text]],
-#ABCDE        :body_html => inbound_email_params[field_mapper[:body_html]],
-#ABCDE        :from => inbound_email_params[field_mapper[:from]],
-#ABCDE        :to => inbound_email_params[field_mapper[:to]],
-#ABCDE        :subject => inbound_email_params[field_mapper[:subject]],
-#ABCDE        :cc => inbound_email_params[field_mapper[:cc]],
-#ABCDE        :dkim => inbound_email_params[field_mapper[:dkim]],
-#ABCDE        :spf => inbound_email_params[field_mapper[:spf]],
-#ABCDE        :envelope => inbound_email_params[field_mapper[:envelope]],
-#ABCDE        :charsets => inbound_email_params[field_mapper[:charsets]],
-#ABCDE        :spam_score => inbound_email_params[field_mapper[:spam_score]],
-#ABCDE        :spam_report => inbound_email_params[field_mapper[:spam_report]],
-#ABCDE        :attachment_count => inbound_email_params[field_mapper[:attachment_count]]
-#ABCDE      )
-#ABCDE  
-#ABCDE      unless @inbound_email.save
-#ABCDE        error_display("Error creating inbound_email:#{@inbound_email.errors}", @inbound_email.errors, :error, logtag) 
-#ABCDE        return
-#ABCDE      end # end unless @inbound_email ...
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created inbound_email with id:#{@inbound_email.id}")
-#ABCDE      sender_str = inbound_email_params[field_mapper[:from]]
-#ABCDE      logger.debug("#{File.basename(__FILE__)}:#{self.class},create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
-#ABCDE      # Parse sender string to derive nick and email address
-#ABCDE      sender_str_match_arr = sender_str.match(/(.*)<(.*)>/)
-#ABCDE      sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
-#ABCDE      sender_str = sender_str_match_arr[2] if !sender_str_match_arr.nil?
-#ABCDE      sender_nick_str ||= sender_str
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_str:#{sender_str}")
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_nick_str:#{sender_nick_str}")
-#ABCDE      sender_email_addr = inbound_email_params[field_mapper[:to]]
-#ABCDE      logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, sender_email_addr = inbound_email_params[field_mapper[:to]]:#{inbound_email_params[field_mapper[:to]]}")
-#ABCDE      message_type_str = ControllerHelper.parse_message_type_from_email_addr(sender_email_addr, logtag)
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, message_type_str:#{message_type_str}")
-#ABCDE      # Create sender EndPoint
-#ABCDE      @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
-#ABCDE        logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created sender_pii")
-#ABCDE      end # end Pii.find_or_create_by_pii ...
-#ABCDE      unless @sender_pii.errors.empty?
-#ABCDE        @error_obj_arr << @sender_pii
-#ABCDE        error_display("Error creating sender_pii '#{sender_str}':#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
-#ABCDE        return
-#ABCDE      end # unless @sender_pii.errors.empty?
-#ABCDE      @sender_endPoint = @sender_pii.endPoint
-#ABCDE      if @sender_endPoint.nil?
-#ABCDE        @sender_endPoint = @sender_pii.create_endPoint(:nick => sender_nick_str, :start_time => Time.now)
-#ABCDE        # Save the association
-#ABCDE        @sender_endPoint.pii = @sender_pii
-#ABCDE        @sender_endPoint.nick = sender_nick_str
-#ABCDE        @sender_endPoint.creator_endpoint_id = @sender_endPoint.id
-#ABCDE        unless @sender_endPoint.save
-#ABCDE         @error_obj_arr << @sender_endPoint
-#ABCDE          error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
-#ABCDE          return
-#ABCDE        end # end unless @sender_endPoint.save
-#ABCDE        logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
-#ABCDE      end # end if @sender_endPoint.nil?
-#ABCDE      logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
-#ABCDE      if @sender_endPoint.entities.empty?
-#ABCDE        # Create person
-#ABCDE        @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
-#ABCDE        unless @person.errors.empty?
-#ABCDE          @error_obj_arr << @person
-#ABCDE          error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
-#ABCDE          return
-#ABCDE        end # end unless @person.errors.empty?
-#ABCDE        # Create an entity having property_document with sender email
-#ABCDE        entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
-#ABCDE        logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
-#ABCDE        if entity_collection.empty?
-#ABCDE          @entity = Entity.create(:property_document_id => @person.id)
-#ABCDE        else
-#ABCDE          @entity = entity_collection[0]
-#ABCDE        end # end if entity_collection.empty?
-#ABCDE        unless @entity.errors.empty?
-#ABCDE          @error_obj_arr << @entity
-#ABCDE          error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
-#ABCDE          return
-#ABCDE        end # end unless @entity.errors.empty?
-#ABCDE        # Link entity to the @sender_endPoint
-#ABCDE        if @entity.errors.empty?
-#ABCDE          # We cannot just do @entity.endPoints << @sender_endPoint
-#ABCDE          # because EntityEndPointRels.verification_type must not be null
-#ABCDE          @entityEndPointRel1 = @entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_EMAIL)
-#ABCDE          @entityEndPointRel1.endpoint_id = @sender_endPoint.id
-#ABCDE          unless @entityEndPointRel1.save
-#ABCDE            @error_obj_arr << @entityEndPointRel1
-#ABCDE            error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
-#ABCDE            return
-#ABCDE          end # end unless @entityEndPointRel1.save
-#ABCDE        end # end if @entity.errors.empty?
-#ABCDE      end # end if @sender_endPoint.entities.empty?
-#ABCDE      # Look at subject if it's not nil
-#ABCDE      # else use body_text
-#ABCDE      input_str = inbound_email_params[field_mapper[:subject]]
-#ABCDE      if input_str.nil? or input_str.empty?
-#ABCDE        input_str = inbound_email_params[field_mapper[:body_text]]
-#ABCDE      end # end if input_str.nil? or input_str.empty?
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, input_str:#{input_str}")
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, receiver_pii_str:#{receiver_pii_str}, receiver_nick_str:#{receiver_nick_str}")
-#ABCDE      # Decide what to do on nick, pii, message, tags...
-#ABCDE      # Case:
-#ABCDE      # nick (yes) :xxx (no) ;yyy (*) tags (yes): sender (global id-able source)
-#ABCDE      # Dup input_str in case we need it
-#ABCDE      # Don't manipulate the original input_str since it is used
-#ABCDE      # to re-populate form on failures
-#ABCDE      input_str_dup = input_str.dup
-#ABCDE      meantItInput_hash = ControllerHelper.parse_meant_it_input(input_str_dup, logtag)
-#ABCDE      message_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_MESSAGE]
-#ABCDE      receiver_pii_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
-#ABCDE      receiver_nick_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
-#ABCDE      tag_str_arr = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
-#ABCDE  
-#ABCDE      # Four conditions:
-#ABCDE      # 1. receiver_pii_str: empty, receiver_nick_str: empty
-#ABCDE      # 2. receiver_pii_str: yes, receiver_nick_str: yes
-#ABCDE      # 3. receiver_pii_str: yes, receiver_nick_str: empty
-#ABCDE      # 4. receiver_pii_str: empty, receiver_nick_str: yes
-#ABCDE      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, receiver_pii_str:#{receiver_pii_str}, receiver_nick_str:#{receiver_nick_str}")
-#ABCDE  
-#ABCDE      # Case 1. receiver_pii_str: empty, receiver_nick_str: empty
-#ABCDE      # Cannot identify receiver
-#ABCDE      if (receiver_pii_str.nil? or receiver_pii_str.empty?) and (receiver_nick_str.nil? or receiver_nick_str.empty?)
-#ABCDE        @receiver_endPoint.new
-#ABCDE        @error_obj_arr << @receiver_endPoint
-#ABCDE        error_display("Error finding/creating @receiver_endPoint, both receiver_nick and receiver_pii are empty", @receiver_endPoint.errors, :error, logtag)
-#ABCDE        return
-#ABCDE      end # end Case 1. ... if (receiver_pii_str.nil? or  ...
-#ABCDE  
-#ABCDE      # Case 2. receiver_pii_str: yes, receiver_nick_str: yes
-#ABCDE      # or
-#ABCDE      # Case 3. receiver_pii_str: yes, receiver_nick_str: empty
-#ABCDE      # We need to find_or_create the receiver_pii
-#ABCDE      if (
-#ABCDE          ((!receiver_pii_str.nil? and !receiver_pii_str.empty?) and (!receiver_nick_str.nil? and !receiver_nick_str.empty?)) or
-#ABCDE          ((!receiver_pii_str.nil? and !receiver_pii_str.empty?) and (receiver_nick_str.nil? or receiver_nick_str.empty?))
-#ABCDE         )
-#ABCDE        # Create receiver pii if it does not possess one
-#ABCDE        @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
-#ABCDE          logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_pii")
-#ABCDE        end # end Pii.find_or_create_by_pii ...
-#ABCDE        unless @receiver_pii.errors.empty?
-#ABCDE          @error_obj_arr << @receiver_pii
-#ABCDE          error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
-#ABCDE          return
-#ABCDE        end # end unless @receiver_pii.errors.empty?
-#ABCDE      end # end get @receiver_pii ... if (receiver_pii_str.nil? or  ...
-#ABCDE  
-#ABCDE      # Case 2. receiver_pii_str: yes, receiver_nick_str: yes
-#ABCDE      # or
-#ABCDE      # Case 4. receiver_pii_str: empty, receiver_nick_str: yes
-#ABCDE      # Need to find EndPoint
-#ABCDE      if (
-#ABCDE          ((!receiver_pii_str.nil? and !receiver_pii_str.empty?) and (!receiver_nick_str.nil? and !receiver_nick_str.empty?)) or
-#ABCDE          ((receiver_pii_str.nil? or receiver_pii_str.empty?) and (!receiver_nick_str.nil? and !receiver_nick_str.empty?))
-#ABCDE         )
-#ABCDE        @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now) do |ep_obj|
-#ABCDE          logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_endPoint - case 2")
-#ABCDE        end # end @receiver_endPoint ...
-#ABCDE      end # end Cases 2 and 4 ...
-#ABCDE  
-#ABCDE      # For Case 2. receiver_pii_str: yes, receiver_nick_str: yes 
-#ABCDE      # and they have been linked before, we check validity
-#ABCDE      # If @receiver_pii and @receiver_endPoints exist and there were no 
-#ABCDE      # errors creating them they must point to each other if they
-#ABCDE      # are not pointing to nil.
-#ABCDE      if (!@receiver_pii.nil? and !@receiver_pii.errors.any?) and (!@receiver_endPoint.nil? and !@receiver_endPoint.errors.any?)
-#ABCDE        unless @receiver_pii.endPoint == @receiver_endPoint and @receiver_endPoint.pii = @receiver_pii
-#ABCDE          @error_obj_arr << @receiver_endPoint
-#ABCDE          error_display("receiver_endPoint '#{@receiver_endPoint.nick}' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
-#ABCDE          return
-#ABCDE        end # end unless @receiver_pii.endPoint == @receiver_endPoint and @receiver_endPoint.pii = @receiver_pii
-#ABCDE      end # end if (!@receiver_pii.nil? and !@receiver_pii.errors.any?)  ...
-#ABCDE  
-#ABCDE      # For Case 3. receiver_pii_str: yes, receiver_nick_str: empty
-#ABCDE      # we create endPoint and tie receiver_pii to it
-#ABCDE      if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?) and (receiver_nick_str.nil? or receiver_nick_str.empty?))
-#ABCDE        @receiver_endPoint = EndPoint.create(:creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
-#ABCDE        logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_endPoint - case 3")
-#ABCDE        @receiver_endPoint.pii = @receiver_pii
-#ABCDE        unless @receiver_endPoint.save
-#ABCDE          @error_obj_arr << @receiver_endPoint
-#ABCDE          error_display("Error saving receiver_pii '#{receiver_pii.inspect}' to receiver_endPoint '{receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
-#ABCDE          return
-#ABCDE        end # end unless @receiver_endPoint.save
-#ABCDE      end # end if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?)  ...
-#ABCDE      
-#ABCDE      # For Case 4. receiver_pii_str: empty, receiver_nick_str: yes
-#ABCDE      # We already have endPoint
-#ABCDE  
-#ABCDE      # At this stage all Case 2, 3, 4 have @receiver_endPoints
-#ABCDE  
-#ABCDE  #20110627    @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now) do |ep_obj|
-#ABCDE  #20110627      logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_endPoint")
-#ABCDE  #20110627    end # end EndPoint.find_or_create_by ...
-#ABCDE  #20110627    if @receiver_endPoint.pii
-#ABCDE  #20110627      # Ensure the existing pii is the same otherwise flag error
-#ABCDE  #20110627      unless @receiver_endPoint.pii.pii_value == receiver_pii_str or receiver_pii_str.nil? or receiver_pii_str.empty?
-#ABCDE  #20110627        @error_obj_arr << @receiver_endPoint
-#ABCDE  #20110627        error_display("receiver_endPoint '#{@receiver_endPoint.nick}' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
-#ABCDE  #20110627        return
-#ABCDE  #20110627      end # end if @receiver_endPoint.pii != ...
-#ABCDE  #20110627AA    elsif !receiver_pii_str.nil? and !receiver_pii_str.empty?
-#ABCDE  #20110627    else
-#ABCDE  #20110627      # Create receiver pii if it does not possess one
-#ABCDE  #20110627      @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
-#ABCDE  #20110627        logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_pii")
-#ABCDE  #20110627      end # end Pii.find_or_create_by_pii ...
-#ABCDE  #20110627AA      unless @receiver_pii.errors.empty? or receiver_pii_str.nil? or receiver_pii_str.empty?
-#ABCDE  #20110627      unless @receiver_pii.errors.empty?
-#ABCDE  #20110627        @error_obj_arr << @receiver_pii
-#ABCDE  #20110627        error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
-#ABCDE  #20110627        return
-#ABCDE  #20110627      end # end unless @receiver_pii.errors.empty?
-#ABCDE  #20110627      @receiver_endPoint.pii = @receiver_pii
-#ABCDE  #20110627      unless @receiver_endPoint.save
-#ABCDE  #20110627        @error_obj_arr << @receiver_endPoint
-#ABCDE  #20110627        error_display("Error saving receiver_pii '#{receiver_pii.inspect}' to receiver_endPoint '{receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
-#ABCDE  #20110627        return
-#ABCDE  #20110627      end # end unless @receiver_endPoint.save
-#ABCDE  #20110627    end # end if @receiver_endPoint.pii
-#ABCDE  
-#ABCDE      unless @receiver_endPoint.errors.empty?
-#ABCDE        @error_obj_arr << @receiver_endPoint
-#ABCDE        error_display("Error creating @receiver_endPoint '#{@receiver_endPoint.inspect}':#{@receiver_endPoint.errors}", @receiver_endPoint.errors, :error, logtag)
-#ABCDE        return
-#ABCDE      end # end unless @receiver_endPoint.errors.empty?
-#ABCDE      if !@receiver_endPoint.nil?
-#ABCDE        # Add tags that are not yet attached to the @receiver_endPoint
-#ABCDE        existing_tag_str_arr = @receiver_endPoint.tags.collect { |tag_elem| tag_elem.name }
-#ABCDE        yet_2b_associated_tag_str_arr = (existing_tag_str_arr - tag_str_arr) + (tag_str_arr - existing_tag_str_arr)
-#ABCDE        yet_2b_associated_tag_str_arr.each { |tag_str_elem|
-#ABCDE          @new_tag = Tag.find_or_create_by_name(tag_str_elem) do |tag_obj|
-#ABCDE            logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created tag:#{tag_str_elem}")
-#ABCDE          end # end Tag.find_or_create_by ...
-#ABCDE          unless @new_tag.errors.empty?
-#ABCDE            @error_obj_arr << @new_tag
-#ABCDE            error_display("Error creating new_tag '#{tag_str_elem}':#{@new_tag.errors}", @new_tag.errors, :error, logtag)
-#ABCDE            return
-#ABCDE          end # end unless @new_tag.errors.empty?
-#ABCDE          @receiver_endPoint.tags << @new_tag
-#ABCDE        } # end tag_str_arr.each ...
-#ABCDE      end # end if !@receiver_endPoint.nil?
-#ABCDE      # Create meant_it rel
-#ABCDE      if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
-#ABCDE        @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id, :inbound_email_id => @inbound_email.id)
-#ABCDE        unless @meantItRel.errors.empty?
-#ABCDE          @error_obj_arr << @meantItRel
-#ABCDE          error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
-#ABCDE          return
-#ABCDE        end # end unless @meantItRel.errors.empty?
-#ABCDE        if @meantItRel.errors.empty?
-#ABCDE            if message_type_str == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
-#ABCDE              # Call mood reasoner
-#ABCDE              # CODE!!!!! Implement this in ControllerHelper
-#ABCDE            else
-#ABCDE              logger.debug("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}: creating mood using message_type_str:#{message_type_str}")
-#ABCDE              @new_mood_tag = Tag.find_or_create_by_name_and_desc(message_type_str, MeantItMoodTagRel::MOOD_TAG_TYPE) do |tag_obj|
-#ABCDE               logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created mood_tag:#{message_type_str}")
-#ABCDE              end # end Tag.find_or_create_by ...
-#ABCDE              unless @new_mood_tag.errors.empty?
-#ABCDE                @error_obj_arr << @new_mood_tag
-#ABCDE                error_display("Error creating new_mood_tag '#{message_type_str}':#{@new_mood_tag.errors}", @new_mood_tag.errors, :error, logtag)
-#ABCDE                return
-#ABCDE              end # end unless @new_mood_tag.errors.empty?
-#ABCDE              @meantItRel.tags << @new_mood_tag
-#ABCDE            end # end if message_type_str == MeantItMessageTypeValidator:: ...
-#ABCDE          end # end if @meantItRel.errors.empty?
-#ABCDE        end # end if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
-#ABCDE      end # end def create_common
-
   # POST /inbound_emails
   # POST /inbound_emails.xml
   def create
@@ -412,9 +115,20 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       error_display("Error creating sender_pii '#{sender_str}':#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
       return
     end # unless @sender_pii.errors.empty?
-    @sender_endPoint = @sender_pii.endPoint
+#20110628a    @sender_endPoint = @sender_pii.endPoint
+#20110628a : Start
+    sender_endPoints = @sender_pii.endPoints
+    sender_endPoints_arr = sender_endPoints.select { |elem| elem.creator_endpoint_id == elem.id }
+    if !sender_endPoints_arr.nil?
+      @sender_endPoint = sender_endPoints_arr[0]
+      if sender_endPoints_arr.size > 1
+        logger.warn("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, more than one sender_endPoints with id == creator_endpoint_id, sender_endPoints_arr:#{sender_endPoints_arr.inspect}")
+      end # end if sender_endPoints_arr.size > 1
+    end # end if sender_endPoints_arr.nil?
+#20110628a : End
     if @sender_endPoint.nil?
-      @sender_endPoint = @sender_pii.create_endPoint(:nick => sender_nick_str, :start_time => Time.now)
+#20110628a      @sender_endPoint = @sender_pii.create_endPoint(:nick => sender_nick_str, :start_time => Time.now)
+      @sender_endPoint = @sender_pii.endPoints.create(:nick => sender_nick_str, :start_time => Time.now)
       # Save the association
       @sender_endPoint.pii = @sender_pii
       @sender_endPoint.nick = sender_nick_str
@@ -539,41 +253,82 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # are not pointing to nil.
 p "### @receiver_pii.inspect:#{@receiver_pii.inspect}"
 p "### @receiver_endPoint.inspect:#{@receiver_endPoint.inspect}"
+#20110628a : Start
+    # We are only interested in endPoints created by us
+    # They may have different nicks/roles/empty nicks
+    # Resist the urge to populate empty nicks because if
+    # a user sends to just pii, i.e., without nick, then we update
+    # the endPoint with empty nick.
+    our_receiver_pii_endPoints = []
+    our_receiver_pii_endPoints = @receiver_pii.endPoints.select { |elem| elem.creator_endpoint_id == @sender_endPoint.id } if !@receiver_pii.nil? and !@receiver_pii.endPoints.nil?
+p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
+#20110628a : End
     if (!@receiver_pii.nil? and !@receiver_pii.errors.any?) and (!@receiver_endPoint.nil? and !@receiver_endPoint.errors.any?)
-      # We have an endpoint (nick) and pii
-      # Each nick/pii can either point to each other (OK)
-      # another entity (ERROR), or nothing.
-      # There are 9 combos:
-      # The only valid ones are:
-      # Case #A: nick/pii points to nil
-p "AAAAAAAAAAA @receiver_pii:#{@receiver_pii.inspect}"
-p "AAAAAAAAAAA @receiver_endPoint:#{@receiver_endPoint.inspect}"
-p "AAAAAAAAAAA @receiver_endPoint.pii:#{@receiver_endPoint.pii.inspect}"
-      if @receiver_pii.endPoint.nil? and @receiver_endPoint.pii.nil?
-p "\nAAAAAAAAAAA NORMAL!!!\n"
-        @receiver_pii.endPoint = @receiver_endPoint
-        @receiver_pii.save
-      # Case #B: nick points to nothnig, pii points to something but has no nick
-      # No nick assigned, usage is by pii
-      elsif (!@receiver_pii.endPoint.nil? and @receiver_pii.endPoint.nick.nil?) and @receiver_endPoint.pii.nil?
-p "\n!!!!!! YOU CAN'T BE SERIOUS!!!!!\n"
-        @receiver_pii.endPoint.nick = receiver_nick_str
-        @receiver_pii.save
-        @receiver_endPoint.destroy
-        @receiver_endPoint = @receiver_pii.endPoint
-      elsif (!@receiver_pii.endPoint.nil? and !@receiver_endPoint.pii.nil? and @receiver_pii.endPoint == @receiver_endPoint and @receiver_endPoint.pii == @receiver_pii)
-p "\nHUH!!!!?!??! NORMAL!!!\n"
-        # OK
-      elsif (!@receiver_pii.endPoint.nil? and !@receiver_endPoint.pii.nil? and @receiver_pii.endPoint != @receiver_endPoint and @receiver_endPoint.pii != @receiver_pii)
+#20110628a : Start
+      # Endpoint can only have one pii so need to check that
+      if !@receiver_endPoint.pii.nil? and (@receiver_endPoint.pii.pii_value != @receiver_pii.pii_value)
         @error_obj_arr << @receiver_endPoint
         error_display("receiver_endPoint '#{@receiver_endPoint.nick}' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
         return
-      else
-        # Should not happen unless corrupted
-        @error_obj_arr << @receiver_endPoint
-        error_display("receiver_endPoint 'nick:#{@receiver_endPoint.nick}, pii:#{@receiver_endPoint.pii.inspect}' conflicts with receiver_pii 'pii:#{@receiver_pii.pii_value}, endPoint:#{@receiver_pii.endPoint.inspect}",  @receiver_endPoint.errors, :error, logtag) 
-        return
-      end # end if @receiver_pii.endPoint.nil? and @receiver_endPoint.pii.nil?
+      end # end if @receiver_endPoint.pii.pii_value ...
+      # Since we permite a user to create mulitple nicks/roles
+      # tied to a pii, e.g., manager (xxx@yyy.com), lover (xxx@yyy.com)
+      # we just need to check that the new nick endpoint does not exist,
+      # before adding them.  If it exists use it as exsiting endpoints.
+      # This also handles if initially receiver is just nick (endpoint created)
+      # later the nick is accompanied with pii.
+      if our_receiver_pii_endPoints.index(@receiver_endPoint).nil?
+        @receiver_endPoint.pii = @receiver_pii
+        unless @receiver_endPoint.save
+          @error_obj_arr << @receiver_endPoint
+          error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
+          return
+        end # end unless @receiver_endPoint.save
+      end # end if our_receiver_pii_endPoints.index(@receiver_endPoint).nil?
+#20110628a : End
+#20110628a : End
+#20110628a       # We have an endpoint (nick) and pii
+#20110628a       # Each nick/pii can either point to each other (OK)
+#20110628a       # another entity (ERROR), or nothing.
+#20110628a       # There are 9 combos:
+#20110628a       # The only valid ones are:
+#20110628a       # Case #A: nick/pii points to nil
+#20110628a p "AAAAAAAAAAA @receiver_pii:#{@receiver_pii.inspect}"
+#20110628a p "AAAAAAAAAAA @receiver_endPoint:#{@receiver_endPoint.inspect}"
+#20110628a p "AAAAAAAAAAA @receiver_endPoint.pii:#{@receiver_endPoint.pii.inspect}"
+#20110628a      if @receiver_pii.endPoint.nil? and @receiver_endPoint.pii.nil?
+#20110628aAA      if receiver_pii_endPoints.empty? and @receiver_endPoint.pii.nil?
+#20110628a p "\nAAAAAAAAAAA NORMAL!!!\n"
+#20110628a        @receiver_pii.endPoint = @receiver_endPoint
+#20110628a        @receiver_pii.save
+#20110628aAA        @receiver_endPoint.pii = @receiver_pii
+#20110628aAA        @receiver_endPoint.save
+#20110628a : Start
+#20110628a      # Case #Aa: receiver_pii points to some empty nick_name
+#20110628a      elsif !receiver_pii_endPoints.empty? and @receiver_endPoint.pii.nil?
+#20110628a#20110628a : End
+#20110628a      # Case #B: nick points to nothing, pii points to something but has no nick
+#20110628a      # and has the same creator_endpoint_id
+#20110628a      elsif (!@receiver_pii.endPoint.nil? and @receiver_pii.endPoint.nick.nil?) and @receiver_endPoint.pii.nil?
+#20110628ap "\n!!!!!! YOU CAN'T BE SERIOUS!!!!!\n"
+#20110628a        @receiver_pii.endPoint.nick = receiver_nick_str
+#20110628a        @receiver_pii.save
+#20110628a        @receiver_endPoint.destroy
+#20110628a        @receiver_endPoint = @receiver_pii.endPoint
+#20110628a      # Case #C: nick points to this pii and vice versa
+#20110628a      elsif (!@receiver_pii.endPoint.nil? and !@receiver_endPoint.pii.nil? and @receiver_pii.endPoint == @receiver_endPoint and @receiver_endPoint.pii == @receiver_pii)
+#20110628ap "\nHUH!!!!?!??! NORMAL!!!\n"
+#20110628a        # OK
+#20110628a      elsif (!@receiver_pii.endPoint.nil? and !@receiver_endPoint.pii.nil? and @receiver_pii.endPoint != @receiver_endPoint and @receiver_endPoint.pii != @receiver_pii)
+#20110628a        @error_obj_arr << @receiver_endPoint
+#20110628a        error_display("receiver_endPoint '#{@receiver_endPoint.nick}' already has pii_value '#{@receiver_endPoint.pii.pii_value}' so it cannot accept new value '#{receiver_pii_str}'",  @receiver_endPoint.errors, :error, logtag) 
+#20110628a        return
+#20110628a      else
+#20110628a        # Should not happen unless corrupted
+#20110628a        @error_obj_arr << @receiver_endPoint
+#20110628a        error_display("receiver_endPoint 'nick:#{@receiver_endPoint.nick}, pii:#{@receiver_endPoint.pii.inspect}' conflicts with receiver_pii 'pii:#{@receiver_pii.pii_value}, endPoint:#{@receiver_pii.endPoint.inspect}",  @receiver_endPoint.errors, :error, logtag) 
+#20110628a        return
+#20110628a      end # end if @receiver_pii.endPoint.nil? and @receiver_endPoint.pii.nil?
 
 #20110627a      if !@receiver_pii.endPoint.nil? and !@receiver_endPoint.pii.nil?
 #20110627a        unless (@receiver_pii.endPoint == @receiver_endPoint and @receiver_endPoint.pii = @receiver_pii)
@@ -594,18 +349,27 @@ p "\nHUH!!!!?!??! NORMAL!!!\n"
     # For Case 3. receiver_pii_str: yes, receiver_nick_str: empty
     # we create endPoint and tie receiver_pii to it
     if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?) and (receiver_nick_str.nil? or receiver_nick_str.empty?))
-      @receiver_endPoint = EndPoint.create(:creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
+#20110628a : Start
+      # Check if we already have endPoint with no nick.  If so use it.
+      receiver_endPoint_no_nick_arr = our_receiver_pii_endPoints.select { |elem| elem.nick.nil? }
+      @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 1
+      if receiver_endPoint_no_nick_arr.size > 1
+        logger.warn("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, more than one receiver_endPoints with nick = nil, receiver_endPoints_no_nick_arr:#{receiver_endPoints_no_nick_arr.inspect}")
+      end # end if receiver_endPoint_no_nick_arr.size > 1
+#20110628a : End
+#20110628a      @receiver_endPoint = EndPoint.create(:creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)
+      @receiver_endPoint = EndPoint.create(:creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now) if @receiver_endPoint.nil?
       logger.info("#{File.basename(__FILE__)}:#{self.class}:create:#{logtag}, created receiver_endPoint - case 3")
       @receiver_endPoint.pii = @receiver_pii
       unless @receiver_endPoint.save
         @error_obj_arr << @receiver_endPoint
-        error_display("Error saving receiver_pii '#{receiver_pii.inspect}' to receiver_endPoint '{receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
+        error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end unless @receiver_endPoint.save
     end # end if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?)  ...
     
     # For Case 4. receiver_pii_str: empty, receiver_nick_str: yes
-    # We already have endPoint
+    # We already have endPoint. Tags, meant_it_rels are tied to endPoints.
 
     # At this stage all Case 2, 3, 4 have @receiver_endPoints
 

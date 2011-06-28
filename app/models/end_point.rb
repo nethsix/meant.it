@@ -13,7 +13,8 @@ class EndPoint < ActiveRecord::Base
 #  has_one :creatorEndPoint, :foreign_key => "createEndPoint_id", :class_name => "EndPoint"
   has_one :creatorEndPoint, :foreign_key => "creator_endoint_id", :class_name => "EndPoint"
 #  has_one :pii, :foreign_key => '"endPoint_id"'
-  has_one :pii, :foreign_key => "endpoint_id"
+#20110628a  has_one :pii, :foreign_key => "endpoint_id"
+  belongs_to :pii
 #  has_many :objRels, :as => "srcObj"
   has_many :objRels, :as => "srcobj"
 #  has_many :objRels, :as => "dstObj"

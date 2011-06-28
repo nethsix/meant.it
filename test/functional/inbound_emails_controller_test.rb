@@ -147,8 +147,12 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       assert_not_nil sender_pii
 
       # Check that sender EndPoint is created
-      sender_endPoint = sender_pii.endPoint
-      assert_not_nil sender_endPoint
+#20110628a      sender_endPoint = sender_pii.endPoint
+#20110628a      assert_not_nil sender_endPoint
+      sender_endPoint_arr = sender_pii.endPoints
+      assert_equal 1, sender_endPoint_arr.size
+      sender_endPoint = sender_endPoint_arr[0]
+      assert_equal email_elem.from, sender_endPoint.pii.pii_value
 
       # Check that sender Entity is created
       sender_entities = sender_endPoint.entities
@@ -357,7 +361,10 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     # Same sender but different receiver, pii is increased by one
     # Different sender but same receiver, pii is specified, new receiver_endPoint but no new pii
     # Same sender same receiver but no pii
-    # Add nick later to pii
+    # Send first time with pii nick and second time with just pii, should be different endPoint, the latter is one with no endPoint
+    # Send with just nick, later same nick with pii
+    # Send first time with pii nick and second time with just nick, should be the same receiver endPoint
+    # Add nick later to pii (NOT permitted, a new endpoint created)
     # Test all four cases of nick/pii empty/yes
   end # end test "should create inbound_email but not sender endpoint" do
 
@@ -410,7 +417,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     first_inbound_email.body_text = body_text
 
     assert_differences([
-      ['InboundEmail.count', 1]
+      ['InboundEmail.count', 1],
       ]) do
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
@@ -422,7 +429,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     p "#### inbound_email_last #2:#{InboundEmail.last.body_text}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_msgs}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_objs}"
-    assert_match /conflicts with receiver_pii 'pii:#{receiver_pii}/, inbound_email_last.error_msgs
+    assert_match /already has pii_value '#{receiver_pii}/, inbound_email_last.error_msgs
     assert_match /OrderedHash/, inbound_email_last.error_objs
     assert_response :success
   end # end test "should generate error field in inbound_email but response success" do
