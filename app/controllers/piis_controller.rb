@@ -83,23 +83,23 @@ class PiisController < ApplicationController
     end
   end
 
-  def find
+  def find_by_pii_value
     respond_to do |format|
-      format.html # find.html.erb
+      format.html # find_by_pii_value.html.erb
       format.xml  { render :xml => @pii }
     end
   end
 
-  def show_by_pii
+  def show_by_pii_value
     logtag = ControllerHelper.gen_logtag
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii:#{logtag}, params[:pii_value_input]:#{params[:pii_value_input]}")
-    pii_value_input = params[:pii_value_input]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_value:#{logtag}, params[Constants::PII_VALUE_INPUT]:#{params[Constants::PII_VALUE_INPUT]}")
+    pii_value_input = params[Constants::PII_VALUE_INPUT]
     decoded_pii_input = URI::decode(pii_value_input)
     decoded_pii_input.chomp!
     decoded_pii_input.strip!
     @pii = nil
     @pii = Pii.find_by_pii_value(decoded_pii_input) if !decoded_pii_input.nil?
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii:#{logtag}, @pii:#{@pii.inspect}")
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_value:#{logtag}, @pii:#{@pii.inspect}")
 
     respond_to do |format|
       format.html { render "show_pii_details" }

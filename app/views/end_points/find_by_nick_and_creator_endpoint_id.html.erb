@@ -1,0 +1,15 @@
+<% require 'constants' %>
+<p id="notice"><%= notice %></p>
+<form method='get' action='<%= show_by_nick_and_creator_endpoint_id_end_points_url %>'>
+  <div>
+    Nick: 
+    <input type='text' name='<%= Constants::END_POINT_NICK_INPUT %>'/>
+  </div>
+  <div>
+    Creator Endpoint Id:
+    <input type='text' name='<%= Constants::END_POINT_CREATOR_END_POINT_INPUT %>'/>
+  </div>
+  <div class='actions'>
+    <input type='submit'/>
+  </div>
+</form>

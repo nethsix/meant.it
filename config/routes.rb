@@ -19,14 +19,21 @@ MeantIt::Application.routes.draw do
 
   resources :entity_end_point_rels
 
-  resources :end_points
+  resources :end_points do
+    collection do
+      get 'find_by_nick_and_creator_endpoint_id'
+      get 'show_by_nick_and_creator_endpoint_id'
+      get 'find_by_tags'
+      get 'show_by_tags'
+    end
+  end
 
   resources :entities
 
   resources :piis do
     collection do
-      get 'find'
-      get 'show_by_pii'
+      get 'find_by_pii_value'
+      get 'show_by_pii_value'
     end
   end
 
@@ -94,6 +101,9 @@ MeantIt::Application.routes.draw do
 
 #  match '/receive_email' => 'emails#receive_email'
   match "/receive_email" => ReceiveEmail
+
+  match "/find_any" => FindAny.action(:index)
+
   match "/inbound_emails_200" => "inbound_emails#create", :defaults => { :format => 'xml' }
 #  match "/send_email" => SendEmail.action(:index)
 

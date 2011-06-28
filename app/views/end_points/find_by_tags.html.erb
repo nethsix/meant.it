@@ -1,0 +1,11 @@
+<% require 'constants' %>
+<p id="notice"><%= notice %></p>
+<form method='get' action='<%= show_by_tags_end_points_url %>'>
+  <div>
+    Tags: 
+    <input type='text' name='<%= Constants::TAGS_INPUT %>'/>
+  </div>
+  <div class='actions'>
+    <input type='submit'/>
+  </div>
+</form>

@@ -1,6 +1,6 @@
 <p id="notice"><%= notice %></p>
 
-<% endPoint = @pii.endPoint %>
+<% endPoint = @endPoint %>
 <% srcMeantItRels = endPoint.srcMeantItRels %>
 <% srcMeantItRelDstUniqs = [] %>
 <% srcMeantItRelDstUniqs = srcMeantItRels.collect { |elem| elem.dst_endpoint } %>
@@ -14,7 +14,7 @@
 
 <p>
   <b>Piivalue:</b>
-  <%= @pii.pii_value %>
+  <%= endPoint.pii.pii_value if !endPoint.pii.nil? %>
 </p>
 
 <p>
