@@ -1,14 +1,14 @@
-<p>
 <% if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil? %>
   <%= link_to "#{meant_it_rel.src_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.src_endpoint.creator_endpoint_id}" %>
-<% elsif !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? %>
- <%= link_to "#{meant_it_rel.src_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii_value)}" %>
+<% end %>
+<% if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? %>
+ (<%= link_to "#{meant_it_rel.src_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii.pii_value)}" %>)
 <% end %>
 
 <%= meant_it_rel.message_type %> 
 <% if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil? %>
   <%= link_to "#{meant_it_rel.dst_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.dst_endpoint.creator_endpoint_id}" %>
-<% elsif !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? %>
- <%= link_to "#{meant_it_rel.dst_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii_value)}" %>
 <% end %>
-</p>
+<% if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? %>
+ (<%= link_to "#{meant_it_rel.dst_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii.pii_value)}" %>)
+<% end %>

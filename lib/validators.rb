@@ -35,7 +35,7 @@ class MeantItMessageTypeValidator < ActiveModel::EachValidator
   MEANT_IT_MESSAGE_SYMPATHY = "sympathy"
   MEANT_IT_MESSAGE_RESENT = "resent"
   MEANT_IT_MESSAGE_OTHER= "other"
-  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT ]
+  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT, MEANT_IT_MESSAGE_OTHER ]
   def validate_each(record, attribute, value)
     msg_type_downcase = value.downcase
     normalized_msg_type_downcase = MessageTypeMapper.get_message_type(msg_type_downcase)

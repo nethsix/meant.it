@@ -1,0 +1,3 @@
+<% if !end_point_pii_col.pii.nil? %>
+   <%= link_to "#{end_point_pii_col.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_pii_col.pii.pii_value)}" %>
+<% end %>

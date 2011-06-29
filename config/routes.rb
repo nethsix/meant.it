@@ -33,7 +33,9 @@ MeantIt::Application.routes.draw do
   resources :piis do
     collection do
       get 'find_by_pii_value'
+      get 'find_by_pii_value_debug'
       get 'show_by_pii_value'
+      get 'show_by_pii_value_debug'
     end
   end
 

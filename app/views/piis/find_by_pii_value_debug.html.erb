@@ -1,0 +1,11 @@
+<% require 'constants' %>
+<p id="notice"><%= notice %></p>
+<form method='get' action='<%= show_by_pii_value_debug_piis_url %>'>
+  <div>
+    Pii: 
+    <input type='text' name='<%= Constants::PII_VALUE_INPUT %>'/>
+  </div>
+  <div class='actions'>
+    <input type='submit'/>
+  </div>
+</form>

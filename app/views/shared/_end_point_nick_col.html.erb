@@ -1,0 +1,7 @@
+<%
+  if !end_point_nick_col.nick.nil?
+    creator_endPoint = EndPoint.find(end_point_nick_col.creator_endpoint_id)
+    creator_ident = creator_endPoint.nick.nil? ? creator_endPoint.id : creator_endPoint.nick
+%>
+  <%= link_to "#{end_point_nick_col.nick} (#{creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+<% end %>
