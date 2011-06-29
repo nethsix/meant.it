@@ -39,7 +39,7 @@
   } # end totalSrcMeantItRels.each ...
   totalDstMeantItRels.each { |mi_elem|
     dstMeantItRelTypeHash[mi_elem.message_type] << mi_elem
-  } # end totalSrcMeantItRels.each ...
+  } # end totalDstMeantItRels.each ...
   
   srcMeantItRelDstUniqs = []
   srcMeantItRelDstUniqs = totalSrcMeantItRels.collect { |elem| elem.dst_endpoint }
@@ -143,10 +143,12 @@
   <div class='span-24'>
     <h3><strong>Consists:</strong>  <%= endPoints.size %> endPoint(s)</h3>
   </div>
-  <div class='span-10'>
-    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/comma_ruler", :collection => endPoints %>
+  <div class='span-20'>
+    <ul><li>
+    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/li_ruler", :collection => endPoints %>
+    </li></ul>
   </div>
-  <div class='span-14 last'>
+  <div class='span-4 last'>
   </div>
   <div class='span-24'>
 &nbsp;
@@ -191,7 +193,13 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXdstMeantItRels %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    </li></ul>
+  <% end %>
 </p>
 
 <table summary="MeantIt Out Table"  border="0" cellspacing="0" cellpadding="0">
@@ -232,7 +240,13 @@ Last <%= Constants::WEB_MAX_MEANTIT_OUT %> MeantIt Out<br/>
 <%
   lastXsrcMeantItRels= MeantItRel.where(:src_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
 %>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    </li></ul>
+  <% end %>
 </p>
 
 -------------------------------
@@ -274,7 +288,13 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXdstMeantItRels %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    </li></ul>
+  <% end %>
 </p>
 
 <table summary="sender_endPoint MeantIt Out Table"  border="0" cellspacing="0" cellpadding="0">
@@ -315,53 +335,11 @@ Last <%= Constants::WEB_MAX_MEANTIT_OUT %> MeantIt Out<br/>
 <%
   lastXsrcMeantItRels= MeantItRel.where(:src_endpoint_id => [sender_endPoint]).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
 %>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
-</p>
-<p>
-  <b>MeantIt Out:</b>
-  <% if !sender_endPoint_srcMeantItRels.nil? %>
-    <%= sender_endPoint_srcMeantItRels.size %>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    </li></ul>
   <% end %>
 </p>
-
-<p>
-  <b>MeantIt Out List:</b>
-  <%= render :partial => "shared/meant_it_rel", :collection => sender_endPoint_srcMeantItRels %>
-</p>
-
-<p>
-  <b>MeantIt Out (Uniq receiver):</b>
-  <% if !sender_endPoint_srcMeantItRelDstUniqs.nil? %>
-    <%= sender_endPoint_srcMeantItRelDstUniqs.size %>
-  <% end %>
-</p>
-
-<p>
-  <b>MeantIt Out (Uniq receiver) List:</b>
-  <%= render :partial => "shared/end_point", :collection => sender_endPoint_srcMeantItRelDstUniqs %> 
-</p>
-
-<p>
-  <b>MeantIt In:</b>
-  <% if !sender_endPoint_dstMeantItRels.nil? %>
-    <%= sender_endPoint_dstMeantItRels.size %>
-  <% end %>
-</p>
-
-<p>
-  <b>MeantIt In List:</b>
-  <%= render :partial => "shared/meant_it_rel", :collection => sender_endPoint_dstMeantItRels %>
-</p>
-
-<p>
-  <b>MeantIt In (Uniq receiver):</b>
-  <% if !sender_endPoint_dstMeantItRelSrcUniqs.nil? %>
-    <%= sender_endPoint_dstMeantItRelSrcUniqs.size %>
-  <% end %>
-</p>
-
-<p>
-  <b>MeantIt In (Uniq receiver) List:</b>
-  <%= render :partial => "shared/end_point", :collection => sender_endPoint_dstMeantItRelSrcUniqs %> 
-</p>
-

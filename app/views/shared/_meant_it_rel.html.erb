@@ -1,14 +1,32 @@
-<% if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil? %>
-  <%= link_to "#{meant_it_rel.src_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.src_endpoint.creator_endpoint_id}" %>
-<% end %>
+<%
+  src_creator_endPoint = nil
+  src_creator_ident = nil
+  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil?
+    src_creator_endPoint = EndPoint.find(meant_it_rel.src_endpoint.creator_endpoint_id)
+    src_creator_ident = src_creator_endPoint.nick.nil? ? src_creator_endPoint.id : src_creator_endPoint.nick
+  end
+%>
 <% if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? %>
- (<%= link_to "#{meant_it_rel.src_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii.pii_value)}" %>)
+ <%= link_to "[pii:#{meant_it_rel.src_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii.pii_value)}" %>
+<% end %>
+<% if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil? %>
+  <%= link_to "nick:#{meant_it_rel.src_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.src_endpoint.creator_endpoint_id}" %>
+  <%= link_to "(own:#{src_creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(src_creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.src_endpoint.creator_endpoint_id}" %>
 <% end %>
 
 <%= meant_it_rel.message_type %> 
-<% if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil? %>
-  <%= link_to "#{meant_it_rel.dst_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.dst_endpoint.creator_endpoint_id}" %>
-<% end %>
+<%
+  dst_creator_endPoint = nil
+  dst_creator_ident = nil
+  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil?
+    dst_creator_endPoint = EndPoint.find(meant_it_rel.dst_endpoint.creator_endpoint_id)
+    dst_creator_ident = dst_creator_endPoint.nick.nil? ? dst_creator_endPoint.id : dst_creator_endPoint.nick
+  end
+%>
 <% if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? %>
- (<%= link_to "#{meant_it_rel.dst_endpoint.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii.pii_value)}" %>)
+ <%= link_to "[pii:#{meant_it_rel.dst_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii.pii_value)}" %>
+<% end %>
+<% if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil? %>
+  <%= link_to "nick:#{meant_it_rel.dst_endpoint.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.dst_endpoint.creator_endpoint_id}" %>
+  <%= link_to "(own:#{dst_creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(dst_creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.dst_endpoint.creator_endpoint_id}" %>
 <% end %>

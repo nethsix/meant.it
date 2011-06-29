@@ -1,7 +1,13 @@
 <%
+  creator_endPoint = nil
+  creator_ident = nil
   if !end_point_nick_col.nick.nil?
     creator_endPoint = EndPoint.find(end_point_nick_col.creator_endpoint_id)
     creator_ident = creator_endPoint.nick.nil? ? creator_endPoint.id : creator_endPoint.nick
+  end
 %>
-  <%= link_to "#{end_point_nick_col.nick} (#{creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+  <%= link_to "nick:#{end_point_nick_col.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+  <%= link_to "(own:#{creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+<% if !end_point_nick_col.pii.nil? %>
+     <%= link_to "[pii:#{end_point_nick_col.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
 <% end %>
