@@ -135,7 +135,7 @@
 
 
 <p>
-  <b>Piivalue:</b>
+  <b>Pii:</b>
   <%= @pii.pii_value %>
 </p>
 
@@ -145,7 +145,7 @@
   </div>
   <div class='span-20'>
     <ul><li>
-    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/li_ruler", :collection => endPoints %>
+    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/li_ruler", :collection => endPoints, :locals => { :show_nick_force => true } %>
     </li></ul>
   </div>
   <div class='span-4 last'>

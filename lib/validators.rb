@@ -58,7 +58,8 @@ class PiiTypeValidator < ActiveModel::EachValidator
   PII_TYPE_EMAIL = "email"
   PII_TYPE_ID_CARD = "id_card"
   PII_TYPE_SSN = "ssn"
-  PII_TYPE_ENUM = [ PII_TYPE_PASSPORT, PII_TYPE_EMAIL, PII_TYPE_ID_CARD, PII_TYPE_SSN ]
+  PII_TYPE_GLOBAL = "global"
+  PII_TYPE_ENUM = [ PII_TYPE_PASSPORT, PII_TYPE_EMAIL, PII_TYPE_ID_CARD, PII_TYPE_SSN, PII_TYPE_GLOBAL ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{PII_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or PII_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each

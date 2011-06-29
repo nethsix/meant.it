@@ -64,13 +64,8 @@
 <p>
   <b>Endpoint:</b>
   <% if !endPoint.nil? %>
-    <%= render :partial => "shared/end_point", :collection => [endPoint] %>
+    <%= render :partial => "shared/end_point_nick_col", :collection => [endPoint] %>
   <% end %>
-</p>
-
-<p>
-  <b>Piivalue:</b>
-  <%= endPoint.pii.pii_value if !endPoint.pii.nil? %>
 </p>
 
 <table summary="MeantIt In Table"  border="0" cellspacing="0" cellpadding="0">

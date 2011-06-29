@@ -1,13 +1,50 @@
+<% require 'validators' %>
+<%
+  show_pii_force ||= false
+  show_nick_force ||= false
+  show_own_force ||= false
+  # If not forced, the rules for display are:
+  # - don't show pii unless its global, i.e., not confidential
+  # - if we have not shown pii, then show nick, if it's not nil, otherwise show record number
+  # - if we show nick, then show own
+  pii_shown = false
+  nick_shown = false
+%>
 <%
   creator_endPoint = nil
-  creator_ident = nil
   if !end_point_nick_col.nick.nil?
     creator_endPoint = EndPoint.find(end_point_nick_col.creator_endpoint_id)
-    creator_ident = creator_endPoint.nick.nil? ? creator_endPoint.id : creator_endPoint.nick
   end
 %>
-  <%= link_to "nick:#{end_point_nick_col.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
-  <%= link_to "(own:#{creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
-<% if !end_point_nick_col.pii.nil? %>
+<%
+  if !end_point_nick_col.nil? and !end_point_nick_col.pii.nil? and (end_point_nick_col.pii.pii_type == PiiTypeValidator::PII_TYPE_GLOBAL)
+    pii_shown = true
+%>
      <%= link_to "[pii:#{end_point_nick_col.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
 <% end %>
+<% 
+  if !end_point_nick_col.nil? and (show_nick_force or !pii_shown)
+    nick_shown = true
+    if !end_point_nick_col.nick.nil?
+%>
+    <%= link_to "nick:#{end_point_nick_col.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+<%
+    else
+%>
+    <%= link_to "id:#{end_point_nick_col.id}", end_point_path(end_point_nick_col.id) %>
+<% 
+    end 
+  end
+%>
+<% if !creator_endPoint.nil? and nick_shown
+     if !creator_endPoint.nick.nil?
+%>
+     <%= link_to "(own:#{creator_endPoint.nick})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+<% 
+     else
+%>
+     <%= link_to "id:#{creator_endPoint.id}", end_point_path(creator_endPoint.id) %>
+<% 
+     end
+  end
+ %>
