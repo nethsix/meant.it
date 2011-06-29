@@ -1,16 +1,41 @@
 <p id="notice"><%= notice %></p>
 
-<% endPoint = @pii.endPoint %>
-<% srcMeantItRels = endPoint.srcMeantItRels %>
-<% srcMeantItRelDstUniqs = [] %>
-<% srcMeantItRelDstUniqs = srcMeantItRels.collect { |elem| elem.dst_endpoint } %>
-<% srcMeantItRelDstUniqs.compact! %>
-<% srcMeantItRelDstUniqs.uniq! %>
-<% dstMeantItRels = endPoint.dstMeantItRels %>
-<% dstMeantItRelDstUniqs = [] %>
-<% dstMeantItRelDstUniqs = dstMeantItRels.collect { |elem| elem.src_endpoint } %>
-<% dstMeantItRelDstUniqs.compact! %>
-<% dstMeantItRelDstUniqs.uniq! %>
+<%
+  endPoints = @pii.endPoints
+  # Aggregate the results
+  totalSrcMeantItRels = []
+  totalDstMeantItRels = []
+  # The real sender endpoint is the one that has creator_endpoint_id equals id
+  sender_endPoint = nil
+  endPoints.each { |ep_elem|
+    totalSrcMeantItRels += ep_elem.srcMeantItRels
+    totalDstMeantItRels += ep_elem.dstMeantItRels
+    sender_endPoint = ep_elem if ep_elem.creator_endpoint_id == ep_elem.id
+  }
+  srcMeantItRelDstUniqs = []
+  srcMeantItRelDstUniqs = totalSrcMeantItRels.collect { |elem| elem.dst_endpoint }
+  srcMeantItRelDstUniqs.compact!
+  srcMeantItRelDstUniqs.uniq!
+
+  dstMeantItRelDstUniqs = []
+  dstMeantItRelDstUniqs = totalDstMeantItRels.collect { |elem| elem.src_endpoint }
+  dstMeantItRelDstUniqs.compact!
+  dstMeantItRelDstUniqs.uniq!
+
+  sender_endPoint_srcMeantItRelDstUniqs = []
+  sender_endPoint_dstMeantItRelDstUniqs = []
+  if !sender_endPoint.nil?
+    sender_endPoint_srcMeantItRels = sender_endPoint.srcMeantItRels
+    sender_endPoint_srcMeantItRelDstUniqs = sender_endPoint_srcMeantItRels.collect { |elem| elem.dst_endpoint }
+    sender_endPoint_srcMeantItRelDstUniqs.compact!
+    sender_endPoint_srcMeantItRelDstUniqs.uniq!
+
+    sender_endPoint_dstMeantItRels = sender_endPoint.dstMeantItRels
+    sender_endPoint_dstMeantItRelDstUniqs = sender_endPoint_dstMeantItRels.collect { |elem| elem.src_endpoint }
+    sender_endPoint_dstMeantItRelDstUniqs.compact!
+    sender_endPoint_dstMeantItRelDstUniqs.uniq!
+  end # end if !sender_endPoint.nil?
+%>
 
 <p>
   <b>Piivalue:</b>
@@ -18,22 +43,20 @@
 </p>
 
 <p>
-  <b>Endpoint nick:</b>
-  <% if !endPoint.nil? %>
-    <%= endPoint.nick %>
-  <% end %>
+  Consists: <%= endPoints.size %> endPoint(s)
+  <%= render :partial => "shared/end_point", :collection => endPoints %> 
 </p>
 
 <p>
   <b>MeantIt Out:</b>
-  <% if !srcMeantItRels.nil? %>
-    <%= srcMeantItRels.size %>
+  <% if !totalSrcMeantItRels.nil? %>
+    <%= totalSrcMeantItRels.size %>
   <% end %>
 </p>
 
 <p>
   <b>MeantIt Out List:</b>
-  <%= render :partial => "shared/meant_it_rel", :collection => srcMeantItRels %>
+  <%= render :partial => "shared/meant_it_rel", :collection => totalSrcMeantItRels %>
 </p>
 
 <p>
@@ -50,23 +73,73 @@
 
 <p>
   <b>MeantIt In:</b>
-  <% if !dstMeantItRels.nil? %>
-    <%= dstMeantItRels.size %>
+  <% if !totalDstMeantItRels.nil? %>
+    <%= totalDstMeantItRels.size %>
   <% end %>
 </p>
 
 <p>
   <b>MeantIt In List:</b>
-  <%= render :partial => "shared/meant_it_rel", :collection => dstMeantItRels %>
+  <%= render :partial => "shared/meant_it_rel", :collection => totalDstMeantItRels %>
 </p>
 
 <p>
-  <b>MeantIt Out (Uniq receiver):</b>
+  <b>MeantIt In (Uniq receiver):</b>
   <% if !dstMeantItRelDstUniqs.nil? %>
     <%= dstMeantItRelDstUniqs.size %>
   <% end %>
 </p>
+
 <p>
   <b>MeantIt In (Uniq receiver) List:</b>
   <%= render :partial => "shared/end_point", :collection => dstMeantItRelDstUniqs %> 
+</p>
+
+-------------------------------
+<p>
+  <b>MeantIt Out:</b>
+  <% if !sender_endPoint_srcMeantItRels.nil? %>
+    <%= sender_endPoint_srcMeantItRels.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt Out List:</b>
+  <%= render :partial => "shared/meant_it_rel", :collection => sender_endPoint_srcMeantItRels %>
+</p>
+
+<p>
+  <b>MeantIt Out (Uniq receiver):</b>
+  <% if !sender_endPoint_srcMeantItRelDstUniqs.nil? %>
+    <%= sender_endPoint_srcMeantItRelDstUniqs.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt Out (Uniq receiver) List:</b>
+  <%= render :partial => "shared/end_point", :collection => sender_endPoint_srcMeantItRelDstUniqs %> 
+</p>
+
+<p>
+  <b>MeantIt In:</b>
+  <% if !sender_endPoint_dstMeantItRels.nil? %>
+    <%= sender_endPoint_dstMeantItRels.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt In List:</b>
+  <%= render :partial => "shared/meant_it_rel", :collection => sender_endPoint_dstMeantItRels %>
+</p>
+
+<p>
+  <b>MeantIt In (Uniq receiver):</b>
+  <% if !sender_endPoint_dstMeantItRelDstUniqs.nil? %>
+    <%= sender_endPoint_dstMeantItRelDstUniqs.size %>
+  <% end %>
+</p>
+
+<p>
+  <b>MeantIt In (Uniq receiver) List:</b>
+  <%= render :partial => "shared/end_point", :collection => sender_endPoint_dstMeantItRelDstUniqs %> 
 </p>

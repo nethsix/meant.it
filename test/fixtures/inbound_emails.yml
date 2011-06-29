@@ -59,14 +59,14 @@ nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
 nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
-  body_text: hakusan8 lawson8 ;thank you for the great service8; :hello_kitty8@yahoo.co.jp
+  body_text: '"hakusan8" "lawson8" ;thank you for the great service8; :hello_kitty8@yahoo.co.jp'
   to: thank@meant.it
   from: mama8@gmail.com
   attachment_count: 0
 nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
-  body_text: hakusan9 lawson9 :hello_kitty9@yahoo.co.jp
+  body_text: '"hakusan9" "lawson9" :hello_kitty9@yahoo.co.jp'
   to: thank@meant.it
   from: mama9@gmail.com
   attachment_count: 0

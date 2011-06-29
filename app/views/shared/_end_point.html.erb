@@ -1,8 +1,12 @@
 <% require 'constants' %>
 <p>
 
-<% if !end_point.nick.nil? %>
-  <%= link_to "#{end_point.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point.creator_endpoint_id}" %>
+<%
+  if !end_point.nick.nil?
+    creator_endPoint = EndPoint.find(end_point.creator_endpoint_id)
+    creator_ident = creator_endPoint.nick.nil? ? creator_endPoint.id : creator_endPoint.nick
+%>
+  <%= link_to "#{end_point.nick} (#{creator_ident})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point.creator_endpoint_id}" %>
 <% end %>
 ,
 <% if !end_point.pii.nil? %>
