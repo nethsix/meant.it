@@ -43,6 +43,7 @@ class EndPoint < ActiveRecord::Base
       "'").group("end_points.id", "end_points.creator_endpoint_id", 
       "end_points.nick", "end_points.start_time", "end_points.end_time", 
       "end_points.created_at", "end_points.updated_at", 
+      "end_points.pii_id",
       "end_points.status").having("count(end_points.id) = #{tgs.count}")
   end # end def EndPoint.tagged
 
