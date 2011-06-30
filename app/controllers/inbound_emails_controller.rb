@@ -100,6 +100,10 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
     sender_str = sender_str_match_arr[2] if !sender_str_match_arr.nil?
     sender_nick_str ||= sender_str
+    # If sender_nick_str is email, e.g., some smtp servers provide
+    # "hello_kitty@sanrio.com <hello_kitty@sanrio.com>" then we
+    # don't use the nick
+    sender_nick_str = nil if !sender_nick_str.match(/.*@.*\..*/).nil?
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_str:#{sender_str}")
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_nick_str:#{sender_nick_str}")
     sender_email_addr = inbound_email_params[field_mapper[:to]]
@@ -107,7 +111,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     message_type_str = ControllerHelper.parse_message_type_from_email_addr(sender_email_addr, logtag)
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, message_type_str:#{message_type_str}")
     # Create sender EndPoint
-    @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type(sender_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
+    sender_pii_hash = ControllerHelper.get_pii_hash(sender_str)
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_pii_hash:#{sender_pii_hash.inspect}")
+    @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(sender_pii_hash[ControllerHelper::PII_VALUE_STR], sender_pii_hash[ControllerHelper::PII_TYPE], sender_pii_hash[ControllerHelper::PII_HIDE]) do |pii_obj|
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created sender_pii")
     end # end Pii.find_or_create_by_pii ...
     unless @sender_pii.errors.empty?
@@ -192,6 +198,9 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     meantItInput_hash = ControllerHelper.parse_meant_it_input(input_str_dup, logtag)
     message_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_MESSAGE]
     receiver_pii_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
+    receiver_pii_str = receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, receiver_pii_hash:#{receiver_pii_hash.inspect}")
     receiver_nick_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
     tag_str_arr = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_TAGS]
 
@@ -222,7 +231,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
        )
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, case 2, 3")
       # Create receiver pii if it does not possess one
-      @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type(receiver_pii_str, PiiTypeValidator::PII_TYPE_EMAIL) do |pii_obj|
+      @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(receiver_pii_hash[ControllerHelper::PII_VALUE_STR], receiver_pii_hash[ControllerHelper::PII_TYPE], receiver_pii_hash[ControllerHelper::PII_HIDE]) do |pii_obj|
         logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created receiver_pii")
       end # end Pii.find_or_create_by_pii ...
       unless @receiver_pii.errors.empty?

@@ -4,7 +4,8 @@
   show_nick_force ||= false
   show_own_force ||= false
   # If not forced, the rules for display are:
-  # - don't show pii unless its global, i.e., not confidential
+  # - never shown if pii_hide is "true" (string not boolean)
+  # - don't show pii unless pii_hide is "false"
   # - if we have not shown pii, then show nick, if it's not nil, otherwise show record number
   # - if we show nick, then show own
   src_pii_shown = false
@@ -19,7 +20,7 @@
   end
 %>
 <% 
-  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? and (meant_it_rel.src_endpoint.pii.pii_type == PiiTypeValidator::PII_TYPE_GLOBAL or show_pii_force) 
+  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? and (meant_it_rel.src_endpoint.pii.pii_hide == "false" or show_pii_force) 
     src_pii_shown = true
 %>
   <%= link_to "[pii:#{meant_it_rel.src_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii.pii_value)}" %>
@@ -59,7 +60,7 @@
   end
 %>
 <% 
-  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? and (meant_it_rel.dst_endpoint.pii.pii_type == PiiTypeValidator::PII_TYPE_GLOBAL or show_pii_force)
+  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? and (meant_it_rel.dst_endpoint.pii.pii_hide == "false" or show_pii_force)
     dst_pii_shown = true
 %>
   <%= link_to "[pii:#{meant_it_rel.dst_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii.pii_value)}" %>

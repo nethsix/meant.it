@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110628123736) do
+ActiveRecord::Schema.define(:version => 20110630014101) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -176,6 +176,7 @@ ActiveRecord::Schema.define(:version => 20110628123736) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "endpoint_id"
+    t.string   "pii_hide"
   end
 
   add_index "piis", ["pii_value", "pii_type"], :name => "by_piiVaue_and_piiType", :unique => true

@@ -7,6 +7,15 @@ class StatusTypeValidator < ActiveModel::EachValidator
   end # end def validate_each
 end # end class StatusTypeValidator
 
+class PiiHideTypeValidator < ActiveModel::EachValidator
+  PII_HIDE_TRUE = "true"
+  PII_HIDE_FALSE = "false"
+  PII_HIDE_ENUM = [ PII_HIDE_TRUE, PII_HIDE_FALSE ]
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{PII_HIDE_ENUM.join('\', \'').strip}'" if value.nil? or PII_HIDE_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class StatusTypeValidator
+
 #20110612 class DocIdForeignKeyValidator < ActiveModel::EachValidator
 class PropertyDocumentIdForeignKeyValidator < ActiveModel::EachValidator
   COUCHDB_ADDR = '127.0.0.1'
@@ -59,7 +68,8 @@ class PiiTypeValidator < ActiveModel::EachValidator
   PII_TYPE_ID_CARD = "id_card"
   PII_TYPE_SSN = "ssn"
   PII_TYPE_GLOBAL = "global"
-  PII_TYPE_ENUM = [ PII_TYPE_PASSPORT, PII_TYPE_EMAIL, PII_TYPE_ID_CARD, PII_TYPE_SSN, PII_TYPE_GLOBAL ]
+  PII_TYPE_OTHER = "other"
+  PII_TYPE_ENUM = [ PII_TYPE_PASSPORT, PII_TYPE_EMAIL, PII_TYPE_ID_CARD, PII_TYPE_SSN, PII_TYPE_GLOBAL, PII_TYPE_OTHER ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{PII_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or PII_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each

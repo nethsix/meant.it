@@ -144,7 +144,9 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     assert_not_nil inbound_email_from_db
 
     # Check that sender Pii
-    sender_pii = Pii.find_by_pii_value(email_elem.from)
+    sender_pii_str = email_elem.from
+    sender_pii_hash = ControllerHelper.get_pii_hash(sender_pii_str)
+    sender_pii = Pii.find_by_pii_value(sender_pii_hash[ControllerHelper::PII_VALUE_STR])
     assert_not_nil sender_pii
 
     # Check that sender EndPoint is created
@@ -170,9 +172,22 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
 
     # Check receiver_endPoint
-    receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK])
-    assert_not_nil receiver_endPoint
     receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_nick_str =  meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
+    receiver_pii_str = receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    receiver_endPoint = EndPoint.find_by_creator_endpoint_id_and_nick(sender_endPoint.id, receiver_nick_str) if !receiver_nick_str.nil? and !receiver_nick_str.empty?
+    # Try getting by pii if nick is not provided
+    if receiver_endPoint.nil? and !receiver_pii_str.nil? and !receiver_pii_str.empty?
+      receiver_endPoint_arr =  EndPoint.find(:all, :conditions => { :creator_endpoint_id => sender_endPoint.id})
+      receiver_endPoint_arr.each { |receiver_ep|
+        if !receiver_ep.pii.nil? and receiver_ep.pii.pii_value == receiver_pii_str
+          receiver_endPoint = receiver_ep
+          break
+        end # end if !receiver_ep.pii.nil?
+      } # end receiver_endPoint_arr ...
+    end # end if receiver_endPoint.nil? ...
+    assert_not_nil receiver_endPoint
     if receiver_pii_str.nil? or receiver_pii_str.empty?
       assert_nil receiver_endPoint.pii
     else # else if !receiver_pii_str.nil? and !receiver_pii_str.empty?
@@ -617,4 +632,30 @@ p "#AAAAAAA after body_text:#{body_text}"
   test "inbound_emails_200 should lead to create action and xml" do
     assert_recognizes({:controller => "inbound_emails", :action => "create", :format => "xml"}, {:path => '/inbound_emails_200', :method => :post})
   end
+
+  test "global pii with only preceding colon" do
+    pii_at_start_input_str = ":hello kitty ;why don't you have a mouth?; sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_start_input_str)
+
+    assert_equal 'hello', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    pii_at_mid_input_str = ";why don't you have a mouth?; :hello kitty sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_mid_input_str)
+    assert_equal 'hello', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    pii_at_end_input_str = "sanrio ;why don't you have a mouth?; tokyo kitty :hello"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_end_input_str)
+    assert_equal 'hello', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+  end # end test "global pii with only  preceding colon"
+
+  test "global pii enclosed with colon" do
+    pii_at_start_input_str = ":hello kitty: ;why don't you have a mouth?; sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_start_input_str)
+
+    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    pii_at_mid_input_str = ";why don't you have a mouth?; :hello kitty: sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_mid_input_str)
+    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    pii_at_end_input_str = "sanrio ;why don't you have a mouth?; tokyo :hello kitty:"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_end_input_str)
+    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+  end # end test "global pii enclosed with colon" do
 end

@@ -38,14 +38,22 @@ module ControllerHelper
     result_hash[MEANT_IT_INPUT_MESSAGE] = message_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, message_str:#{message_str}")
     message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{msg_elem};/, '') }
-    receiver_pii_str_arr = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
+    # Check for colon enclosed receiver pii
+    receiver_pii_str_arr = input_str_dup.scan(/:(.*?):/).collect { |elem| elem[
+0] }
     if receiver_pii_str_arr.empty?
-      receiver_pii_str_arr = input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
+      # If no colon enclosed receiver pii, check for pii starting with colon
+      receiver_pii_str_arr = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
+      if receiver_pii_str_arr.empty?
+        receiver_pii_str_arr = input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
+      end
+      receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}/, '') }
+    else
+      receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}:/, '') }
     end # end if receiver_pii_str_arr.nil?
     receiver_pii_str = receiver_pii_str_arr[0]
     result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
-    receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}/, '') }
     single_quote_tag_arr = input_str_dup.scan(/'(.*?)'/).collect { |elem| elem[0] }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, single_quote_tag_arr.inspect:#{single_quote_tag_arr.inspect}")
     # Remove those quoted tags since we've processed them
@@ -117,4 +125,31 @@ module ControllerHelper
    end # end find/create person
    new_person
   end # end def self.find_or_create_person_by_email
+
+  PII_VALUE_STR = :pii_value_str
+  PII_TYPE = :pii_type
+  PII_HIDE = :pii_hide
+  def self.get_pii_hash(initial_pii_value_str)
+    final_pii_value_str = initial_pii_value_str
+    pii_type = PiiTypeValidator::PII_TYPE_GLOBAL
+    pii_hide = PiiHideTypeValidator::PII_HIDE_FALSE
+    if !final_pii_value_str.nil?
+      if (match_arr = initial_pii_value_str.match(/.*@.*\..*/))
+        pii_type = PiiTypeValidator::PII_TYPE_EMAIL
+        pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
+      elsif (match_arr = sender_str.match(/(.*)\$(.*)/))
+        pii_type = match_arr[2]
+        pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
+        final_pii_value_str = match_arr[1]
+        if PiiTypeValidator::PII_TYPE_ENUM.index(pii_type).nil?
+          pii_type = PiiTypeValidator::PII_TYPE_OTHER
+        end # end if PiiTypeValidator::PII_TYPE_ENUM.index(pii_type)
+      end # end if initial_pii_value_str.match ...
+      if initial_pii_value_str.match(/.*\$$/)
+        # Ends with $ then we set to hide
+        pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
+      end # end if initial_pii_value_str.match ...
+    end # end if !final_pii_value_str.nil?
+    { PII_VALUE_STR => final_pii_value_str, PII_TYPE => pii_type, PII_HIDE => pii_hide }
+  end # end def self.get_pii_type
 end # end module ControllerHelper

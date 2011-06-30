@@ -25,6 +25,7 @@ MeantIt::Application.routes.draw do
       get 'show_by_nick_and_creator_endpoint_id'
       get 'find_by_tags'
       get 'show_by_tags'
+      get "show_by_id/:id", :action => "show_by_id"
     end
   end
 

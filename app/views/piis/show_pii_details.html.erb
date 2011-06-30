@@ -71,66 +71,6 @@
     } # end mi_arr.each ...
   } # end dstMeantItRelSrcUniqs.each ...
 
-
-  sender_endPoint_srcMeantItRelDstUniqs = []
-  sender_endPoint_dstMeantItRelSrcUniqs = []
-
-  sender_endPoint_srcMeantItRelTypeHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    sender_endPoint_srcMeantItRelTypeHash[mi_type] = []
-  }
-  sender_endPoint_srcMeantItRelTypeUniqHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    sender_endPoint_srcMeantItRelTypeUniqHash[mi_type] = []
-  }
-  sender_endPoint_dstMeantItRelTypeHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    sender_endPoint_dstMeantItRelTypeHash[mi_type] = []
-  }
-  sender_endPoint_dstMeantItRelTypeUniqHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    sender_endPoint_dstMeantItRelTypeUniqHash[mi_type] = []
-  }
-
-  if !sender_endPoint.nil?
-    sender_endPoint_srcMeantItRels = sender_endPoint.srcMeantItRels
-    sender_endPoint_srcMeantItRelDstUniqs = sender_endPoint_srcMeantItRels.collect { |elem| elem.dst_endpoint }
-    sender_endPoint_srcMeantItRelDstUniqs.compact!
-    sender_endPoint_srcMeantItRelDstUniqs.uniq!
-
-    sender_endPoint_dstMeantItRels = sender_endPoint.dstMeantItRels
-    sender_endPoint_dstMeantItRelSrcUniqs = sender_endPoint_dstMeantItRels.collect { |elem| elem.src_endpoint }
-    sender_endPoint_dstMeantItRelSrcUniqs.compact!
-    sender_endPoint_dstMeantItRelSrcUniqs.uniq!
-
-    sender_endPoint_srcMeantItRels.each { |mi_elem|
-      sender_endPoint_srcMeantItRelTypeHash[mi_elem.message_type] << mi_elem
-    } # end sender_endPoint_srcMeantItRels.each ...
-    sender_endPoint_dstMeantItRels.each { |mi_elem|
-      sender_endPoint_dstMeantItRelTypeHash[mi_elem.message_type] << mi_elem
-    } # end sender_endPoint_dstMeantItRels.each ...
-  
-    sender_endPoint_dstMeantItRelTypeHash.each { |mi_type, mi_arr|
-      uniqSenderArr = []
-      mi_arr.each { |mi_elem|
-        if uniqSenderArr.index(mi_elem.src_endpoint).nil?
-          sender_endPoint_dstMeantItRelTypeUniqHash[mi_type] << mi_elem 
-          uniqSenderArr << mi_elem.src_endpoint
-        end # end if uniqSenderArr.index(mi_elem.src_endpoint).nil?
-      } # end mi_arr.each ...
-    } # end sender_endPoint_dstMeantItRelTypeHash.each ...
-
-    sender_endPoint_srcMeantItRelTypeHash.each { |mi_type, mi_arr|
-      uniqReceiverArr = []
-      mi_arr.each { |mi_elem|
-        if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
-          sender_endPoint_srcMeantItRelTypeUniqHash[mi_type] << mi_elem 
-          uniqReceiverArr << mi_elem.dst_endpoint
-        end # end if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
-      } # end mi_arr.each ...
-    } # end sender_endPoint_srcMeantItRelTypeHash.each ...
-  end # end if !sender_endPoint.nil?
-
 %>
 
 
@@ -155,11 +95,11 @@
   </div>
 </div>
 
-<table summary="MeantIt In Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>MeantIt In</em></caption>
+<table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It In</em></caption>
   <thead>
     <tr>
-      <th class='span-12'>MeantIt Type</th>
+      <th class='span-12'>Meant.It Type</th>
       <th class='span-4'>Senders</th>
       <th class='span-4'>Unique Senders</th>
       <th class='span-4'>Value</th>
@@ -189,7 +129,7 @@
   </tbody>
 </table>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>
@@ -202,11 +142,11 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
   <% end %>
 </p>
 
-<table summary="MeantIt Out Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>MeantIt Out</em></caption>
+<table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Out</em></caption>
   <thead>
     <tr>
-      <th class='span-12'>MeantIt Type</th>
+      <th class='span-12'>Meant.It Type</th>
       <th class='span-4'>Receivers</th>
       <th class='span-4'>Unique Receivers</th>
       <th class='span-4'>Value</th>
@@ -236,7 +176,7 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
   </tbody>
 </table>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_OUT %> MeantIt Out<br/>
+Last <%= Constants::WEB_MAX_MEANTIT_OUT %> Meant.It Out<br/>
 <%
   lastXsrcMeantItRels= MeantItRel.where(:src_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
 %>
@@ -249,97 +189,3 @@ Last <%= Constants::WEB_MAX_MEANTIT_OUT %> MeantIt Out<br/>
   <% end %>
 </p>
 
--------------------------------
-<table summary="sender_endPoint MeantIt In Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>sender_endPoint MeantIt In</em></caption>
-  <thead>
-    <tr>
-      <th class='span-12'>MeantIt Type</th>
-      <th class='span-4'>Senders</th>
-      <th class='span-4'>Unique Senders</th>
-      <th class='span-4'>Value</th>
-    </tr>
-  </thead>
-  <tbody>
-<% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type| %>
-    <tr>
-      <td>
-         <%= mi_type %>
-      </td>
-      <td>
-        <% if !sender_endPoint_dstMeantItRelTypeHash[mi_type].nil? %>
-          <%= sender_endPoint_dstMeantItRelTypeHash[mi_type].size %>
-        <% end %>
-      </td>
-      <td>
-        <% if !sender_endPoint_dstMeantItRelTypeUniqHash[mi_type].nil? %>
-          <%= sender_endPoint_dstMeantItRelTypeUniqHash[mi_type].size %>
-        <% end %>
-      </td>
-      <td>
-        Coming..
-      </td>
-    </tr>
-<% } %>
-  </tbody>
-</table>
-<p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
-<%
-  lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
-%>
-  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
-  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
-</p>
-
-<table summary="sender_endPoint MeantIt Out Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>sender_endPoint MeantIt Out</em></caption>
-  <thead>
-    <tr>
-      <th class='span-12'>MeantIt Type</th>
-      <th class='span-4'>Receivers</th>
-      <th class='span-4'>Unique Receivers</th>
-      <th class='span-4'>Value</th>
-    </tr>
-  </thead>
-  <tbody>
-<% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type| %>
-    <tr>
-      <td>
-         <%= mi_type %>
-      </td>
-      <td>
-        <% if !sender_endPoint_srcMeantItRelTypeHash[mi_type].nil? %>
-          <%= sender_endPoint_srcMeantItRelTypeHash[mi_type].size %>
-        <% end %>
-      </td>
-      <td>
-        <% if !sender_endPoint_srcMeantItRelTypeUniqHash[mi_type].nil? %>
-          <%= sender_endPoint_srcMeantItRelTypeUniqHash[mi_type].size %>
-        <% end %>
-      </td>
-      <td>
-        Coming..
-      </td>
-    </tr>
-<% } %>
-  </tbody>
-</table>
-<p>
-Last <%= Constants::WEB_MAX_MEANTIT_OUT %> MeantIt Out<br/>
-<%
-  lastXsrcMeantItRels= MeantItRel.where(:src_endpoint_id => [sender_endPoint]).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
-%>
-  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
-  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
-</p>

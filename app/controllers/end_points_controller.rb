@@ -84,6 +84,17 @@ class EndPointsController < ApplicationController
     end
   end
 
+  def show_by_id
+    logtag = ControllerHelper.gen_logtag
+    @endPoint = EndPoint.find(params[:id])
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_id:#{logtag}, @endPoint:#{@endPoint.inspect}")
+
+    respond_to do |format|
+      format.html { render "show_end_point_details" }
+      format.xml  { render :xml => @endPoint }
+    end
+  end # end def show_by_id
+
   def show_by_nick_and_creator_endpoint_id
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_nick_and_creator_endpoint_id:#{logtag}, params[Constants::END_POINT_NICK_INPUT]:#{params[Constants::END_POINT_NICK_INPUT]}")
@@ -100,7 +111,7 @@ class EndPointsController < ApplicationController
 
     respond_to do |format|
       format.html { render "show_end_point_details" }
-      format.xml  { render :xml => @pii }
+      format.xml  { render :xml => @endPoint }
     end
   end
 
@@ -118,7 +129,7 @@ class EndPointsController < ApplicationController
 
     respond_to do |format|
       format.html { render "show_end_points" }
-      format.xml  { render :xml => @pii }
+      format.xml  { render :xml => @endPoint }
     end
   end
 

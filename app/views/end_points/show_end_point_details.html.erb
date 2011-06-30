@@ -68,11 +68,11 @@
   <% end %>
 </p>
 
-<table summary="MeantIt In Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>MeantIt In</em></caption>
+<table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It In</em></caption>
   <thead>
     <tr>
-      <th class='span-12'>MeantIt Type</th>
+      <th class='span-12'>Meant.It Type</th>
       <th class='span-4'>Senders</th>
       <th class='span-4'>Unique Senders</th>
       <th class='span-4'>Value</th>
@@ -102,18 +102,18 @@
   </tbody>
 </table>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> MeantIt In<br/>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => @endPoint.id).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>
   <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXdstMeantItRels %>
 </p>
 
-<table summary="MeantIt Out Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>MeantIt Out</em></caption>
+<table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Out</em></caption>
   <thead>
     <tr>
-      <th class='span-12'>MeantIt Type</th>
+      <th class='span-12'>Meant.It Type</th>
       <th class='span-4'>Receivers</th>
       <th class='span-4'>Unique Receivers</th>
       <th class='span-4'>Value</th>
