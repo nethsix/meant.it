@@ -43,10 +43,15 @@ class MeantItMessageTypeValidator < ActiveModel::EachValidator
   MEANT_IT_MESSAGE_THANK = "thank"
   MEANT_IT_MESSAGE_SYMPATHY = "sympathy"
   MEANT_IT_MESSAGE_RESENT = "resent"
-  MEANT_IT_MESSAGE_OTHER= "other"
-  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT, MEANT_IT_MESSAGE_OTHER ]
+  MEANT_IT_MESSAGE_OTHER = "other"
+  MEANT_IT_MESSAGE_ORGANIZE = "organize"
+  MEANT_IT_MESSAGE_SORRY = "sorry"
+  MEANT_IT_MESSAGE_LOST = "lost"
+  MEANT_IT_MESSAGE_FOUND = "found"
+  MEANT_IT_MESSAGE_REGRET = "regret"
+  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT, MEANT_IT_MESSAGE_OTHER, MEANT_IT_MESSAGE_ORGANIZE, MEANT_IT_MESSAGE_SORRY, MEANT_IT_MESSAGE_LOST, MEANT_IT_MESSAGE_FOUND, MEANT_IT_MESSAGE_REGRET ]
   def validate_each(record, attribute, value)
-    msg_type_downcase = value.downcase
+    msg_type_downcase = value.downcase if !value.nil?
     normalized_msg_type_downcase = MessageTypeMapper.get_message_type(msg_type_downcase)
     record.errors[attribute] << "permits only '#{MessageTypeMapper.get_all_message_types.join('\', \'').strip}'" if normalized_msg_type_downcase.nil?
   end # end def validate_each
@@ -126,15 +131,18 @@ class MessageTypeMapper
   @@msg_type_map_hash["sympathizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
   @@msg_type_map_hash["consoles"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
   @@msg_type_map_hash["console"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
-  @@msg_type_map_hash["other"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
-  @@msg_type_map_hash["others"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
+  @@msg_type_map_hash["other"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+  @@msg_type_map_hash["others"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+  @@msg_type_map_hash["organizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_ORGANIZE
+  @@msg_type_map_hash["regrets"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_REGRET
+  @@msg_type_map_hash["resents"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
 
   def self.get_all_message_types
     @@msg_type_map_hash.keys
   end # end def self.get_all_message_types
 
   def self.get_message_type(message_type)
-    msg_type_downcase = message_type.downcase
+    msg_type_downcase = message_type.downcase if !message_type.nil?
     final_msg_type = nil
     # Don't need to map if it's in the 
     if MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.index(msg_type_downcase).nil?

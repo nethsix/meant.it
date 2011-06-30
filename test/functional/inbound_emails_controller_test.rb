@@ -129,7 +129,7 @@ p "message_type_str:#{message_type_str}"
       ['Tag.count', non_exist_endpoint_tag_arr.size + non_exist_mood_tag_arr.size],
       ['EndPointTagRel.count', endpoint_tag_arr.size],
       ['MeantItRel.count', 1],
-      ['MeantItMoodTagRel.count', 1]
+      ['MeantItMoodTagRel.count', non_exist_mood_tag_arr.size]
       ]) do
       post :create, :inbound_email => email_elem.attributes
     end
@@ -633,7 +633,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_recognizes({:controller => "inbound_emails", :action => "create", :format => "xml"}, {:path => '/inbound_emails_200', :method => :post})
   end
 
-  test "global pii with only preceding colon" do
+  test "pii with only preceding colon" do
     pii_at_start_input_str = ":hello kitty ;why don't you have a mouth?; sanrio tokyo"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_start_input_str)
 
@@ -644,18 +644,52 @@ p "#AAAAAAA after body_text:#{body_text}"
     pii_at_end_input_str = "sanrio ;why don't you have a mouth?; tokyo kitty :hello"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_end_input_str)
     assert_equal 'hello', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
-  end # end test "global pii with only  preceding colon"
+  end # end test "pii with only  preceding colon"
 
-  test "global pii enclosed with colon" do
+  test "pii enclosed with colon" do
     pii_at_start_input_str = ":hello kitty: ;why don't you have a mouth?; sanrio tokyo"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_start_input_str)
-
-    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII])
+    assert_equal 'hello kitty', receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_GLOBAL, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_FALSE, receiver_pii_hash[ControllerHelper::PII_HIDE]
     pii_at_mid_input_str = ";why don't you have a mouth?; :hello kitty: sanrio tokyo"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_mid_input_str)
-    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII])
+    assert_equal 'hello kitty', receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_GLOBAL, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_FALSE, receiver_pii_hash[ControllerHelper::PII_HIDE]
     pii_at_end_input_str = "sanrio ;why don't you have a mouth?; tokyo :hello kitty:"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_at_end_input_str)
-    assert_equal 'hello kitty', meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
-  end # end test "global pii enclosed with colon" do
+    receiver_pii_hash = ControllerHelper.get_pii_hash(meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII])
+    assert_equal 'hello kitty', receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_GLOBAL, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_FALSE, receiver_pii_hash[ControllerHelper::PII_HIDE]
+  end # end test "pii enclosed with colon" do
+
+  test "pii with auto assign pii_type pii_hide" do
+    pii_with_no_dollar = ":hello_kitty@sanrio.com ;why don't you have a mouth?; sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_with_no_dollar)
+
+    receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
+    assert_equal 'hello_kitty@sanrio.com', receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_EMAIL, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_TRUE, receiver_pii_hash[ControllerHelper::PII_HIDE]
+    pii_with_dollar_at_end = ";wow, you are rich; :hello kitty's treasure$: sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_with_dollar_at_end)
+    receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
+   
+    assert_equal "hello kitty's treasure", receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_OTHER, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_TRUE, receiver_pii_hash[ControllerHelper::PII_HIDE]
+    pii_with_dollar_at_mid = ";wow, you are rich; :hellokitty$ssn: sanrio tokyo"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(pii_with_dollar_at_mid)
+    receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
+    assert_equal "hellokitty", receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
+    assert_equal PiiTypeValidator::PII_TYPE_SSN, receiver_pii_hash[ControllerHelper::PII_TYPE]
+    assert_equal PiiHideTypeValidator::PII_HIDE_TRUE, receiver_pii_hash[ControllerHelper::PII_HIDE]
+  end # end test "pii with auto assign pii_type pii_hide" do
 end

@@ -138,7 +138,7 @@ module ControllerHelper
       if (match_arr = initial_pii_value_str.match(/.*@.*\..*/))
         pii_type = PiiTypeValidator::PII_TYPE_EMAIL
         pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
-      elsif (match_arr = sender_str.match(/(.*)\$(.*)/))
+      elsif (match_arr = initial_pii_value_str.match(/(.*)\$(.*)/))
         pii_type = match_arr[2]
         pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
         final_pii_value_str = match_arr[1]
