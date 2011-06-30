@@ -82,7 +82,7 @@ module ControllerHelper
     tag_str_arr = single_quote_tag_arr + double_quotes_tag_arr
     input_str_arr = input_str_dup.split
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, stripped input_str_arr.inspect:#{input_str_arr.inspect}")
-    result_hash[MEANT_IT_INPUT_TAGS_ARR] = input_str_arr
+    result_hash[MEANT_IT_INPUT_TAGS_ARR] = input_str_arr.clone + tag_str_arr.clone
     receiver_nick_str = input_str_arr.shift
     result_hash[MEANT_IT_INPUT_RECEIVER_NICK] = receiver_nick_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_nick_str:#{receiver_nick_str}")
