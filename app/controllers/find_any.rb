@@ -28,9 +28,8 @@ class FindAny < ApplicationController
     if decoded_find_any_input.nil? or decoded_find_any_input.empty?
       render and return
     else
-      ControllerHelper.parse_meant_it_input(decoded_find_any_input)
-      # Currently we're only interested in the tag_str
-      # CODE!!! We should be able to find relationships, etc.
+#      parsed_find_any = ControllerHelper.parse_meant_it_input(decoded_find_any_input)
+      
       
       # Check if it is a pii
       @pii = Pii.find_by_pii_value(decoded_find_any_input)

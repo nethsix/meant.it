@@ -4,7 +4,10 @@ module ControllerHelper
   LOGTAG_MAX = 2**32
 
   MEANT_IT_INPUT_MESSAGE = :message
+  MEANT_IT_INPUT_MESSAGE_ARR = :message_arr
   MEANT_IT_INPUT_RECEIVER_PII = :receiver_pii
+  MEANT_IT_INPUT_RECEIVER_PII_ARR = :receiver_pii_arr
+  MEANT_IT_INPUT_TAGS_ARR = :tags_arr
   MEANT_IT_INPUT_RECEIVER_NICK = :receiver_nick
   MEANT_IT_INPUT_TAGS = :tags
 
@@ -28,6 +31,7 @@ module ControllerHelper
     input_str_dup = input_str.dup if !input_str.nil?
     input_str_dup.downcase! if !input_str_dup.nil?
     result_hash = {}
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, input_str_dup:#{input_str_dup}")
     # Determine nick, :xxx, :yyy, tags
     # Get those strings enclosed with quotes ' or "
     # NOTE: scan returns [['abc'], ['def']... thus we use collect
@@ -36,35 +40,49 @@ module ControllerHelper
     # Message is enclosed within ;
     message_str_arr = input_str_dup.scan(/;(.*);/).collect { |elem| elem[0] }
     message_str = message_str_arr[0]
+    result_hash[MEANT_IT_INPUT_MESSAGE_ARR] = message_str_arr
     result_hash[MEANT_IT_INPUT_MESSAGE] = message_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, message_str:#{message_str}")
-    message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{msg_elem};/, '') }
+    message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{Regexp.escape(msg_elem)};/, '') }
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after message_str remove, input_str_dup:#{input_str_dup}")
     # Check for colon enclosed receiver pii
     receiver_pii_str_arr = input_str_dup.scan(/:(.*?):/).collect { |elem| elem[
 0] }
-    if receiver_pii_str_arr.empty?
-      # If no colon enclosed receiver pii, check for pii starting with colon
-      receiver_pii_str_arr = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
-      if receiver_pii_str_arr.empty?
-        receiver_pii_str_arr = input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
-      end
-      receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}/, '') }
-    else
-      receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{receiver_pii_elem}:/, '') }
-    end # end if receiver_pii_str_arr.nil?
-    receiver_pii_str = receiver_pii_str_arr[0]
+    receiver_pii_str_idx = input_str.index(":#{receiver_pii_str_arr[0]}") if !receiver_pii_str_arr.empty?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr:#{receiver_pii_str_arr.inspect}, receiver_pii_str_idx:#{receiver_pii_str_idx}")
+    receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}:/, '') }
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after receiver_pii_str_arr remove, input_str_dup:#{input_str_dup}")
+    # Check for pii starting with colon
+    receiver_pii_str_arr2 = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
+    receiver_pii_str_arr2 += input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
+    receiver_pii_str_idx2 = input_str.index(":#{receiver_pii_str_arr2[0]}") if !receiver_pii_str_arr2.empty?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr2:#{receiver_pii_str_arr2.inspect}, receiver_pii_str_idx2:#{receiver_pii_str_idx2}")
+    get_from_this_receiver_pii_arr = nil
+    if receiver_pii_str_idx.nil? and !receiver_pii_str_idx2.nil?
+      get_from_this_receiver_pii_arr = receiver_pii_str_arr2
+    elsif !receiver_pii_str_idx.nil? and receiver_pii_str_idx2.nil?
+      get_from_this_receiver_pii_arr = receiver_pii_str_arr
+    elsif !receiver_pii_str_idx.nil? and !receiver_pii_str_idx2.nil?
+      get_from_this_receiver_pii_arr = receiver_pii_str_idx < receiver_pii_str_idx2 ? receiver_pii_str_arr : receiver_pii_str_arr2
+    end # end elsif !receiver_pii_str_idx.nil?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, get_from_this_receiver_pii_arr:#{get_from_this_receiver_pii_arr.inspect}")
+    receiver_pii_str_arr2.each { |receiver_pii_elem| input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}/, '') }
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after receiver_pii_str_arr2 remove, input_str_dup:#{input_str_dup}")
+    result_hash[MEANT_IT_INPUT_RECEIVER_PII_ARR] = receiver_pii_str_arr + receiver_pii_str_arr2
+    receiver_pii_str = get_from_this_receiver_pii_arr[0] if !get_from_this_receiver_pii_arr.nil?
     result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
     single_quote_tag_arr = input_str_dup.scan(/'(.*?)'/).collect { |elem| elem[0] }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, single_quote_tag_arr.inspect:#{single_quote_tag_arr.inspect}")
     # Remove those quoted tags since we've processed them
-    single_quote_tag_arr.each { |tag_elem| input_str_dup.sub!(/'#{tag_elem}'/, '') }
+    single_quote_tag_arr.each { |tag_elem| input_str_dup.sub!(/'#{Regexp.escape(tag_elem)}'/, '') }
     double_quotes_tag_arr = input_str_dup.scan(/"(.*?)"/).collect { |elem| elem[0] }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, double_quotes_tag_arr.inspect:#{double_quotes_tag_arr.inspect}")
-    double_quotes_tag_arr.each { |tag_elem| input_str_dup.sub!(/"#{tag_elem}"/, '') }
+    double_quotes_tag_arr.each { |tag_elem| input_str_dup.sub!(/"#{Regexp.escape(tag_elem)}"/, '') }
     tag_str_arr = single_quote_tag_arr + double_quotes_tag_arr
     input_str_arr = input_str_dup.split
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, stripped input_str_arr.inspect:#{input_str_arr.inspect}")
+    result_hash[MEANT_IT_INPUT_TAGS_ARR] = input_str_arr
     receiver_nick_str = input_str_arr.shift
     result_hash[MEANT_IT_INPUT_RECEIVER_NICK] = receiver_nick_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_nick_str:#{receiver_nick_str}")
