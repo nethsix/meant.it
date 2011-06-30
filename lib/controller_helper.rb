@@ -25,7 +25,8 @@ module ControllerHelper
   end # end def self.parse_message_type_from_email
 
   def self.parse_meant_it_input(input_str, logtag = nil)
-    input_str_dup = input_str.dup
+    input_str_dup = input_str.dup if !input_str.nil?
+    input_str_dup.downcase! if !input_str_dup.nil?
     result_hash = {}
     # Determine nick, :xxx, :yyy, tags
     # Get those strings enclosed with quotes ' or "
