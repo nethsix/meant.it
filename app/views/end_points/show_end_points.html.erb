@@ -1,5 +1,5 @@
 <p id="notice"><%= notice %></p>
-<p>
-  <b>EndPoints:</b><br/>
-  <%= render :partial => "shared/end_point_nick_col", :collection => @endPoint_arr, :spacer_template => "shared/br_ruler" %>
-</p>
+  <b>Person(s):</b><br/>
+  <ul><li>
+  <%= render :partial => "shared/end_point_nick_col", :collection => @endPoint_arr, :spacer_template => "shared/li_ruler", :locals => { :show_nick_force => true } %>
+  </li></ul>

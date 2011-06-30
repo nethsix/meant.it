@@ -13,7 +13,7 @@
 %>
 <%
   creator_endPoint = nil
-  if !end_point_nick_col.nick.nil?
+  if !end_point_nick_col.nil?
     creator_endPoint = EndPoint.find(end_point_nick_col.creator_endpoint_id)
   end
 %>
@@ -33,7 +33,7 @@
 <%
     else
 %>
-    <%= link_to "id:#{end_point_nick_col.id}", end_point_path(end_point_nick_col.id) %>
+    <%= link_to "id:#{end_point_nick_col.id}", "/end_points/show_by_id/#{end_point_nick_col.id}" %>
 <% 
     end 
   end
@@ -45,7 +45,7 @@
 <% 
      else
 %>
-     <%= link_to "id:#{creator_endPoint.id}", end_point_path(creator_endPoint.id) %>
+     <%= link_to "own:#{creator_endPoint.id}", "/end_points/show_by_id/#{creator_endPoint.id}" %>
 <% 
      end
   end

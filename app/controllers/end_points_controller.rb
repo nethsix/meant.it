@@ -84,6 +84,22 @@ class EndPointsController < ApplicationController
     end
   end
 
+  def show_by_nick
+    logtag = ControllerHelper.gen_logtag
+    end_point_nick = params[:nick]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_nick:#{logtag}, end_point_nick:#{end_point_nick}")
+    decoded_end_point_nick_input = URI::decode(end_point_nick)
+    decoded_end_point_nick_input.chomp!
+    decoded_end_point_nick_input.strip!
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_nick:#{logtag}, decoded_end_point_nick_input:#{decoded_end_point_nick_input}")
+    @endPoint_arr = EndPoint.where("nick = ?", decoded_end_point_nick_input)
+
+    respond_to do |format|
+      format.html { render "show_end_points" }
+      format.xml  { render :xml => @endPoint_arr }
+    end
+  end # end def show_by_nick
+
   def show_by_id
     logtag = ControllerHelper.gen_logtag
     @endPoint = EndPoint.find(params[:id])
@@ -129,7 +145,7 @@ class EndPointsController < ApplicationController
 
     respond_to do |format|
       format.html { render "show_end_points" }
-      format.xml  { render :xml => @endPoint }
+      format.xml  { render :xml => @endPoint_arr }
     end
   end
 

@@ -127,6 +127,20 @@ module ControllerHelper
    new_person
   end # end def self.find_or_create_person_by_email
 
+  # Email can be of long format "hello kitty" <hello_kitty@sanrio.com>
+  EMAIL_NICK_STR = :email_nick_str
+  EMAIL_STR = :email_str
+  def self.parse_email(email_str)
+    email_str_match_arr = email_str.match(/(.*)<(.*)>/)
+    email_nick_str = email_str_match_arr[1].strip if !email_str_match_arr.nil?
+    email_nick_str = strip_quotes(email_nick_str)
+    # NOTE: <kuromi@sanrio.com> will give email_nick_str = '' instead of nil
+    email_nick_str = nil if email_nick_str.nil? or email_nick_str.empty?
+    email_str = email_str_match_arr[2] if !email_str_match_arr.nil?
+    email_nick_str ||= email_str
+    { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
+  end # end self.parse_email
+
   PII_VALUE_STR = :pii_value_str
   PII_TYPE = :pii_type
   PII_HIDE = :pii_hide
@@ -153,4 +167,17 @@ module ControllerHelper
     end # end if !final_pii_value_str.nil?
     { PII_VALUE_STR => final_pii_value_str, PII_TYPE => pii_type, PII_HIDE => pii_hide }
   end # end def self.get_pii_type
+
+  def self.strip_quotes(input_str)
+    stripped_input_str = nil
+    if !input_str.nil?
+      input_match_arr = input_str.match(/"(.*)"/)
+      if input_match_arr.nil?
+        input_match_arr = input_str.match(/'(.*)'/)
+      end # end if input_match_arr.empty? ...
+      stripped_input_str = input_match_arr[1] if !input_match_arr.nil?
+      stripped_input_str ||= input_str
+    end # end if !input_str.nil?
+    stripped_input_str
+  end # end def self.strip_quotes
 end # end module ControllerHelper

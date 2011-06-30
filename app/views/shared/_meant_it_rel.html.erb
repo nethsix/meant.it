@@ -15,7 +15,8 @@
 %>
 <%
   src_creator_endPoint = nil
-  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil?
+#20110630a  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.nick.nil?
+  if !meant_it_rel.src_endpoint.nil?
     src_creator_endPoint = EndPoint.find(meant_it_rel.src_endpoint.creator_endpoint_id)
   end
 %>
@@ -34,7 +35,7 @@
 <%
     else
 %>
-    <%= link_to "id:#{meant_it_rel.src_endpoint.id}", end_point_path(meant_it_rel.src_endpoint.id) %>
+    <%= link_to "id:#{meant_it_rel.src_endpoint.id}", "/end_points/show_by_id/#{meant_it_rel.src_endpoint.id}" %>
 <% 
     end 
   end
@@ -46,7 +47,7 @@
 <% 
      else
 %>
-     <%= link_to "id:#{src_creator_endPoint.id}", end_point_path(src_creator_endPoint.id) %>
+     <%= link_to "own:#{src_creator_endPoint.id}", end_point_path(src_creator_endPoint.id) %>
 <% 
      end
   end
@@ -55,7 +56,8 @@
 <%= meant_it_rel.message_type %> 
 <%
   dst_creator_endPoint = nil
-  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil?
+#20110630a  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.nick.nil?
+  if !meant_it_rel.dst_endpoint.nil?
     dst_creator_endPoint = EndPoint.find(meant_it_rel.dst_endpoint.creator_endpoint_id)
   end
 %>
@@ -74,7 +76,7 @@
 <%
     else
 %>
-    <%= link_to "id:#{meant_it_rel.dst_endpoint.id}", end_point_path(meant_it_rel.dst_endpoint.id) %>
+    <%= link_to "id:#{meant_it_rel.dst_endpoint.id}", "/end_points/show_by_id/#{meant_it_rel.dst_endpoint.id}" %>
 <% 
     end 
   end
@@ -86,7 +88,7 @@
 <% 
      else
 %>
-     <%= link_to "id:#{dst_creator_endPoint.id}", end_point_path(dst_creator_endPoint.id) %>
+     <%= link_to "own:#{dst_creator_endPoint.id}", end_point_path(dst_creator_endPoint.id) %>
 <% 
      end
   end

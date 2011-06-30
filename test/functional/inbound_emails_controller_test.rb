@@ -144,7 +144,9 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     assert_not_nil inbound_email_from_db
 
     # Check that sender Pii
-    sender_pii_str = email_elem.from
+    sender_pii_email_hash = ControllerHelper.parse_email(email_elem.from)
+    sender_pii_str = sender_pii_email_hash[ControllerHelper::EMAIL_STR]
+    sender_pii_nick_str = sender_pii_email_hash[ControllerHelper::EMAIL_NICK_STR]
     sender_pii_hash = ControllerHelper.get_pii_hash(sender_pii_str)
     sender_pii = Pii.find_by_pii_value(sender_pii_hash[ControllerHelper::PII_VALUE_STR])
     assert_not_nil sender_pii
@@ -155,7 +157,7 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_endPoint_arr = sender_pii.endPoints
     assert_equal 1, sender_endPoint_arr.size
     sender_endPoint = sender_endPoint_arr[0]
-    assert_equal email_elem.from, sender_endPoint.pii.pii_value
+    assert_equal sender_pii_str, sender_endPoint.pii.pii_value
 
     # Check that sender Entity is created
     sender_entities = sender_endPoint.entities
@@ -498,7 +500,10 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
-    kitty_pii = Pii.find_by_pii_value(first_inbound_email.from)
+    sender_email_str = first_inbound_email.from
+    sender_email_hash = ControllerHelper.parse_email(sender_email_str)
+    sender_pii_str = sender_email_hash[ControllerHelper::EMAIL_STR]
+    kitty_pii = Pii.find_by_pii_value(sender_pii_str)
     assert 1, kitty_pii.endPoints.size
     kitty_ep = kitty_pii.endPoints[0]
     assert 1, kitty_ep.srcMeantItRels.size
@@ -692,4 +697,40 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal PiiTypeValidator::PII_TYPE_SSN, receiver_pii_hash[ControllerHelper::PII_TYPE]
     assert_equal PiiHideTypeValidator::PII_HIDE_TRUE, receiver_pii_hash[ControllerHelper::PII_HIDE]
   end # end test "pii with auto assign pii_type pii_hide" do
+
+  test "parse email string to get nick and email" do
+    email_str = '"kuromi" <kuromi@sanrio.com>'
+    email_hash = ControllerHelper.parse_email(email_str)
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert "kuromi", email_nick
+    assert_equal "kuromi@sanrio.com", email
+
+    email_str = "'kuromi' <kuromi@sanrio.com>"
+    email_hash = ControllerHelper.parse_email(email_str)
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert "kuromi", email_nick
+    assert_equal "kuromi@sanrio.com", email
+
+    email_str = "kuromi <kuromi@sanrio.com>"
+    email_hash = ControllerHelper.parse_email(email_str)
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert_equal "kuromi", email_nick
+
+    email_str = "<kuromi@sanrio.com>"
+    email_hash = ControllerHelper.parse_email(email_str)
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert_equal "kuromi@sanrio.com", email_nick
+    assert_equal "kuromi@sanrio.com", email
+
+    email_str = "kuromi@sanrio.com"
+    email_hash = ControllerHelper.parse_email(email_str)
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert_equal "kuromi@sanrio.com", email_nick
+    assert_equal "kuromi@sanrio.com", email
+  end # end test "parse email to get nick and email
 end

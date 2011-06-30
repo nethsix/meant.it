@@ -21,6 +21,7 @@ MeantIt::Application.routes.draw do
 
   resources :end_points do
     collection do
+      get 'show_by_nick/:nick', :action => "show_by_nick"
       get 'find_by_nick_and_creator_endpoint_id'
       get 'show_by_nick_and_creator_endpoint_id'
       get 'find_by_tags'

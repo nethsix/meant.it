@@ -135,7 +135,7 @@ class MessageTypeMapper
   @@msg_type_map_hash["others"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
   @@msg_type_map_hash["organizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_ORGANIZE
   @@msg_type_map_hash["regrets"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_REGRET
-  @@msg_type_map_hash["resents"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
+  @@msg_type_map_hash["resents"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_RESENT
 
   def self.get_all_message_types
     @@msg_type_map_hash.keys

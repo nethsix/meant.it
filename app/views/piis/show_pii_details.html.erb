@@ -81,7 +81,14 @@
 
 <div class='container'>
   <div class='span-24'>
-    <h3><strong>Consists:</strong>  <%= endPoints.size %> endPoint(s)</h3>
+    <strong>
+    <% if endPoints.size > 1 %>
+      <%= endPoints.size %> persons
+    <% else %>
+      <%= endPoints.size %> person
+    <% end %>
+    </strong>
+    have created an id/nick for this <strong>Pii</strong>.
   </div>
   <div class='span-20'>
     <ul><li>

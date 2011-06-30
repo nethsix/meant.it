@@ -5,7 +5,7 @@ nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email:
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty0 lawson0 hakusan0 ;thank you for great service0;
   to: thanks@meant.it
-  from: mama0@gmail.com
+  from: '"mama0" <mama0@gmail.com>'
   attachment_count: 0
 nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>

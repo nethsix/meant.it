@@ -95,11 +95,10 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created inbound_email with id:#{@inbound_email.id}")
     sender_str = inbound_email_params[field_mapper[:from]]
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
+    sender_email_hash = ControllerHelper.parse_email(sender_str)
+    sender_str = sender_email_hash[ControllerHelper::EMAIL_STR]
+    sender_nick_str = sender_email_hash[ControllerHelper::EMAIL_NICK_STR]
     # Parse sender string to derive nick and email address
-    sender_str_match_arr = sender_str.match(/(.*)<(.*)>/)
-    sender_nick_str = sender_str_match_arr[1].strip if !sender_str_match_arr.nil?
-    sender_str = sender_str_match_arr[2] if !sender_str_match_arr.nil?
-    sender_nick_str ||= sender_str
     # If sender_nick_str is email, e.g., some smtp servers provide
     # "hello_kitty@sanrio.com <hello_kitty@sanrio.com>" then we
     # don't use the nick

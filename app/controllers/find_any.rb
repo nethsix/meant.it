@@ -28,6 +28,10 @@ class FindAny < ApplicationController
     if decoded_find_any_input.nil? or decoded_find_any_input.empty?
       render and return
     else
+      ControllerHelper.parse_meant_it_input(decoded_find_any_input)
+      # Currently we're only interested in the tag_str
+      # CODE!!! We should be able to find relationships, etc.
+      
       # Check if it is a pii
       @pii = Pii.find_by_pii_value(decoded_find_any_input)
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, @pii.inspect:#{@pii.inspect}")
@@ -38,7 +42,14 @@ class FindAny < ApplicationController
       # Check if they are tags
       tags_arr = decoded_find_any_input.split
       @endPoint_arr = EndPoint.tagged(tags_arr)
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, find tags, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
+      if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+        render "end_points/show_end_points", :layout => true, :locals => { :notice => nil }
+        return
+      end # end if !@endPoint_arr.nil?
+      
+      @endPoint_arr = EndPoint.where("nick = ?", decoded_find_any_input)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, find nicks, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
       if !@endPoint_arr.nil?
         render "end_points/show_end_points", :layout => true, :locals => { :notice => nil }
         return
