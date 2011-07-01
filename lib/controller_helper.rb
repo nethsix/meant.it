@@ -18,7 +18,7 @@ module ControllerHelper
   def self.parse_message_type_from_email_addr(email_addr, logtag = nil)
     message_type_str = nil
     email_addr_match_arr = nil
-    email_addr_match_arr = email_addr.match /(.*)@.*/ if !email_addr.nil?
+    email_addr_match_arr = email_addr.match /(.+)@.+\..+/ if !email_addr.nil?
     if email_addr_match_arr.nil?
       message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
     else
@@ -40,17 +40,24 @@ module ControllerHelper
     # Message is enclosed within ;
     message_str_arr = input_str_dup.scan(/;(.*);/).collect { |elem| elem[0] }
     message_str = message_str_arr[0]
+    message_str.strip! if !message_str.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, message_str:#{message_str}")
+    message_str_arr.each { |msg_elem| 
+      input_str_dup.sub!(/;#{Regexp.escape(msg_elem)};/, '')
+      msg_elem.strip!
+    }
     result_hash[MEANT_IT_INPUT_MESSAGE_ARR] = message_str_arr
     result_hash[MEANT_IT_INPUT_MESSAGE] = message_str
-    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, message_str:#{message_str}")
-    message_str_arr.each { |msg_elem| input_str_dup.sub!(/;#{Regexp.escape(msg_elem)};/, '') }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after message_str remove, input_str_dup:#{input_str_dup}")
     # Check for colon enclosed receiver pii
     receiver_pii_str_arr = input_str_dup.scan(/:(.*?):/).collect { |elem| elem[
 0] }
     receiver_pii_str_idx = input_str.index(":#{receiver_pii_str_arr[0]}") if !receiver_pii_str_arr.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr:#{receiver_pii_str_arr.inspect}, receiver_pii_str_idx:#{receiver_pii_str_idx}")
-    receiver_pii_str_arr.each { |receiver_pii_elem| input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}:/, '') }
+    receiver_pii_str_arr.each { |receiver_pii_elem| 
+      input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}:/, '')
+      receiver_pii_elem.strip!
+    }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after receiver_pii_str_arr remove, input_str_dup:#{input_str_dup}")
     # Check for pii starting with colon
     receiver_pii_str_arr2 = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
@@ -66,24 +73,47 @@ module ControllerHelper
       get_from_this_receiver_pii_arr = receiver_pii_str_idx < receiver_pii_str_idx2 ? receiver_pii_str_arr : receiver_pii_str_arr2
     end # end elsif !receiver_pii_str_idx.nil?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, get_from_this_receiver_pii_arr:#{get_from_this_receiver_pii_arr.inspect}")
-    receiver_pii_str_arr2.each { |receiver_pii_elem| input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}/, '') }
+    receiver_pii_str_arr2.each { |receiver_pii_elem| 
+      input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}/, '')
+      receiver_pii_elem.strip!
+    }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after receiver_pii_str_arr2 remove, input_str_dup:#{input_str_dup}")
     result_hash[MEANT_IT_INPUT_RECEIVER_PII_ARR] = receiver_pii_str_arr + receiver_pii_str_arr2
     receiver_pii_str = get_from_this_receiver_pii_arr[0] if !get_from_this_receiver_pii_arr.nil?
-    result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
-    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
     single_quote_tag_arr = input_str_dup.scan(/'(.*?)'/).collect { |elem| elem[0] }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, single_quote_tag_arr.inspect:#{single_quote_tag_arr.inspect}")
     # Remove those quoted tags since we've processed them
-    single_quote_tag_arr.each { |tag_elem| input_str_dup.sub!(/'#{Regexp.escape(tag_elem)}'/, '') }
+    single_quote_tag_arr.each { |tag_elem| 
+      input_str_dup.sub!(/'#{Regexp.escape(tag_elem)}'/, '')
+      tag_elem.strip!
+    }
     double_quotes_tag_arr = input_str_dup.scan(/"(.*?)"/).collect { |elem| elem[0] }
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, double_quotes_tag_arr.inspect:#{double_quotes_tag_arr.inspect}")
-    double_quotes_tag_arr.each { |tag_elem| input_str_dup.sub!(/"#{Regexp.escape(tag_elem)}"/, '') }
+    double_quotes_tag_arr.each { |tag_elem|
+      input_str_dup.sub!(/"#{Regexp.escape(tag_elem)}"/, '')
+      tag_elem.strip!
+    }
     tag_str_arr = single_quote_tag_arr + double_quotes_tag_arr
     input_str_arr = input_str_dup.split
+    input_str_arr.each { |input_elem|
+      input_elem.strip!
+    } 
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, stripped input_str_arr.inspect:#{input_str_arr.inspect}")
     result_hash[MEANT_IT_INPUT_TAGS_ARR] = input_str_arr.clone + tag_str_arr.clone
+    if receiver_pii_str.nil?
+      # Check for an email on the remaining input_str
+      receiver_pii_arr = input_str_arr.find_all { |str| str.match(/.+@.+\..+/) }
+      receiver_pii_str = receiver_pii_arr[0] if !receiver_pii_arr.empty?
+      receiver_pii_arr.each { |rec_pii_elem|
+        input_str_dup.sub!(/:#{Regexp.escape(rec_pii_elem)}/, '') 
+        rec_pii_elem.strip!
+      } # end receiver_pii_arr.each ...
+    end # if receiver_pii_str.nil?
+    receiver_pii_str.strip! if !receiver_pii_str.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
+    result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
     receiver_nick_str = input_str_arr.shift
+    receiver_nick_str.strip! if !receiver_nick_str.nil?
     result_hash[MEANT_IT_INPUT_RECEIVER_NICK] = receiver_nick_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_nick_str:#{receiver_nick_str}")
     tag_str_arr += input_str_arr
@@ -154,7 +184,7 @@ module ControllerHelper
     email_nick_str = strip_quotes(email_nick_str)
     # NOTE: <kuromi@sanrio.com> will give email_nick_str = '' instead of nil
     email_nick_str = nil if email_nick_str.nil? or email_nick_str.empty?
-    email_str = email_str_match_arr[2] if !email_str_match_arr.nil?
+    email_str = email_str_match_arr[2].strip if !email_str_match_arr.nil?
     email_nick_str ||= email_str
     { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
   end # end self.parse_email
@@ -167,10 +197,10 @@ module ControllerHelper
     pii_type = PiiTypeValidator::PII_TYPE_GLOBAL
     pii_hide = PiiHideTypeValidator::PII_HIDE_FALSE
     if !final_pii_value_str.nil?
-      if (match_arr = initial_pii_value_str.match(/.*@.*\..*/))
+      if (match_arr = initial_pii_value_str.match(/.+@.+\..+/))
         pii_type = PiiTypeValidator::PII_TYPE_EMAIL
         pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
-      elsif (match_arr = initial_pii_value_str.match(/(.*)\$(.*)/))
+      elsif (match_arr = initial_pii_value_str.match(/(.+)\$(.*)/))
         pii_type = match_arr[2]
         pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
         final_pii_value_str = match_arr[1]
@@ -178,7 +208,7 @@ module ControllerHelper
           pii_type = PiiTypeValidator::PII_TYPE_OTHER
         end # end if PiiTypeValidator::PII_TYPE_ENUM.index(pii_type)
       end # end if initial_pii_value_str.match ...
-      if initial_pii_value_str.match(/.*\$$/)
+      if initial_pii_value_str.match(/.+\$$/)
         # Ends with $ then we set to hide
         pii_hide = PiiHideTypeValidator::PII_HIDE_TRUE
       end # end if initial_pii_value_str.match ...

@@ -84,3 +84,10 @@ nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
   to: thank@meant.it
   from: mama11@gmail.com
   attachment_count: 0
+xxx_no_colon_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: kurochan lawson12 hakusan12 ;you're evil!; kuromi@sanrio.com
+  to: lost@meant.it
+  from: kuromi_dad@gmail.com
+  attachment_count: 0

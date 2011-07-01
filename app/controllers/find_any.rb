@@ -13,6 +13,9 @@ class FindAny < ApplicationController
 #  include ActionController::Rendering
 #  include AbstractController::Layouts
 
+  PII_OBJ = :pii_obj
+  PII_IDX = :pii_idx
+
   append_view_path "#{Rails.root}/app/views/" 
 
   def index
@@ -35,12 +38,30 @@ class FindAny < ApplicationController
       # or two explicit piis, get them.  NOTE: we treat the first pii
       # as sender the the latter as receiver.
       explicit_pii_arr = parsed_find_any_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII_ARR]
-      sender_pii_str = explicit_pii_arr.shift
-      sender_pii = Pii.find_by_pii_value(sender_pii_str) if sender_pii_str.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_pii.inspect:#{sender_pii.inspect}")
-      receiver_pii_str = explicit_pii_arr.shift 
-      receiver_pii = Pii.find_by_pii_value(receiver_pii_str) if receiver_pii_str.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, receiver_pii.inspect:#{receiver_pii.inspect}")
+      # We stop checking for pii and ep when ep_count = 2
+      pii_str = explicit_pii_arr.shift
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, #1 pii_str:#{pii_str}")
+      # Stores pii and ep we collect along the way
+      pii_ep_arr = []
+      pii = nil
+      pii = Pii.find_by_pii_value(pii_str) if !pii_str.nil?
+      if !pii.nil?
+        # We keep track of where we find pii so that we know which is
+        # sender/receiver.  We may find receiver first since sender can
+        # be just a nick
+        pii_str_idx = decoded_find_any_input.index(pii_str)
+        pii_ep_arr << { PII_OBJ => pii, PII_IDX => pii_str_idx }
+      end # end if !pii.nil?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, #1 pii.inspect:#{pii.inspect}")
+      pii_str = explicit_pii_arr.shift 
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, #2 pii_str:#{pii_str}")
+      pii = nil
+      pii = Pii.find_by_pii_value(pii_str) if !pii_str.nil?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, #2 pii.inspect:#{pii.inspect}")
+      if !pii.nil?
+        pii_str_idx = decoded_find_any_input.index(pii_str)
+        pii_ep_arr << { PII_OBJ => pii, PII_IDX => pii_str_idx }
+      end # end if !pii.nil?
       parsed_find_any_tags_arr = parsed_find_any_hash[ControllerHelper::MEANT_IT_INPUT_TAGS_ARR]
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag},  initial parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
       # Look for message_type
@@ -59,50 +80,63 @@ class FindAny < ApplicationController
       end # end if message_type.nil?
       parsed_find_any_tags_arr.delete(message_type)
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after MeantItMessageTypeValidator message_type, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      # Maybe one of the tag is pii
+      found_arr = []
+      parsed_find_any_tags_arr.each { |tag_elem|
+        break if pii_ep_arr.size >= 2
+        pii = Pii.find_by_pii_value(tag_elem)
+        if !pii.nil?
+          pii_str_idx = decoded_find_any_input.index(pii.pii_value)
+          found_arr << { PII_OBJ => pii, PII_IDX => pii_str_idx }
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding pii from tags, pii.inspect:#{pii.inspect}")
+        end # end if !pii.nil?
+      } # end parsed_find_any_tags_arr.each ...
+      pii_ep_arr += found_arr
+      found_arr.each { |found_elem|
+        parsed_find_any_tags_arr.delete(found_elem[PII_OBJ].pii_value)
+      } # found_arr.each ...
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after get pii from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      found_arr = []
+      # Maybe one of them tag is nick
+      parsed_find_any_tags_arr.each { |tag_elem|
+        break if pii_ep_arr.size >= 2
+        ep_arr = EndPoint.where("nick = ?", tag_elem)
+        if !ep_arr.nil? and !ep_arr.empty?
+          ep_idx = decoded_find_any_input.index(ep_arr[0].nick)
+          pii_ep_arr << { PII_OBJ => ep_arr, PII_IDX => ep_idx }
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding ep from tags, ep_arr.inspect:#{ep_arr.inspect}")
+        end # end if !ep_arr.nil? and !ep_arr.empty?
+      } # end parsed_find_any_tags_arr.each ...
+      pii_ep_arr += found_arr
+      found_arr.each { |found_elem|
+        parsed_find_any_tags_arr.delete(found_elem[PII_OBJ][0].nick)
+      } # found_arr.each ...
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after find ep from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      tags_arr = parsed_find_any_tags_arr
+      # Order pii/ep based on idx
+      pii_ep_arr.sort! { |a,b| a[PII_IDX] <=> b[PII_IDX] }
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sorted pii_ep_arr.inspect:#{pii_ep_arr.inspect}")
+      sender_pii = nil
+      receiver_pii = nil
       sender_ep_arr = []
       receiver_ep_arr = []
-      if sender_pii.nil?
-        # Maybe one of them tag is pii
-        parsed_find_any_tags_arr.each { |tag_elem|
-          sender_pii = Pii.find_by_pii_value(tag_elem)
-          break if !sender_pii.nil?
-        } # end parsed_find_any_tags_arr.each ...
-        parsed_find_any_tags_arr.delete(sender_pii.pii_value) if !sender_pii.nil?
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding sender_pii from tags, sender_pii.inspect:#{sender_pii.inspect}")
-      end # end if sender_pii.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after sender_pii, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
-      if sender_pii.nil?
-        # Maybe one of them tag is nick for sender_ep
-        parsed_find_any_tags_arr.each { |tag_elem|
-          sender_ep_arr = EndPoint.where("nick = ?", tag_elem)
-          break if !sender_ep_arr.empty?
-        } # end parsed_find_any_tags_arr.each ...
-        parsed_find_any_tags_arr.delete(sender_ep_arr[0].nick) if !sender_ep_arr.empty?
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding sender_ep from tags, sender_ep_arr.inspect:#{sender_ep_arr.inspect}")
-      end # end if sender_pii.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after sender_ep_arr, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
-      if !sender_pii.nil? or !sender_ep_arr.empty?
-        # Search for receiver if sender found otherwise if there 
-        # are no piis, no eps among tags so don't bother
-        parsed_find_any_tags_arr.each { |tag_elem|
-          receiver_pii = Pii.find_by_pii_value(tag_elem)
-          break if !receiver_pii.nil?
-        } # end parsed_find_any_tags_arr.each ...
-        parsed_find_any_tags_arr.delete(receiver_pii.pii_value) if !receiver_pii.nil?
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding receiver_pii from tags, receiver_pii.inspect:#{receiver_pii.inspect}")
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after receiver_pii, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
-        if receiver_pii.nil?
-          # Maybe one of the tag is nick for receiver_ep
-          parsed_find_any_tags_arr.each { |tag_elem|
-            receiver_ep_arr = EndPoint.where("nick = ?", tag_elem)
-            break if !receiver_ep_arr.empty?
-          } # end parsed_find_any_tags_arr.each ...
-          parsed_find_any_tags_arr.delete(receiver_ep_arr[0].nick) if !receiver_ep_arr.empty?
-          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, finding receiver_ep from tags, receiver_ep_arr.inspect:#{receiver_ep_arr.inspect}")
-        end # end if receiver_pii.nil?
-      end # end if !sender_pii.nil? ....
-      tags_arr = parsed_find_any_tags_arr
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after receiver_ep_arr remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      pii_ep_arr.each { |pii_ep_elem|
+        if pii_ep_elem[PII_OBJ].class == Pii
+          if sender_pii.nil? or sender_ep_arr.empty?
+            sender_pii = pii_ep_elem[PII_OBJ]
+          # We can just use else if we trust that elems is just 2
+          elsif receiver_pii.nil? or receiver_ep_arr.empty?
+            receiver_pii = pii_ep_elem[PII_OBJ]
+          end # end if sender_pii.nil?
+        else
+          if sender_pii.nil? or sender_ep_arr.empty?
+            sender_ep_arr = pii_ep_elem[PII_OBJ]
+          # We can just use else if we trust that elems is just 2
+          elsif receiver_pii.nil? or receiver_ep_arr.empty?
+            receiver_ep_arr = pii_ep_elem[PII_OBJ]
+          end # end if sender_pii.nil?
+        end # end if pii_ep_elem.class(Pii)
+      } # end pii_ep_arr.each ...
       # At this point we have:
       # sender_pii/sender_ep_arr, receiver_pii/receiver_ep_arr, message_type,
       # tags_arr

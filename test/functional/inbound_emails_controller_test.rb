@@ -86,6 +86,11 @@ class InboundEmailsControllerTest < ActionController::TestCase
    common_code(email_elem)
   end # end "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email"
 
+  test "xxx_no_colon_inbound_email" do
+   email_elem = inbound_emails(:xxx_no_colon_inbound_email)
+   common_code(email_elem)
+  end # end test "xxx_no_colon_inbound_email"
+
   def common_code(email_elem)
     p "testing inbound_email.inspect:#{email_elem.inspect}"
 
@@ -733,4 +738,19 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal "kuromi@sanrio.com", email_nick
     assert_equal "kuromi@sanrio.com", email
   end # end test "parse email to get nick and email
+
+  test "pick up pii without colon" do
+    receiver_pii_str = "kuromi@sanrio.com"
+    input_str = "kurochan lawson12 hakusan12 ;you're evil!; #{receiver_pii_str}"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    assert_equal receiver_pii_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+  end # end test "pick up pii without colon" do
+
+  test "aaa" do
+    # Test find_any relationship
+    # nick :xxx
+    # :xxx :xxx
+    # :xxx nick
+    # nick nick
+  end
 end
