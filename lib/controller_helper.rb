@@ -243,6 +243,27 @@ module ControllerHelper
     receiver_arr
   end # end def self.ep_from_mir_uniqDstEndPoints
 
+  def self.gen_srcMsgDst_key(src, msg_type, dst)
+    hash_key = "#{src}#{msg_type}#{dst}"
+    hash_key
+  end # end def self.gen_hash_key
+
+  def self.ungen_srcMsgDst_key(key)
+    match_arr = key.match(/(\d+)([A-Za-z]+)(\d+)/)
+    match_arr
+  end # end def self.gen_hash_key
+
+  def self.mir_from_mir_uniqSrcMsgDstEndPoints(meantItRels)
+    src_msg_dst_uniq_hash = {}
+    meantItRels.each { |mir| 
+      hash_key = gen_srcMsgDst_key(mir.src_endpoint_id, mir.message_type, mir.dst_endpoint_id)
+      src_msg_dst_uniq_hash[hash_key] ||= []
+      src_msg_dst_uniq_hash[hash_key] << mir
+    } # end meantItRels.each ...
+    src_msg_dst_uniq_hash
+  end #end def self.mir_from_mir_uniqSrcDstEndPoints
+
+
   def self.mir_from_mir_messageType(meantItRels, message_type)
     meantItRels.find_all { |elem| elem.message_type == message_type }
   end # end def self.mir_from_mir_messageType

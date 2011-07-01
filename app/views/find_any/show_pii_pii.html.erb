@@ -3,22 +3,26 @@
 <p id="notice"><%= notice %></p>
 
 <%
-  logtag = ControllerHelper.gen_logtag
   sender_endPoints = sender_pii.endPoints
   receiver_endPoints = receiver_pii.endPoints
   sender_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(sender_endPoints)
   # sender to receiver relationship
   s_mir_r_arr = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
-  s_mir_r_uniq_hash = ControllerHelper.classified_mir_hash_on_message_type_from_mir(s_mir_r_arr)
+  s_mir_r_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(s_mir_r_arr)
 
   # receiver to sender relationship
   receiver_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(receiver_endPoints)
   r_mir_s_arr = ControllerHelper.mir_from_find_match_dstEndPoints(receiver_srcMeantItRels, sender_endPoints)
-  r_mir_s_uniq_hash = ControllerHelper.classified_mir_hash_on_message_type_from_mir(r_mir_s_arr)
+  r_mir_s_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(r_mir_s_arr)
   
 %>
+<p>
+<strong>Meant.It:</strong>
+<%= sender_pii.pii_value  %> <=>
+<%= receiver_pii.pii_value %>
+</p>
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It</em></caption>
+  <caption><em>Meant.It '<%= sender_pii.pii_value %> <=> <%= receiver_pii.pii_value %>'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -29,21 +33,21 @@
     </tr>
   </thead>
   <tbody>
-<% s_mir_r_uniq_hash.each { |mi_type, mir_arr| %>
+<% s_mir_r_msg_uniq_hash.each { |hash_key, mir_arr| %>
     <tr>
       <td>
         <% # Just take any elem since they all have same source dest %>
         <%= render :partial => "shared/end_point_nick_col", :collection => [mir_arr[0].src_endpoint], :locals => { :show_nick_force => true } %>
       </td>
       <td>
-        <%= mi_type %>
+        <%= mir_arr[0].message_type %>
       </td>
       <td>
         <% # Just take any elem since they all have same source dest %>
         <%= render :partial => "shared/end_point_nick_col", :collection => [mir_arr[0].dst_endpoint], :locals => { :show_nick_force => true } %>
       </td>
       <td>
-        <%= s_mir_r_uniq_hash[mi_type].size %>
+        <%= mir_arr.size %>
       </td>
       <td>
         Coming..
@@ -54,7 +58,7 @@
 </table>
 
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It</em></caption>
+  <caption><em>Meant.It '<%= receiver_pii.pii_value %> <=> <%= sender_pii.pii_value %>'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -65,21 +69,21 @@
     </tr>
   </thead>
   <tbody>
-<% r_mir_s_uniq_hash.each { |mi_type, mir_arr| %>
+<% r_mir_s_msg_uniq_hash.each { |hash_key, mir_arr| %>
     <tr>
       <td>
         <% # Just take any elem since they all have same source dest %>
         <%= render :partial => "shared/end_point_nick_col", :collection => [mir_arr[0].src_endpoint], :locals => { :show_nick_force => true } %>
       </td>
       <td>
-        <%= mi_type %>
+        <%= mir_arr[0].message_type %>
       </td>
       <td>
         <% # Just take any elem since they all have same source dest %>
         <%= render :partial => "shared/end_point_nick_col", :collection => [mir_arr[0].dst_endpoint], :locals => { :show_nick_force => true } %>
       </td>
       <td>
-        <%= r_mir_s_uniq_hash[mi_type].size %>
+        <%= mir_arr.size %>
       </td>
       <td>
         Coming..
