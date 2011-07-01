@@ -752,5 +752,9 @@ p "#AAAAAAA after body_text:#{body_text}"
     # :xxx :xxx
     # :xxx nick
     # nick nick
+    # nick
+    # :xxx
+    # xxx
+    # tag msg
   end
 end

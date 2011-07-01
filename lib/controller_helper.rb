@@ -228,4 +228,63 @@ module ControllerHelper
     end # end if !input_str.nil?
     stripped_input_str
   end # end def self.strip_quotes
+
+  def self.ep_from_mir_uniqSrcEndPoints(meantItRels)
+    sender_arr = meantItRels.collect { |mir| mir.src_endpoint }
+    sender_arr.compact!
+    sender_arr.uniq!
+    sender_arr
+  end # end def self.ep_from_mir_uniqSrcEndPoints
+
+  def self.ep_from_mir_uniqDstEndPoints(meantItRels)
+    receiver_arr = meantItRels.collect { |mir| mir.dst_endpoint }
+    receiver_arr.compact!
+    receiver_arr.uniq!
+    receiver_arr
+  end # end def self.ep_from_mir_uniqDstEndPoints
+
+  def self.mir_from_mir_messageType(meantItRels, message_type)
+    meantItRels.find_all { |elem| elem.message_type == message_type }
+  end # end def self.mir_from_mir_messageType
+
+  def self.mir_from_ep_meantItRels(endPoints)
+    mirs = endPoints.collect { |s_ep_elem| s_ep_elem.srcMeantItRels if !s_ep_elem.srcMeantItRels.nil? }
+    mirs.flatten!
+    mirs
+  end # end def self.mir_from_end_points_mirs
+
+  def self.classified_mir_hash_on_message_type_from_mir(meantItRels)
+    meantItRelTypeHash = {}
+    meantItRels.each { |mi_elem|
+      meantItRelTypeHash[mi_elem.message_type] ||= []
+      meantItRelTypeHash[mi_elem.message_type] << mi_elem
+    } # end meantItRels.each ...
+    meantItRelTypeHash
+  end # end def self.classified_mir_hash_on_message_type_from_mir
+
+  def self.classified_mir_hash_on_message_type_from_classified_mir_hash_on_message_type_uniqDstEndPoints(meantItRelTypeHash)
+   
+    meantItRelTypeUniqHash = {}
+    meantItRelTypeHash.each { |mi_type, mi_arr|
+      uniqReceiverArr = []
+      mi_arr.each { |mi_elem|
+        if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
+          meantItRelTypeUniqHash[mi_type] ||= []
+          meantItRelTypeUniqHash[mi_type] << mi_elem 
+          uniqReceiverArr << mi_elem.dst_endpoint
+        end # end if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
+      } # end mi_arr.each ...
+    } # end meantItRelTypeHash.each ...
+    meantItRelTypeUniqHash
+  end # end def self.classified_mir_hash_on_message_type_from_classified_mir_hash_on_message_type_uniqDstEndPoints
+
+  def self.mir_from_find_match_dstEndPoints(meantItRels, matchEndPoints_arr)
+    match_mir_arr = meantItRels.find_all { |mir_elem| !matchEndPoints_arr.index(mir_elem.dst_endpoint).nil?  }
+    match_mir_arr
+  end # end def self.mir_from_find_match_dstEndPoints
+
+  def self.mir_from_find_match_srcEndPoints(meantItRels, matchEndPoints_arr)
+    match_mir_arr = meantItRels.find_all { |mir_elem| !matchEndPoints_arr.index(mir_elem.src_endpoint).nil?  }
+    match_mir_arr
+  end # def self.mir_from_find_match_srcEndPoints
 end # end module ControllerHelper

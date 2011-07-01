@@ -1,63 +1,37 @@
 <p id="notice"><%= notice %></p>
 
 <%
-  srcMeantItRelTypeHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    srcMeantItRelTypeHash[mi_type] = []
-  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
-  srcMeantItRelTypeUniqHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    srcMeantItRelTypeUniqHash[mi_type] = []
-  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
-  dstMeantItRelTypeHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    dstMeantItRelTypeHash[mi_type] = []
-  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
-  dstMeantItRelTypeUniqHash = {}
-  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
-    dstMeantItRelTypeUniqHash[mi_type] = []
-  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
-%>
-<% endPoint = @endPoint %>
-<% srcMeantItRels = endPoint.srcMeantItRels %>
-<% srcMeantItRelDstUniqs = [] %>
-<% srcMeantItRelDstUniqs = srcMeantItRels.collect { |elem| elem.dst_endpoint } %>
-<% srcMeantItRelDstUniqs.compact! %>
-<% srcMeantItRelDstUniqs.uniq! %>
-<%
-  srcMeantItRels.each { |mi_elem|
-    srcMeantItRelTypeHash[mi_elem.message_type] << mi_elem
-  } # end srcMeantItRels.each ...
+#  srcMeantItRelTypeHash = {}
+#  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
+#    srcMeantItRelTypeHash[mi_type] = []
+#  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
+#  srcMeantItRelTypeUniqHash = {}
+#  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
+#    srcMeantItRelTypeUniqHash[mi_type] = []
+#  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
+#  dstMeantItRelTypeHash = {}
+#  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
+#    dstMeantItRelTypeHash[mi_type] = []
+#  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
+#  dstMeantItRelTypeUniqHash = {}
+#  MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type|
+#    dstMeantItRelTypeUniqHash[mi_type] = []
+#  } # end MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each ...
 
-  srcMeantItRelTypeHash.each { |mi_type, mi_arr|
-    uniqReceiverArr = []
-    mi_arr.each { |mi_elem|
-      if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
-        srcMeantItRelTypeUniqHash[mi_type] << mi_elem 
-        uniqReceiverArr << mi_elem.dst_endpoint
-      end # end if uniqReceiverArr.index(mi_elem.dst_endpoint).nil?
-    } # end mi_arr.each ...
-  } # end srcMeantItRelSrcUniqs.each ...
-%>
-<% dstMeantItRels = endPoint.dstMeantItRels %>
-<% dstMeantItRelDstUniqs = [] %>
-<% dstMeantItRelDstUniqs = dstMeantItRels.collect { |elem| elem.src_endpoint } %>
-<% dstMeantItRelDstUniqs.compact! %>
-<% dstMeantItRelDstUniqs.uniq! %>
-<%
-  dstMeantItRels.each { |mi_elem|
-    dstMeantItRelTypeHash[mi_elem.message_type] << mi_elem
-  } # end dstMeantItRels.each ...
+  endPoint = @endPoint
+  srcMeantItRels = endPoint.srcMeantItRels
+  srcMeantItRelDstUniqs = ControllerHelper.ep_from_mir_uniqDstEndPoints(srcMeantItRels)
 
-  dstMeantItRelTypeHash.each { |mi_type, mi_arr|
-    uniqSenderArr = []
-    mi_arr.each { |mi_elem|
-      if uniqSenderArr.index(mi_elem.src_endpoint).nil?
-        dstMeantItRelTypeUniqHash[mi_type] << mi_elem 
-        uniqSenderArr << mi_elem.src_endpoint
-      end # end if uniqSenderArr.index(mi_elem.src_endpoint).nil?
-    } # end mi_arr.each ...
-  } # end dstMeantItRelSrcUniqs.each ...
+  srcMeantItRelTypeHash = ControllerHelper.classified_mir_hash_on_message_type_from_mir(srcMeantItRels)
+
+  srcMeantItRelTypeUniqHash = ControllerHelper.classified_mir_hash_on_message_type_from_classified_mir_hash_on_message_type_uniqDstEndPoints(srcMeantItRelTypeHash)
+
+ dstMeantItRels = endPoint.dstMeantItRels
+ dstMeantItRelDstUniqs = ControllerHelper.ep_from_mir_uniqSrcEndPoints(dstMeantItRels)
+
+  dstMeantItRelTypeHash = ControllerHelper.classified_mir_hash_on_message_type_from_mir(dstMeantItRels)
+
+  dstMeantItRelTypeUniqHash = ControllerHelper.classified_mir_hash_on_message_type_from_classified_mir_hash_on_message_type_uniqDstEndPoints(dstMeantItRelTypeHash)
 %>
 
 
@@ -79,7 +53,7 @@
     </tr>
   </thead>
   <tbody>
-<% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type| %>
+<% dstMeantItRelTypeHash.each { |mi_type, mi_elem| %>
     <tr>
       <td>
          <%= mi_type %>
@@ -101,6 +75,11 @@
 <% } %>
   </tbody>
 </table>
+<% if dstMeantItRelTypeHash.empty? %>
+<p>
+Nothing yet... <b>Don't be disheartened.  They'll come!</b>
+</p>
+<% end %>
 <p>
 Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
 <%
@@ -120,7 +99,7 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
     </tr>
   </thead>
   <tbody>
-<% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |mi_type| %>
+<% srcMeantItRelTypeHash.each { |mi_type, mi_elem| %>
     <tr>
       <td>
          <%= mi_type %>
@@ -142,6 +121,11 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
 <% } %>
   </tbody>
 </table>
+<% if srcMeantItRelTypeHash.empty? %>
+<p>
+Nothing yet... <b>Send a meant.it today!</b>
+</p>
+<% end %>
 <p>
 Last <%= Constants::WEB_MAX_MEANTIT_OUT %> Meant.It Out<br/>
 <%

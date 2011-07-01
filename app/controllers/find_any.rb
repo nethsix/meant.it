@@ -63,23 +63,34 @@ class FindAny < ApplicationController
         pii_ep_arr << { PII_OBJ => pii, PII_IDX => pii_str_idx }
       end # end if !pii.nil?
       parsed_find_any_tags_arr = parsed_find_any_hash[ControllerHelper::MEANT_IT_INPUT_TAGS_ARR]
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag},  initial parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag},  initial parsed_find_any_tags_arr:#{parsed_find_any_tags_arr.inspect}")
       # Look for message_type
       message_type = nil
+      origin_message_type = nil
       parsed_find_any_tags_arr.each { |tag_elem|
         message_type_idx = MessageTypeMapper.get_all_message_types.index(tag_elem)
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, MessageTypeMapper tag_elem:#{tag_elem}")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, MessageTypeMapper.get_all_message_types:#{MessageTypeMapper.get_all_message_types.inspect}")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, MessageTypeMapper message_type, message_type_idx:#{message_type_idx}")
         # Get the DRY message_type
-        message_type = MessageTypeMapper.get_message_type(tag_elem) if !message_type_idx.nil?
+        if !message_type_idx.nil?
+          message_type = MessageTypeMapper.get_message_type(tag_elem)
+          origin_message_type = tag_elem
+        end # end if !message_type_idx.nil?
       } # end parsed_find_any_tags_arr ...
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after MessageTypeMapper message_type, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after MessageTypeMapper message_type, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr.inspect}")
       if message_type.nil?
         parsed_find_any_tags_arr.each { |tag_elem|
           message_type_idx = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.index(tag_elem)
-          message_type = tag_elem if !message_type_idx.nil?
+          if !message_type_idx.nil?
+            message_type = tag_elem
+            origin_message_type = tag_elem
+          end # end if !message_type_idx.nil?
         } # end parsed_find_any_tags_arr ...
       end # end if message_type.nil?
-      parsed_find_any_tags_arr.delete(message_type)
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after MeantItMessageTypeValidator message_type, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, message_type:#{message_type}")
+      parsed_find_any_tags_arr.delete(origin_message_type)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after MeantItMessageTypeValidator message_type, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr.inspect}")
       # Maybe one of the tag is pii
       found_arr = []
       parsed_find_any_tags_arr.each { |tag_elem|
@@ -95,7 +106,7 @@ class FindAny < ApplicationController
       found_arr.each { |found_elem|
         parsed_find_any_tags_arr.delete(found_elem[PII_OBJ].pii_value)
       } # found_arr.each ...
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after get pii from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after get pii from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr.inspect}")
       found_arr = []
       # Maybe one of them tag is nick
       parsed_find_any_tags_arr.each { |tag_elem|
@@ -111,7 +122,7 @@ class FindAny < ApplicationController
       found_arr.each { |found_elem|
         parsed_find_any_tags_arr.delete(found_elem[PII_OBJ][0].nick)
       } # found_arr.each ...
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after find ep from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, after find ep from tags, remaining parsed_find_any_tags_arr:#{parsed_find_any_tags_arr.inspect}")
       tags_arr = parsed_find_any_tags_arr
       # Order pii/ep based on idx
       pii_ep_arr.sort! { |a,b| a[PII_IDX] <=> b[PII_IDX] }
@@ -121,22 +132,30 @@ class FindAny < ApplicationController
       sender_ep_arr = []
       receiver_ep_arr = []
       pii_ep_arr.each { |pii_ep_elem|
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, pii_ep_elem[PII_OBJ].class:#{pii_ep_elem[PII_OBJ].class}")
         if pii_ep_elem[PII_OBJ].class == Pii
-          if sender_pii.nil? or sender_ep_arr.empty?
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, pii_ep_elem:#{pii_ep_elem}")
+          if sender_pii.nil? and sender_ep_arr.empty?
             sender_pii = pii_ep_elem[PII_OBJ]
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, assign to sender_pii")
           # We can just use else if we trust that elems is just 2
-          elsif receiver_pii.nil? or receiver_ep_arr.empty?
+          elsif receiver_pii.nil? and receiver_ep_arr.empty?
             receiver_pii = pii_ep_elem[PII_OBJ]
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, assign to receiver_pii")
           end # end if sender_pii.nil?
         else
-          if sender_pii.nil? or sender_ep_arr.empty?
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, pii_ep_elem:#{pii_ep_elem}")
+          if sender_pii.nil? and sender_ep_arr.empty?
             sender_ep_arr = pii_ep_elem[PII_OBJ]
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, assign to sender_ep_arr")
           # We can just use else if we trust that elems is just 2
-          elsif receiver_pii.nil? or receiver_ep_arr.empty?
+          elsif receiver_pii.nil? and receiver_ep_arr.empty?
             receiver_ep_arr = pii_ep_elem[PII_OBJ]
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, assign to receiver_ep_arr")
           end # end if sender_pii.nil?
         end # end if pii_ep_elem.class(Pii)
       } # end pii_ep_arr.each ...
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_pii:#{sender_pii}, sender_ep_arr:#{sender_ep_arr}, receiver_pii:#{receiver_pii}, receiver_ep_arr:#{receiver_ep_arr}, message_type:#{message_type}")
       # At this point we have:
       # sender_pii/sender_ep_arr, receiver_pii/receiver_ep_arr, message_type,
       # tags_arr
@@ -152,38 +171,53 @@ class FindAny < ApplicationController
           end # end if !@endPoint_arr.nil?
         else
           # These are all just tags but with a message_type
+          if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+            render "show_end_points_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            return
+          end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
       elsif !sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
-        if message_type.nil?
+        @pii = sender_pii
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii => @pii.inspect:#{@pii.inspect}")
+        if !@pii.nil? and message_type.nil?
           # Show the pii details
-          @pii = sender_pii
-          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii => @pii.inspect:#{@pii.inspect}")
           render "piis/show_pii_details", :layout => true, :locals => { :notice => nil }
           return
-        else
-          # Get pii with those message_types
-          # CODE!!!!
+        elsif !@pii.nil? and !message_type.nil?
+          # Show the pii details with message_type
+          render "show_pii_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+          return
         end # end elsif !message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
+        @endPoint_arr = sender_ep_arr
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_ep_arr => @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
         if message_type.nil?
-          @endPoint_arr = sender_ep_arr
-          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_ep_arr => @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
           render "end_points/show_end_points", :layout => true, :locals => { :notice => nil }
           return
         else
           # Get eps with those message_types
-          # CODE!!!!
+          if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+            render "show_end_points_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            return
+          end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
       elsif !sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
-         # NOT POSSIBLE since we only get either sender_pii or sender_eps
+        # NOT POSSIBLE since we only get either sender_pii or sender_eps
       elsif sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         # NOT POSSIBLE if there are no senders then receivers can't exist
       elsif sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
         # NOT POSSIBLE if there are no senders then receivers can't exist
       elsif !sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
-        # We can deal with this CODE!!!
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii.inspect:#{sender_pii.inspect} with receiver_pii.inspect:#{receiver_pii.inspect}")
+        if message_type.nil?
+            render "show_pii_pii.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type }
+            return
+        else
+            render "show_pii_pii_with_message_type.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type }
+            return
+        end # end if message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
-        # We need user intervention to deal with this CODE!!!
+        # We can deal with this CODE!!! but is it too many combo?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         # We need user intervention to deal with this CODE!!!
       elsif !sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 

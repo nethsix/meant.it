@@ -1,0 +1,110 @@
+<% require 'validators' %>
+<% require 'constants' %>
+<p id="notice"><%= notice %></p>
+
+<%
+  endPoints = @pii.endPoints
+  # Aggregate the results
+  totalSrcMeantItRels = []
+  totalDstMeantItRels = []
+  # The real sender endpoint is the one that has creator_endpoint_id equals id
+  sender_endPoint = nil
+  sender_endPoint_arr = []
+  endPoints.each { |ep_elem|
+    totalSrcMeantItRels += ep_elem.srcMeantItRels
+    totalDstMeantItRels += ep_elem.dstMeantItRels
+    sender_endPoint = ep_elem if ep_elem.creator_endpoint_id == ep_elem.id
+    sender_endPoint_arr << ep_elem.id
+  }
+
+  srcMeantItRelWithMsg_arr = totalSrcMeantItRels.find_all { |mi_elem|
+    mi_elem.message_type == message_type
+  } # end totalSrcMeantItRels.each ...
+  dstMeantItRelWithMsg_arr = totalDstMeantItRels.find_all { |mi_elem|
+    mi_elem.message_type == message_type
+  } # end totalDstMeantItRels.each ...
+  
+  srcMeantItRelDstUniqs = []
+  srcMeantItRelDstUniqs = srcMeantItRelWithMsg_arr.collect { |elem| elem.dst_endpoint }
+  srcMeantItRelDstUniqs.compact!
+  srcMeantItRelDstUniqs.uniq!
+
+  dstMeantItRelSrcUniqs = []
+  dstMeantItRelSrcUniqs = dstMeantItRelWithMsg_arr.collect { |elem| elem.src_endpoint }
+  dstMeantItRelSrcUniqs.compact!
+  dstMeantItRelSrcUniqs.uniq!
+%>
+
+
+<p>
+<strong>Pii:</strong> <%= @pii.pii_value %><br/>
+<strong>Message Type:</strong> <%= message_type %>
+</p>
+
+<table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It In</em></caption>
+  <thead>
+    <tr>
+      <th class='span-12'>Pii</th>
+      <th class='span-4'>Senders</th>
+      <th class='span-4'>Unique Senders</th>
+      <th class='span-4'>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+<% endPoints.each { |endpoint|
+    dstMeantItRels_arr = endpoint.dstMeantItRels
+    meantIt_in_message_type_arr = ControllerHelper.mir_from_mir_messageType(dstMeantItRels_arr, message_type)
+    dstMeantItRelSrcUniqs = ControllerHelper.ep_from_mir_uniqDstEndPoints(meantIt_in_message_type_arr)
+%>
+    <tr>
+      <td>
+        <%= render :partial => "shared/end_point_nick_col", :collection => [endpoint], :locals => { :show_nick_force => true } %>
+      </td>
+      <td>
+        <%= meantIt_in_message_type_arr.size %>
+      </td>
+      <td>
+        <%= dstMeantItRelSrcUniqs.size %>
+      </td>
+      <td>
+        Coming..
+      </td>
+    </tr>
+<% } %>
+  </tbody>
+</table>
+
+<table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Out</em></caption>
+  <thead>
+    <tr>
+      <th class='span-12'>Person</th>
+      <th class='span-4'>Senders</th>
+      <th class='span-4'>Unique Senders</th>
+      <th class='span-4'>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+<% endPoints.each { |endpoint|
+    srcMeantItRels_arr = endpoint.srcMeantItRels
+    meantIt_out_message_type_arr = ControllerHelper.mir_from_mir_messageType(srcMeantItRels_arr, message_type)
+    srcMeantItRelDstUniqs = ControllerHelper.ep_from_mir_uniqSrcEndPoints(meantIt_out_message_type_arr)
+%>
+    <tr>
+      <td>
+        <%= render :partial => "shared/end_point_nick_col", :collection => [endpoint], :locals => { :show_nick_force => true } %>
+      </td>
+      <td>
+        <%= meantIt_out_message_type_arr.size %>
+      </td>
+      <td>
+        <%= srcMeantItRelDstUniqs.size %>
+      </td>
+      <td>
+        Coming..
+      </td>
+    </tr>
+<% } %>
+  </tbody>
+</table

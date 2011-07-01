@@ -1,0 +1,72 @@
+<p id="notice"><%= notice %></p>
+<p>
+<strong>Message Type:</strong> <%= message_type %>
+</p>
+
+<table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It In</em></caption>
+  <thead>
+    <tr>
+      <th class='span-12'>Nick</th>
+      <th class='span-4'>Sender Nicks</th>
+      <th class='span-4'>Unique Sender Nicks</th>
+      <th class='span-4'>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+<% @endPoint_arr.each { |endpoint|
+    dstMeantItRels_arr = endpoint.dstMeantItRels
+    meantIt_in_message_type_arr = ControllerHelper.mir_from_mir_messageType(dstMeantItRels_arr, message_type)
+    dstMeantItRelSrcUniqs = ControllerHelper.ep_from_mir_uniqSrcEndPoints(meantIt_in_message_type_arr)
+%>
+    <tr>
+      <td>
+        <%= render :partial => "shared/end_point_nick_col", :collection => [endpoint] %>
+      </td>
+      <td>
+        <%= meantIt_in_message_type_arr.size %>
+      </td>
+      <td>
+        <%= dstMeantItRelSrcUniqs.size %>
+      </td>
+      <td>
+        Coming..
+      </td>
+    </tr>
+<% } %>
+  </tbody>
+</table>
+
+<table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Out</em></caption>
+  <thead>
+    <tr>
+      <th class='span-12'>Nicks</th>
+      <th class='span-4'>Receiver Nicks</th>
+      <th class='span-4'>Unique Receiver Nicks</th>
+      <th class='span-4'>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+<% @endPoint_arr.each { |endpoint|
+    srcMeantItRels_arr = endpoint.srcMeantItRels
+    meantIt_out_message_type_arr = ControllerHelper.mir_from_mir_messageType(srcMeantItRels_arr, message_type)
+    srcMeantItRelDstUniqs = ControllerHelper.ep_from_mir_uniqDstEndPoints(meantIt_out_message_type_arr)
+%>
+    <tr>
+      <td>
+        <%= render :partial => "shared/end_point_nick_col", :collection => [endpoint] %>
+      </td>
+      <td>
+        <%= meantIt_out_message_type_arr.size %>
+      </td>
+      <td>
+        <%= srcMeantItRelDstUniqs.size %>
+      </td>
+      <td>
+        Coming..
+      </td>
+    </tr>
+<% } %>
+  </tbody>
+</table>
