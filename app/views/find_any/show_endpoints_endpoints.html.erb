@@ -3,8 +3,6 @@
 <p id="notice"><%= notice %></p>
 
 <%
-  sender_endPoints = sender_pii.endPoints
-  receiver_endPoints = receiver_pii.endPoints
   sender_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(sender_endPoints)
   # sender to receiver relationship
   s_mir_r_arr = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
@@ -14,15 +12,16 @@
   receiver_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(receiver_endPoints)
   r_mir_s_arr = ControllerHelper.mir_from_find_match_dstEndPoints(receiver_srcMeantItRels, sender_endPoints)
   r_mir_s_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(r_mir_s_arr)
-  
+
 %>
+
 <p>
 <strong>Meant.It:</strong>
-[pii:<%= sender_pii.pii_value  %>] <=>
-[pii:<%= receiver_pii.pii_value %>]
+nick:<%= sender_endPoints[0].nick %> <=>
+nick:<%= receiver_endPoints[0].nick %>
 </p>
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It '[pii:<%= sender_pii.pii_value %>] => [pii:<%= receiver_pii.pii_value %>]'</em></caption>
+  <caption><em>Meant.It 'nick:<%= sender_endPoints[0].nick %> <=> nick:<%= receiver_endPoints[0].nick %>'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -62,7 +61,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In '[pii:<%= sender_pii.pii_value %>] => [pii:<%= receiver_pii.pii_value %>]'<br/>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In 'nick:<%= sender_endPoints[0].nick %> <=> nick:<%= receiver_endPoints[0].nick %>'<br/>
 <%
   lastXs2rMeantItRels= MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>
@@ -77,7 +76,7 @@ Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In '[pii:<%= sender_pii.pii_v
 <% end %>
 
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It 'pii:[<%= receiver_pii.pii_value %>] => pii:[<%= sender_pii.pii_value %>]'</em></caption>
+  <caption><em>Meant.It 'nick:<%= receiver_endPoints[0].nick %> <=> nick:<%= sender_endPoints[0].nick %>'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -117,7 +116,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In '[pii:<%= receiver_pii.pii_value %>] => [pii:<%= sender_pii.pii_value %>]'<br/>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In 'nick:<%= receiver_endPoints[0].nick %> <=> nick:<%= sender_endPoints[0].nick %>'<br/>
 <%
   lastXr2sMeantItRels= MeantItRel.where(:src_endpoint_id => receiver_endPoints, :dst_endpoint_id => sender_endPoints).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
 %>

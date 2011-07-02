@@ -1,3 +1,5 @@
+require 'constants'
+
 class MeantItRelsController < ApplicationController
   # GET /meant_it_rels
   # GET /meant_it_rels.xml
@@ -80,4 +82,25 @@ class MeantItRelsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+  def show_out_by_pii
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, params.inspect:#{params.inspect}")
+    pii_str = params[Constants::PII_VALUE_INPUT]
+    meantItRels = nil
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, pii_str:#{pii_str}")
+    pii = Pii.find_by_pii_value(pii_str)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, pii.inspect:#{pii.inspect}")
+    endPoints = pii.endPoints if !pii.nil?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
+    meantItRels = ControllerHelper.mir_from_ep_meantItRels(endPoints) if !endPoints.nil?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
+
+    respond_to do |format|
+      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.xml  { render :xml => meantItRels }
+    end
+
+
+  end # end def show_by_endpoints
 end

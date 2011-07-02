@@ -236,6 +236,7 @@ module ControllerHelper
     sender_arr
   end # end def self.ep_from_mir_uniqSrcEndPoints
 
+
   def self.ep_from_mir_uniqDstEndPoints(meantItRels)
     receiver_arr = meantItRels.collect { |mir| mir.dst_endpoint }
     receiver_arr.compact!
@@ -252,6 +253,26 @@ module ControllerHelper
     match_arr = key.match(/(\d+)([A-Za-z]+)(\d+)/)
     match_arr
   end # end def self.gen_hash_key
+
+  def self.mir_from_mir_uniqSrcEndPoints(meantItRels)
+    src_uniq_hash = {}
+    meantItRels.each { |mir| 
+      hash_key = mir.src_endpoint_id
+      src_uniq_hash[hash_key] ||= []
+      src_uniq_hash[hash_key] << mir
+    } # end meantItRels.each ...
+    src_uniq_hash
+  end # end def self.mir_from_mir_uniqDstEndPoints
+
+  def self.mir_from_mir_uniqDstEndPoints(meantItRels)
+    dst_uniq_hash = {}
+    meantItRels.each { |mir| 
+      hash_key = mir.dst_endpoint_id
+      dst_uniq_hash[hash_key] ||= []
+      dst_uniq_hash[hash_key] << mir
+    } # end meantItRels.each ...
+    dst_uniq_hash
+  end # end def self.mir_from_mir_uniqDstEndPoints
 
   def self.mir_from_mir_uniqSrcMsgDstEndPoints(meantItRels)
     src_msg_dst_uniq_hash = {}
@@ -308,4 +329,9 @@ module ControllerHelper
     match_mir_arr = meantItRels.find_all { |mir_elem| !matchEndPoints_arr.index(mir_elem.src_endpoint).nil?  }
     match_mir_arr
   end # def self.mir_from_find_match_srcEndPoints
+
+  SAY_ENUM = ["said", "quipped", "uttered", "hollered", "mentioned", "mumbled"]
+  def self.random_say
+    SAY_ENUM[rand(SAY_ENUM.size)]
+  end # def self.random_say
 end # end module ControllerHelper

@@ -11,4 +11,5 @@ module ApplicationHelper
     end # end if !obj.nil?
     html
   end # end def errors_show_full(obj)
+
 end

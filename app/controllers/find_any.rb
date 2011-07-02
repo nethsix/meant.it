@@ -172,7 +172,7 @@ class FindAny < ApplicationController
         else
           # These are all just tags but with a message_type
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "show_end_points_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            render "show_endpoints_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
             return
           end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
@@ -197,7 +197,7 @@ class FindAny < ApplicationController
         else
           # Get eps with those message_types
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "show_end_points_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            render "show_endpoints_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
             return
           end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
@@ -208,20 +208,41 @@ class FindAny < ApplicationController
       elsif sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
         # NOT POSSIBLE if there are no senders then receivers can't exist
       elsif !sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii.inspect:#{sender_pii.inspect} with receiver_pii.inspect:#{receiver_pii.inspect}")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii.inspect:#{sender_pii.inspect}, receiver_pii.inspect:#{receiver_pii.inspect}, message_type:#{message_type}")
         if message_type.nil?
-            render "show_pii_pii.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type }
+            render "show_pii_pii.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii }
             return
         else
             render "show_pii_pii_with_message_type.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type }
             return
         end # end if message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
-        # We can deal with this CODE!!! but is it too many combo?
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_nick:#{sender_ep_arr[0].nick}, receiver nick:#{receiver_ep_arr[0].nick}, message_type:#{message_type}")
+        if message_type.nil?
+            render "show_endpoints_endpoints.html.erb", :layout => true, :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr }
+            return
+        else
+            render "show_endpoints_endpoints_with_message_type.html.erb", :layout => true, :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr, :message_type => message_type }
+            return
+        end # end if message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
-        # We need user intervention to deal with this CODE!!!
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_nick:#{sender_ep_arr[0].nick}, receiver pii.inspect:#{receiver_pii.inspect}, message_type:#{message_type}")
+        if message_type.nil?
+            render "show_endpoints_pii", :layout => true, :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii=> receiver_pii }
+            return
+        else
+            render "show_endpoints_pii_with_message_type", :layout => true, :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii => receiver_pii, :message_type => message_type }
+            return
+        end # end if message_type.nil?
       elsif !sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
-        # We need user intervention to deal with this CODE!!!
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender pii.inspect:#{sender_pii.inspect}, receiver_nick:#{receiver_ep_arr[0].nick}, message_type:#{message_type}")
+        if message_type.nil?
+            render "show_endpoints_pii.html", :layout => true, :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii=> sender_pii }
+            return
+        else
+            render "show_endpoints_pii_with_message_type", :layout => true, :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii => sender_pii, :message_type => message_type }
+            return
+        end # end if message_type.nil?
       end # end if sender_pii.nil? ...
     end # end if decoded_find_any_input.nil? or decoded_find_any_input.empty?
   end # end def index

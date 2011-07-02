@@ -15,7 +15,11 @@ MeantIt::Application.routes.draw do
 
   resources :obj_rels
 
-  resources :meant_it_rels
+  resources :meant_it_rels do
+    collection do
+      get 'show_out_by_pii'
+    end
+  end
 
   resources :entity_end_point_rels
 

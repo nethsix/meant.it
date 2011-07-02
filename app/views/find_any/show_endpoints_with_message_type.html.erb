@@ -1,5 +1,6 @@
 <p id="notice"><%= notice %></p>
 <p>
+<strong>Nick:</strong> <%= @endPoint_arr[0].nick %><br/>
 <strong>Message Type:</strong> <%= message_type %>
 </p>
 
@@ -14,10 +15,14 @@
     </tr>
   </thead>
   <tbody>
-<% @endPoint_arr.each { |endpoint|
+<% 
+  exist = nil
+  @endPoint_arr.each { |endpoint|
     dstMeantItRels_arr = endpoint.dstMeantItRels
     meantIt_in_message_type_arr = ControllerHelper.mir_from_mir_messageType(dstMeantItRels_arr, message_type)
     dstMeantItRelSrcUniqs = ControllerHelper.ep_from_mir_uniqSrcEndPoints(meantIt_in_message_type_arr)
+    if !dstMeantItRelSrcUniqs.empty?
+      exist ||= true
 %>
     <tr>
       <td>
@@ -33,9 +38,31 @@
         Coming..
       </td>
     </tr>
-<% } %>
+<% 
+    end
+  } 
+%>
   </tbody>
 </table>
+<% if exist.nil? %>
+<p>
+Nothing yet... <b>Don't be disheartened.  They'll come!</b>
+</p>
+<% else %>
+<p>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
+<%
+  lastXsrcMeantItRels= MeantItRel.where(:dst_endpoint_id => @endPoint_arr, :message_type => message_type).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
+%>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXsrcMeantItRels %>
+  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
+    </li></ul>
+  <% end %>
+</p>
+<% end %>
 
 <table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
   <caption><em>Meant.It Out</em></caption>
@@ -48,10 +75,14 @@
     </tr>
   </thead>
   <tbody>
-<% @endPoint_arr.each { |endpoint|
+<% 
+  exist = nil
+  @endPoint_arr.each { |endpoint|
     srcMeantItRels_arr = endpoint.srcMeantItRels
     meantIt_out_message_type_arr = ControllerHelper.mir_from_mir_messageType(srcMeantItRels_arr, message_type)
     srcMeantItRelDstUniqs = ControllerHelper.ep_from_mir_uniqDstEndPoints(meantIt_out_message_type_arr)
+    if !srcMeantItRelDstUniqs.empty?
+      exist ||= true
 %>
     <tr>
       <td>
@@ -67,6 +98,28 @@
         Coming..
       </td>
     </tr>
-<% } %>
+<%
+    end
+  }
+%>
   </tbody>
 </table>
+<% if exist.nil? %>
+<p>
+Nothing yet... <b>Don't be disheartened.  They'll come!</b>
+</p>
+<% else %>
+<p>
+Last <%= Constants::WEB_MAX_MEANTIT_OUT %> Meant.It Out<br/>
+<%
+  lastXdstMeantItRels= MeantItRel.where(:src_endpoint_id => @endPoint_arr, :message_type => message_type).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
+%>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    </li></ul>
+  <% end %>
+</p>
+<% end %>

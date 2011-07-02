@@ -117,14 +117,21 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <p>
 Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
 <%
-  lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
+  lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => sender_endPoint_arr).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN+1)
 %>
   <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
     <ul><li>
   <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
+    <% 
+      Rails.logger.debug("!!!!::#{lastXdstMeantItRels.size}, #{Constants::WEB_MAX_MEANTIT_IN}")
+      lastXdstMeantItRels_minus_one = lastXdstMeantItRels.size > Constants::WEB_MAX_MEANTIT_IN ? lastXdstMeantItRels_minus_one = lastXdstMeantItRels.slice(0, lastXdstMeantItRels.size-1) : lastXdstMeantItRels
+    %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels_minus_one %>
   <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
     </li></ul>
+    <% if lastXdstMeantItRels.size != lastXdstMeantItRels_minus_one.size %>
+      <%= link_to "More", url_for("meant_it_rels/show_out_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(@pii.pii_value)}") %>
+    <% end # end if lastXdstMeantItRels.size != lastXdstMeantItRels_minus_one.size %>
   <% end %>
 </p>
 

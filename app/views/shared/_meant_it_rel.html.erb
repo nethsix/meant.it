@@ -1,5 +1,8 @@
 <% require 'validators' %>
+<% require 'controller_helper' %>
+
 <%
+  show_pii_these ||= []
   show_pii_force ||= false
   show_nick_force ||= false
   show_own_force ||= false
@@ -21,7 +24,7 @@
   end
 %>
 <% 
-  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? and (meant_it_rel.src_endpoint.pii.pii_hide == "false" or show_pii_force) 
+  if !meant_it_rel.src_endpoint.nil? and !meant_it_rel.src_endpoint.pii.nil? and (meant_it_rel.src_endpoint.pii.pii_hide == "false" or show_pii_force or !show_pii_these.index(meant_it_rel.src_endpoint.pii.pii_value).nil? )
     src_pii_shown = true
 %>
   <%= link_to "[pii:#{meant_it_rel.src_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.src_endpoint.pii.pii_value)}" %>
@@ -62,7 +65,7 @@
   end
 %>
 <% 
-  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? and (meant_it_rel.dst_endpoint.pii.pii_hide == "false" or show_pii_force)
+  if !meant_it_rel.dst_endpoint.nil? and !meant_it_rel.dst_endpoint.pii.nil? and (meant_it_rel.dst_endpoint.pii.pii_hide == "false" or show_pii_force or !show_pii_these.index(meant_it_rel.src_endpoint.pii.pii_value).nil?)
     dst_pii_shown = true
 %>
   <%= link_to "[pii:#{meant_it_rel.dst_endpoint.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(meant_it_rel.dst_endpoint.pii.pii_value)}" %>
@@ -92,4 +95,6 @@
 <% 
      end
   end
- %>
+%>
+
+<%= ControllerHelper.random_say %> '<i><%= meant_it_rel.message %></i>'
