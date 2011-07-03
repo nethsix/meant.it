@@ -3,9 +3,9 @@
 <p id="notice"><%= notice %></p>
 <%
   pii_endPoints = pii.endPoints
-  pii_endPoints_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(pii_endPoints)
+  pii_endPoints_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(pii_endPoints)
 
-  endPoints_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(endPoints)
+  endPoints_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(endPoints)
 
   # pii_endPoints to endPoints relationship
   pii_ep_mir_ep_arr = ControllerHelper.mir_from_find_match_dstEndPoints(pii_endPoints_srcMeantItRels, endPoints)

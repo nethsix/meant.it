@@ -5,13 +5,13 @@
 <%
   sender_endPoints = sender_pii.endPoints
   receiver_endPoints = receiver_pii.endPoints
-  sender_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(sender_endPoints)
+  sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
   # sender to receiver relationship
   s_mir_r_arr = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
   s_mir_r_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(s_mir_r_arr)
 
   # receiver to sender relationship
-  receiver_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(receiver_endPoints)
+  receiver_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(receiver_endPoints)
   r_mir_s_arr = ControllerHelper.mir_from_find_match_dstEndPoints(receiver_srcMeantItRels, sender_endPoints)
   r_mir_s_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(r_mir_s_arr)
   

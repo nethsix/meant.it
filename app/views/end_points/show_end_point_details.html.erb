@@ -81,11 +81,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% end %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
-<%
-  lastXdstMeantItRels= MeantItRel.where(:dst_endpoint_id => @endPoint.id).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
-%>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXdstMeantItRels %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :dst_endpoint_id => endPoint, :sender_endpoint => @endPoint } %>
 </p>
 
 <table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
@@ -127,9 +123,5 @@ Nothing yet... <b>Send a meant.it today!</b>
 </p>
 <% end %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_OUT %> Meant.It Out<br/>
-<%
-  lastXsrcMeantItRels= MeantItRel.where(:src_endpoint_id => @endPoint.id).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
-%>
-  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/br_ruler", :collection => lastXsrcMeantItRels %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => endPoint, :sender_endpoint => @endPoint } %>
 </p>

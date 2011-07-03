@@ -18,6 +18,10 @@ MeantIt::Application.routes.draw do
   resources :meant_it_rels do
     collection do
       get 'show_out_by_pii'
+      get 'show_in_by_pii'
+      get 'show_out_by_endpoint_id/:id', :action => 'show_out_by_endpoint_id'
+      get 'show_in_by_endpoint_id/:id', :action => 'show_in_by_endpoint_id'
+      get 'show_by_endpoint_endpoint_nick/:nick1/:nick2', :action => 'show_by_endpoint_endpoint_nick'
     end
   end
 

@@ -289,11 +289,17 @@ module ControllerHelper
     meantItRels.find_all { |elem| elem.message_type == message_type }
   end # end def self.mir_from_mir_messageType
 
-  def self.mir_from_ep_meantItRels(endPoints)
+  def self.mir_from_ep_srcMeantItRels(endPoints)
     mirs = endPoints.collect { |s_ep_elem| s_ep_elem.srcMeantItRels if !s_ep_elem.srcMeantItRels.nil? }
     mirs.flatten!
     mirs
-  end # end def self.mir_from_end_points_mirs
+  end # end def self.mir_from_ep_srcMeantItRels
+
+  def self.mir_from_ep_dstMeantItRels(endPoints)
+    mirs = endPoints.collect { |d_ep_elem| d_ep_elem.dstMeantItRels if !d_ep_elem.dstMeantItRels.nil? }
+    mirs.flatten!
+    mirs
+  end # end def self.mir_from_ep_dstMeantItRels
 
   def self.classified_mir_hash_on_message_type_from_mir(meantItRels)
     meantItRelTypeHash = {}

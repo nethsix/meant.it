@@ -1,0 +1,80 @@
+<% 
+  logtag = ControllerHelper.gen_logtag
+  # Requires:
+  # Used for getting more meantItRels
+  sender_pii_str ||= nil
+  receiver_pii_str ||= nil
+  sender_endpoint ||= nil
+  sender_endpoint_id = sender_endpoint.id if !sender_endpoint.nil?
+  receiver_endpoint ||= nil
+  receiver_endpoint_id = receiver_endpoint.id if !receiver_endpoint.nil?
+  sender_nick ||= nil
+  receiver_nick ||= nil
+
+  # Used for displaying meantItRels
+  src_endpoint_id ||= nil
+  dst_endpoint_id ||= nil
+  message_type ||= nil
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_pii_str:#{sender_pii_str}, receiver_pii_str:#{receiver_pii_str}, sender_endpoint_id:#{sender_endpoint_id}, receiver_endpoint_id:#{receiver_endpoint_id}, sender_nick:#{sender_nick}, receiver_nick:#{receiver_nick}")
+
+  query_hash = {}
+  query_hash[:src_endpoint_id] = src_endpoint_id if !src_endpoint_id.nil? and ((src_endpoint_id.respond_to?(:empty) and !src_endpoint_id.empty?) or !src_endpoint_id.respond_to?(:empty))
+  query_hash[:dst_endpoint_id] = dst_endpoint_id if !dst_endpoint_id.nil? and ((dst_endpoint_id.respond_to?(:empty) and !dst_endpoint_id.empty?) or !dst_endpoint_id.respond_to?(:empty))
+  query_hash[:message_type] = message_type if !message_type.nil? and !message_type.empty?
+  url = url_for("/meant_it_rels/show_in_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
+                           sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                           sender_nick.nil? and receiver_nick.nil? and
+                           src_endpoint_id.nil? and !dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_out_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
+                           sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                           sender_nick.nil? and receiver_nick.nil? and
+                           !src_endpoint_id.nil? and dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_in_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
+                    !sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                    sender_nick.nil? and receiver_nick.nil? and
+                    src_endpoint_id.nil? and !dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_out_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
+                  !sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  sender_nick.nil? and receiver_nick.nil? and 
+                  !src_endpoint_id.nil? and dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_by_endpoint_endpoint_nick/#{URI::encode(sender_nick)}/#{URI::encode(receiver_nick)}") if sender_pii_str.nil? and receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  !sender_nick.nil? and !receiver_nick.nil?
+  header_str = "Meant.It In" if !dst_endpoint_id.nil? and src_endpoint_id.nil?
+  header_str = "Meant.It Out" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
+  header_str_src = nil
+  if !sender_pii_str.nil?
+    header_str_src = "[pii:#{sender_pii_str}]]"
+  elsif !sender_endpoint_id.nil?
+    header_str_src = "nick:#{sender_endpoint.nick}"
+  elsif !sender_nick.nil?
+    header_str_src = "nick:#{sender_nick}"
+  end # end if !sender_pii_str.nil?
+  if !receiver_pii_str.nil?
+    header_str_dst = "[pii:#{receiver_pii_str}]"
+  elsif !receiver_endpoint_id.nil?
+    header_str_dst = "nick:#{receiver_endpoint.nick}"
+  elsif !receiver_nick.nil?
+    header_str_dst = "nick:#{receiver_nick}"
+  end # end if !receiver_pii_str.nil?
+  header_str = "Meant.It ' #{header_str_src} <=> #{header_str_dst}'" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and message_type.nil?
+  header_str = "Meant.It ' #{header_str_src} #{message_type} #{header_str_dst} '" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and !message_type.nil?
+%>
+Last <%= Constants::WEB_MAX_MEANTIT_IN %> <%= header_str %> <br/>
+<%
+  lastXdstMeantItRels= MeantItRel.where(query_hash).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN+1)
+%>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    <ul><li>
+  <% end %>
+    <% 
+#     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{lastXdstMeantItRels.size}, #{Constants::WEB_MAX_MEANTIT_IN}")
+      lastXdstMeantItRels_minus_one = lastXdstMeantItRels.size > Constants::WEB_MAX_MEANTIT_IN ? lastXdstMeantItRels_minus_one = lastXdstMeantItRels.slice(0, Constants::WEB_MAX_MEANTIT_IN) : lastXdstMeantItRels
+    %>
+    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels_minus_one %>
+  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
+    </li></ul>
+    <% if lastXdstMeantItRels.size != lastXdstMeantItRels_minus_one.size %>
+      <%= link_to "More", url %>
+    <% end # end if lastXdstMeantItRels.size != lastXdstMeantItRels_minus_one.size %>
+  <% end %>

@@ -3,8 +3,8 @@
 <p id="notice"><%= notice %></p>
 
 <%
-  sender_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(sender_endPoints)
-  receiver_srcMeantItRels = ControllerHelper.mir_from_ep_meantItRels(receiver_endPoints)
+  sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
+  receiver_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(receiver_endPoints)
   # sender to receiver relationship
   s_mir_r_arr = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
   s_mir_r_msg_type_arr = ControllerHelper.mir_from_mir_messageType(s_mir_r_arr, message_type)
