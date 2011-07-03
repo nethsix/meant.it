@@ -50,17 +50,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In<br/>
-<%
-  lastXsrcMeantItRels= MeantItRel.where(:dst_endpoint_id => @endPoint_arr, :message_type => message_type).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
-%>
-  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXsrcMeantItRels %>
-  <% if !lastXsrcMeantItRels.nil? and !lastXsrcMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :dst_endpoint_id => @endPoint_arr, :sender_nick => @endPoint_arr[0].nick, :message_type => message_type } %>
 </p>
 <% end %>
 
@@ -110,16 +100,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_OUT %> Meant.It Out<br/>
-<%
-  lastXdstMeantItRels= MeantItRel.where(:src_endpoint_id => @endPoint_arr, :message_type => message_type).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_OUT)
-%>
-  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXdstMeantItRels %>
-  <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => @endPoint_arr, :sender_nick => @endPoint_arr[0].nick, :message_type => message_type } %>
 </p>
 <% end %>

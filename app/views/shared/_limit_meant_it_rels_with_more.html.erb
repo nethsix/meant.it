@@ -15,31 +15,42 @@
   src_endpoint_id ||= nil
   dst_endpoint_id ||= nil
   message_type ||= nil
-  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_pii_str:#{sender_pii_str}, receiver_pii_str:#{receiver_pii_str}, sender_endpoint_id:#{sender_endpoint_id}, receiver_endpoint_id:#{receiver_endpoint_id}, sender_nick:#{sender_nick}, receiver_nick:#{receiver_nick}")
-
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_pii_str:#{sender_pii_str}, receiver_pii_str:#{receiver_pii_str}, sender_endpoint_id:#{sender_endpoint_id}, receiver_endpoint_id:#{receiver_endpoint_id}, sender_nick:#{sender_nick}, receiver_nick:#{receiver_nick}, message_type:#{message_type}")
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, src_endpoint_id.inspect:#{src_endpoint_id.inspect}, dst_endpoint_id.inspect:#{dst_endpoint_id.inspect}")
   query_hash = {}
   query_hash[:src_endpoint_id] = src_endpoint_id if !src_endpoint_id.nil? and ((src_endpoint_id.respond_to?(:empty) and !src_endpoint_id.empty?) or !src_endpoint_id.respond_to?(:empty))
   query_hash[:dst_endpoint_id] = dst_endpoint_id if !dst_endpoint_id.nil? and ((dst_endpoint_id.respond_to?(:empty) and !dst_endpoint_id.empty?) or !dst_endpoint_id.respond_to?(:empty))
   query_hash[:message_type] = message_type if !message_type.nil? and !message_type.empty?
-  url = url_for("/meant_it_rels/show_in_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
-                           sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
-                           sender_nick.nil? and receiver_nick.nil? and
-                           src_endpoint_id.nil? and !dst_endpoint_id.nil?
-  url = url_for("/meant_it_rels/show_out_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
+  url = url_for("/meant_it_rels/show_in_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
+                      sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                      sender_nick.nil? and receiver_nick.nil? and
+                      src_endpoint_id.nil? and !dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_out_by_pii?#{Constants::PII_VALUE_INPUT}=#{URI::encode(sender_pii_str)}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
                            sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                            sender_nick.nil? and receiver_nick.nil? and
                            !src_endpoint_id.nil? and dst_endpoint_id.nil?
-  url = url_for("/meant_it_rels/show_in_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
+  url = url_for("/meant_it_rels/show_in_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}/#{message_type}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
                     !sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                     sender_nick.nil? and receiver_nick.nil? and
                     src_endpoint_id.nil? and !dst_endpoint_id.nil?
-  url = url_for("/meant_it_rels/show_out_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
+  url = url_for("/meant_it_rels/show_out_by_endpoint_id/#{URI::encode(sender_endpoint_id.to_s)}/#{message_type}") if sender_pii_str.nil? and receiver_pii_str.nil? and 
                   !sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                   sender_nick.nil? and receiver_nick.nil? and 
                   !src_endpoint_id.nil? and dst_endpoint_id.nil?
-  url = url_for("/meant_it_rels/show_by_endpoint_endpoint_nick/#{URI::encode(sender_nick)}/#{URI::encode(receiver_nick)}") if sender_pii_str.nil? and receiver_pii_str.nil? and
+  url = url_for("/meant_it_rels/show_by_endpoint_endpoint_nick/#{URI::encode(sender_nick)}/#{URI::encode(receiver_nick)}/#{message_type}") if sender_pii_str.nil? and receiver_pii_str.nil? and
                   sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                   !sender_nick.nil? and !receiver_nick.nil?
+  url = url_for("/meant_it_rels/show_by_pii_pii?#{Constants::PII_VALUE_INPUT}#{CGI::escape('[]')}=#{CGI::escape(sender_pii_str)}&#{Constants::PII_VALUE_INPUT}#{CGI::escape('[]')}=#{CGI::escape(receiver_pii_str)}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if !sender_pii_str.nil? and !receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  sender_nick.nil? and receiver_nick.nil?
+  url = url_for("/meant_it_rels/show_in_by_endpoint_nick/#{URI::encode(sender_nick)}/#{message_type}") if sender_pii_str.nil? and receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  !sender_nick.nil? and receiver_nick.nil? and 
+                  src_endpoint_id.nil? and !dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_out_by_endpoint_nick/#{URI::encode(sender_nick)}/#{message_type}") if sender_pii_str.nil? and receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  !sender_nick.nil? and receiver_nick.nil? and 
+                  !src_endpoint_id.nil? and dst_endpoint_id.nil?
   header_str = "Meant.It In" if !dst_endpoint_id.nil? and src_endpoint_id.nil?
   header_str = "Meant.It Out" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
   header_str_src = nil

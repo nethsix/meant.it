@@ -59,17 +59,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In 'nick:<%= sender_endPoints[0].nick %> <%= message_type %> nick:<%= receiver_endPoints[0].nick %>'<br/>
-<%
-  lastXs2rMeantItRels= MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
-%>
-  <% if !lastXs2rMeantItRels.nil? and !lastXs2rMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXs2rMeantItRels %>
-  <% if !lastXs2rMeantItRels.nil? and !lastXs2rMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints, :sender_nick => sender_endPoints[0].nick, :receiver_nick => receiver_endPoints[0].nick, :message_type => message_type } %>
 </p>
 <% end %>
 
@@ -110,16 +100,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 </p>
 <% else %>
 <p>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> Meant.It In 'nick:<%= receiver_endPoints[0].nick %> <%= message_type %> nick:<%= sender_endPoints[0].nick %>'<br/>
-<%
-  lastXr2sMeantItRels= MeantItRel.where(:src_endpoint_id => receiver_endPoints, :dst_endpoint_id => sender_endPoints).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN)
-%>
-  <% if !lastXr2sMeantItRels.nil? and !lastXr2sMeantItRels.empty? %>
-    <ul><li>
-  <% end %>
-    <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => lastXr2sMeantItRels %>
-  <% if !lastXr2sMeantItRels.nil? and !lastXr2sMeantItRels.empty? %>
-    </li></ul>
-  <% end %>
+  <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => receiver_endPoints, :dst_endpoint_id => sender_endPoints, :sender_nick => receiver_endPoints[0].nick, :receiver_nick => sender_endPoints[0].nick, :message_type => message_type } %>
 </p>
 <% end %>

@@ -1,5 +1,6 @@
 class Constants
   PII_VALUE_INPUT = "pii_value_input"
+  MESSAGE_TYPE_INPUT= "message_type_input"
   FIND_ANY_INPUT = "find_any_input"
   TAGS_INPUT = "tags_input"
   END_POINT_NICK_INPUT = "end_point_nick_input"
