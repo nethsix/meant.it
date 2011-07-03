@@ -83,6 +83,50 @@ class MeantItRelsController < ApplicationController
     end
   end
 
+  def show_by_pii_endpoint_nick
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_endpoint_nick:#{logtag}, params.inspect:#{params.inspect}")
+    pii_str = params[Constants::PII_VALUE_INPUT]
+    nick_str = params[Constants::END_POINT_NICK_INPUT]
+    message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_endpoint_nick:#{logtag}, pii_str:#{pii_str}, nick_str:#{nick_str}")
+    pii = Pii.find_by_pii_value(pii_str)
+    pii_endPoints = pii.endPoints if !pii.nil?
+    nick_endPoints = EndPoint.where(:nick => nick_str)
+    meantItRels = nil
+    if message_type.nil? or message_type.empty?
+      meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints).order("created_at DESC")
+    else
+      meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
+    end # end if message_type.nil? or message_type.empty?
+    respond_to do |format|
+      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.xml  { render :xml => meantItRels }
+    end
+  end # end def show_by_pii_endpoint_nick
+
+  def show_by_endpoint_nick_pii
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_nick_pii:#{logtag}, params.inspect:#{params.inspect}")
+    pii_str = params[Constants::PII_VALUE_INPUT]
+    nick_str = params[Constants::END_POINT_NICK_INPUT]
+    message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_nick_pii:#{logtag}, pii_str:#{pii_str}, nick_str:#{nick_str}")
+    pii = Pii.find_by_pii_value(pii_str)
+    pii_endPoints = pii.endPoints if !pii.nil?
+    nick_endPoints = EndPoint.where(:nick => nick_str)
+    meantItRels = nil
+    if message_type.nil? or message_type.empty?
+      meantItRels = MeantItRel.where(:dst_endpoint_id => pii_endPoints, :src_endpoint_id => nick_endPoints).order("created_at DESC")
+    else
+      meantItRels = MeantItRel.where(:dst_endpoint_id => pii_endPoints, :src_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
+    end # end if message_type.nil? or message_type.empty?
+    respond_to do |format|
+      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.xml  { render :xml => meantItRels }
+    end
+  end # end def show_by_pii_endpoint_nick
+
   def show_by_pii_pii
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_pii:#{logtag}, params.inspect:#{params.inspect}")
@@ -142,8 +186,8 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, sender_endPoints.inspect:#{sender_endPoints.inspect}")
     receiver_endPoints = EndPoint.where(:nick => receiver_nick)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, receiver_endPoints.inspect:#{receiver_endPoints.inspect}")
-    sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
-    meantItRels = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
+#AA    sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
+#AA    meantItRels = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC")
     else
@@ -168,8 +212,8 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, sender_endPoints.inspect:#{sender_endPoints.inspect}")
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, receiver_endPoints.inspect:#{receiver_endPoints.inspect}")
     receiver_endPoints = EndPoint.find(dst_endpoint_id)
-    meantItRels = ControllerHelper.mir_from_find_match_dstEndpoints(sender_endPoints.srcMeantItRels, receiver_endPoints)
-    meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints).order("created_at DESC")
+#AA    meantItRels = ControllerHelper.mir_from_find_match_dstEndpoints(sender_endPoints.srcMeantItRels, receiver_endPoints)
+    meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC")
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|

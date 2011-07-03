@@ -25,7 +25,8 @@ MeantIt::Application.routes.draw do
       get 'show_in_by_endpoint_id/:id/(:message_type)', :action => 'show_in_by_endpoint_id'
       get 'show_by_endpoint_endpoint_nick/:nick1/:nick2/(:message_type)', :action => 'show_by_endpoint_endpoint_nick'
       get 'show_by_pii_pii' 
-      get 'show_by_endpoint_nick_pii/:nick/:pii', :action => 'show_by_endpoint_nick_pii'
+      get 'show_by_pii_endpoint_nick'
+      get 'show_by_endpoint_nick_pii'
     end
   end
 

@@ -51,6 +51,12 @@
                   sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                   !sender_nick.nil? and receiver_nick.nil? and 
                   !src_endpoint_id.nil? and dst_endpoint_id.nil?
+  url = url_for("/meant_it_rels/show_by_pii_endpoint_nick?#{Constants::PII_VALUE_INPUT}=#{sender_pii_str}&#{Constants::END_POINT_NICK_INPUT}=#{receiver_nick}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if !sender_pii_str.nil? and receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  sender_nick.nil? and !receiver_nick.nil?
+  url = url_for("/meant_it_rels/show_by_endpoint_nick_pii?#{Constants::END_POINT_NICK_INPUT}=#{sender_nick}&#{Constants::PII_VALUE_INPUT}=#{receiver_pii_str}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if sender_pii_str.nil? and !receiver_pii_str.nil? and
+                  sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
+                  !sender_nick.nil? and receiver_nick.nil?
   header_str = "Meant.It In" if !dst_endpoint_id.nil? and src_endpoint_id.nil?
   header_str = "Meant.It Out" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
   header_str_src = nil
