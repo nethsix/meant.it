@@ -109,7 +109,7 @@ class PiisController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_value:#{logtag}, @pii:#{@pii.inspect}")
 
     respond_to do |format|
-      format.html { render "show_pii_details" }
+      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => decoded_pii_input } }
       format.xml  { render :xml => @pii }
     end
   end

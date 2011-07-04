@@ -35,6 +35,8 @@
   dstMeantItRelSrcUniqs.uniq!
 %>
 
+<div class='container'>
+  <div class='span-24'>
 
 <p>
 <strong>Pii:</strong> <%= @pii.pii_value %><br/>
@@ -140,3 +142,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => endPoints, :sender_pii_str => @pii.pii_value, :message_type => message_type } %>
 </p>
 <% end %>
+
+  </div>
+</div>

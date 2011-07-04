@@ -124,5 +124,7 @@ MeantIt::Application.routes.draw do
   match "/inbound_emails_200" => "inbound_emails#create", :defaults => { :format => 'xml' }
 #  match "/send_email" => SendEmail.action(:index)
 
-  root :to => "people#index"
+#  root :to => "people#index"
+#  root :to => "home#meant_it"
+
 end

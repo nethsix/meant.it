@@ -16,6 +16,10 @@
   ep_mir_pii_ep_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(ep_mir_pii_ep_arr)
 
 %>
+
+<div class='container'>
+  <div class='span-24'>
+
 <p>
 <strong>Meant.It:</strong>
 [pii:<%= pii.pii_value  %>] <=>
@@ -110,3 +114,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
   <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => endPoints, :dst_endpoint_id => pii_endPoints, :sender_nick => endPoints[0].nick, :receiver_pii_str => pii.pii_value } %>
 </p>
 <% end %>
+
+  </div>
+</div>

@@ -16,6 +16,8 @@
   r_mir_s_msg_type_arr = ControllerHelper.mir_from_mir_messageType(r_mir_s_arr, message_type)
   r_mir_s_msg_uniq_hash = ControllerHelper.mir_from_mir_uniqSrcMsgDstEndPoints(r_mir_s_msg_type_arr)
 %>
+<div class='container'>
+  <div class='span-24'>
 
 <p>
 <strong>Meant.It:</strong>
@@ -104,3 +106,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
   <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => receiver_endPoints, :dst_endpoint_id => sender_endPoints, :sender_pii_str => receiver_pii.pii_value , :receiver_pii_str => sender_pii.pii_value, :message_type => message_type } %>
 </p>
 <% end %>
+
+  </div>
+</div>

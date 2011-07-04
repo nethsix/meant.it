@@ -47,14 +47,13 @@
 
 %>
 
-
-<p>
-  <b>Pii:</b>
-  <%= @pii.pii_value %>
-</p>
-
 <div class='container'>
   <div class='span-24'>
+    <p>
+      <b>Pii:</b>
+      <%= @pii.pii_value %>
+    </p>
+
     <strong>
     <% if endPoints.size > 1 %>
       <%= endPoints.size %> persons
@@ -74,7 +73,6 @@
   <div class='span-24'>
 &nbsp;
   </div>
-</div>
 
 <table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
   <caption><em>Meant.It In</em></caption>
@@ -160,3 +158,4 @@ Nothing yet... <b>Send a meant.it today!</b>
   <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => sender_endPoint_arr, :sender_pii_str => @pii.pii_value } %>
 </p>
 
+</div>

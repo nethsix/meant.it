@@ -1,0 +1,22 @@
+.lightbg1{
+  background: #eed;
+}
+.lightbg2{
+  background: #dee;
+}
+
+/* Rounded Corners */
+.rounded, a.btn{
+-webkit-border-radius:6px;
+-moz-border-radius:6px;
+border-radius:6px;
+-khtml-border-radius: 6px;
+}
+
+select {
+  font-size: 30px;
+}
+
+.superlarge {
+  font-size: 30px;
+}

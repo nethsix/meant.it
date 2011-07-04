@@ -1,0 +1,65 @@
+<% require 'constants' %>
+<% 
+#  req_url = URI::parse(request.url)
+#  req_url_query_hash = CGI::parse(req_url.query) if !req_url.query.nil?
+#  find_any_input = req_url_query_hash.values.join("\n") if !req_url_query_hash.nil?
+find_any_input ||= nil
+%>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Meant.It</title>
+  <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
+  <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+  <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
+  <%= javascript_include_tag :defaults %>
+  <%= csrf_meta_tag %>
+</head>
+<body>
+    <div class="container">
+      <div class="span-24 lightbg1" id="find_meant_it_div">
+        <form id="find_meant_it_form" action="/find_any" method="get">
+
+          <fieldset>
+            <legend>Find Meant.It</legend>
+            <p>
+              <input type="text" class="span-15 title rounded" name="<%= Constants::FIND_ANY_INPUT %>" id="find_meant_it_input" size="500" value="<%= find_any_input %>" />
+               &nbsp;
+              <input class="superlarge rounded" type="submit" value="find" />
+            </p>
+          </fieldset>
+        </form>
+      </div>
+      <div class="span-24 lightbg2" id="send_meant_it_div">
+        <form id="send_meant_it_form" action="" method="post">
+
+          <fieldset>
+            <legend >Send Meant.It</legend>
+            <p>
+              <input type="text" class="span-15 title rounded" name="send_meant_it_input" id="send_meant_it_input" value=""/>
+              &nbsp;
+              <input class="superlarge rounded" type="submit" value="send" />
+              &nbsp;
+              <select>id="message_type_input" name="message_type_input">
+                <option value="thank">thank</option>
+                <option value="resent">resent</option>
+                <option value="like">like</option>
+                <option value="sorry">sorry</option>
+                <option value="join">join</option>
+              </select>
+              &nbsp;
+              <span class="superlarge">@meant.it</span>
+            </p>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+<%= yield %>
+
+</body>
+</html>

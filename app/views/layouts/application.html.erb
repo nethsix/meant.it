@@ -1,3 +1,11 @@
+<% require 'constants' %>
+<% 
+#  req_url = URI::parse(request.url)
+#  req_url_query_hash = CGI::parse(req_url.query) if !req_url.query.nil?
+#  find_any_input = req_url_query_hash.values.join("\n") if !req_url_query_hash.nil?
+find_any_input ||= nil
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,6 +15,7 @@
 <!--[if lt IE 8]>
   <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
+  <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
   <%= javascript_include_tag :defaults %>
   <%= csrf_meta_tag %>
 </head>

@@ -1,4 +1,7 @@
 <p id="notice"><%= notice %></p>
+<div class='container'>
+  <div class='span-24'>
+
 <p>
 <strong>Nick:</strong> <%= @endPoint_arr[0].nick %><br/>
 <strong>Message Type:</strong> <%= message_type %>
@@ -103,3 +106,6 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
   <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :src_endpoint_id => @endPoint_arr, :sender_nick => @endPoint_arr[0].nick, :message_type => message_type } %>
 </p>
 <% end %>
+
+  </div>
+</div>

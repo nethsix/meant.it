@@ -93,6 +93,7 @@ class MeantItRelsController < ApplicationController
     pii = Pii.find_by_pii_value(pii_str)
     pii_endPoints = pii.endPoints if !pii.nil?
     nick_endPoints = EndPoint.where(:nick => nick_str)
+    find_any_input_str = "#{pii_str} #{message_type} #{nick_str}"
     meantItRels = nil
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints).order("created_at DESC")
@@ -100,7 +101,7 @@ class MeantItRelsController < ApplicationController
       meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
     end # end if message_type.nil? or message_type.empty?
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_endpoint_nick
@@ -111,6 +112,7 @@ class MeantItRelsController < ApplicationController
     pii_str = params[Constants::PII_VALUE_INPUT]
     nick_str = params[Constants::END_POINT_NICK_INPUT]
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    find_any_input_str = "#{nick_str} #{message_type} #{pii_str}"
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_nick_pii:#{logtag}, pii_str:#{pii_str}, nick_str:#{nick_str}")
     pii = Pii.find_by_pii_value(pii_str)
     pii_endPoints = pii.endPoints if !pii.nil?
@@ -122,7 +124,7 @@ class MeantItRelsController < ApplicationController
       meantItRels = MeantItRel.where(:dst_endpoint_id => pii_endPoints, :src_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
     end # end if message_type.nil? or message_type.empty?
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_endpoint_nick
@@ -134,6 +136,7 @@ class MeantItRelsController < ApplicationController
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
     sender_pii_str = pii_arr[0] if pii_arr.size > 1
     receiver_pii_str = pii_arr[1] if pii_arr.size > 1
+    find_any_input_str = "#{sender_pii_str} #{message_type} #{receiver_pii_str}"
     sender_pii = Pii.find_by_pii_value(sender_pii_str)
     receiver_pii = Pii.find_by_pii_value(receiver_pii_str)
     sender_endPoints = sender_pii.endPoints
@@ -147,7 +150,7 @@ class MeantItRelsController < ApplicationController
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_pii
@@ -157,6 +160,9 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, params.inspect:#{params.inspect}")
     endpoint_id = params[:id]
     message_type = params[:message_type]
+    endPoint = EndPoint.find(endpoint_id)
+    endpoint_nick_str = endPoint.nick if !endPoint.nil?
+    find_any_input_str = "#{endpoint_nick_str} #{message_type}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, endpoint_id:#{endpoint_id}, message_type:#{message_type}")
     endPoints = EndPoint.find(endpoint_id)
@@ -169,7 +175,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_out_by_endpoint_id
@@ -180,6 +186,7 @@ class MeantItRelsController < ApplicationController
     sender_nick = params[:nick1]
     receiver_nick = params[:nick2]
     message_type = params[:message_type]
+    find_any_input_str = "#{sender_nick} #{message_type} #{receiver_nick}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_endpoint_nick:#{logtag}, sender_nick:#{sender_nick}, receiver_nick:#{receiver_nick}, message_type:#{message_type}")
     sender_endPoints = EndPoint.where(:nick => sender_nick)
@@ -196,7 +203,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_endpoint_endpoint_nick
@@ -206,6 +213,11 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_endpoint_id:#{logtag}, params.inspect:#{params.inspect}")
     src_endpoint_id = params[:id1]
     dst_endpoint_id = params[:id2]
+    src_endPoint = EndPoint.find(src_endpoint_id)
+    src_endpoint_nick_str = src_endPoint.nick if !src_endPoint.nil?
+    dst_endpoint_nick_str = dst_endPoint.nick if !dst_endPoint.nil?
+    dst_endPoint = EndPoint.find(dst_endpoint_id)
+    find_any_input_str = "#{src_endpoint_nick_str} #{dst_endpoint_nick_str}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_endpoint_id:#{logtag}, endpoint_id:#{endpoint_id}")
     sender_endPoints = EndPoint.find(src_endpoint_id)
@@ -217,7 +229,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_endpoint_endpoint_id
@@ -227,6 +239,7 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, params.inspect:#{params.inspect}")
     endpoint_nick = params[:nick]
     message_type = params[:message_type]
+    find_any_input_str = "#{message_type} #{endpoint_nick}"
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_nick:#{logtag}, endpoint_nick:#{endpoint_nick}, message_type:#{message_type}")
     endPoints = EndPoint.where(:nick => endpoint_nick)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_nick:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
@@ -238,7 +251,7 @@ class MeantItRelsController < ApplicationController
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_endpoint_nick
@@ -247,7 +260,10 @@ class MeantItRelsController < ApplicationController
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, params.inspect:#{params.inspect}")
     endpoint_id = params[:id]
+    endPoint = EndPoint.find(endpoint_id)
+    endpoint_nick_str = endPoint.nick if !endPoint.nil?
     message_type = params[:message_type]
+    find_any_input_str = "#{message_type} #{endpoint_nick_str}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, endpoint_id:#{endpoint_id}, message_type:#{message_type}")
     endPoints = EndPoint.find(endpoint_id)
@@ -260,7 +276,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_endpoint_id
@@ -270,6 +286,7 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, params.inspect:#{params.inspect}")
     pii_str = params[Constants::PII_VALUE_INPUT]
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    find_any_input_str = "#{pii_nick} #{message_type}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, pii_str:#{pii_str}, message_type:#{message_type}")
     pii = Pii.find_by_pii_value(pii_str)
@@ -284,7 +301,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end
@@ -294,6 +311,7 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, params.inspect:#{params.inspect}")
     endpoint_nick = params[:nick]
     message_type = params[:message_type]
+    find_any_input_str = "#{endpoint_nick} #{message_type}"
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_nick:#{logtag}, endpoint_nick:#{endpoint_nick}, message_type:#{message_type}")
     endPoints = EndPoint.where(:nick => endpoint_nick)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_nick:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
@@ -305,16 +323,17 @@ class MeantItRelsController < ApplicationController
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
-  end # end def show_in_by_endpoint_nick
+  end # end def show_out_by_endpoint_nick
 
   def show_in_by_pii
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, params.inspect:#{params.inspect}")
     pii_str = params[Constants::PII_VALUE_INPUT]
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    find_any_input_str = "#{message_type} #{pii_str}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, pii_str:#{pii_str}, message_type:#{message_type}")
     pii = Pii.find_by_pii_value(pii_str)
@@ -329,8 +348,8 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :locals => { :meantItRels => meantItRels }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
       format.xml  { render :xml => meantItRels }
     end
-  end # end def show_by_endpoints
+  end # end def show_in_by_pii
 end

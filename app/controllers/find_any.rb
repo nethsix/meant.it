@@ -166,13 +166,13 @@ class FindAny < ApplicationController
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show endpoint with tags, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
         if message_type.nil?
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "end_points/show_end_points", :layout => true, :locals => { :notice => nil }
+            render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
             return
           end # end if !@endPoint_arr.nil?
         else
           # These are all just tags but with a message_type
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "show_endpoints_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            render "show_endpoints_with_message_type", :layout => "find_any", :locals => { :notice => nil, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
           end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
@@ -181,23 +181,23 @@ class FindAny < ApplicationController
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii => @pii.inspect:#{@pii.inspect}")
         if !@pii.nil? and message_type.nil?
           # Show the pii details
-          render "piis/show_pii_details", :layout => true, :locals => { :notice => nil }
+          render "piis/show_pii_details", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
           return
         elsif !@pii.nil? and !message_type.nil?
           # Show the pii details with message_type
-          render "show_pii_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+          render "show_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :message_type => message_type, :find_any_input => decoded_find_any_input }
           return
         end # end elsif !message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
         @endPoint_arr = sender_ep_arr
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_ep_arr => @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
         if message_type.nil?
-          render "end_points/show_end_points", :layout => true, :locals => { :notice => nil }
+          render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
           return
         else
           # Get eps with those message_types
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "show_endpoints_with_message_type", :layout => true, :locals => { :notice => nil, :message_type => message_type }
+            render "show_endpoints_with_message_type", :layout => "find_any", :locals => { :notice => nil, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
           end # end if !@endPoint_arr.nil?
         end # end elsif !message_type.nil?
@@ -210,37 +210,37 @@ class FindAny < ApplicationController
       elsif !sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii.inspect:#{sender_pii.inspect}, receiver_pii.inspect:#{receiver_pii.inspect}, message_type:#{message_type}")
         if message_type.nil?
-            render "show_pii_pii.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii }
+            render "show_pii_pii.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :find_any_input => decoded_find_any_input }
             return
         else
-            render "show_pii_pii_with_message_type.html.erb", :layout => true, :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type }
+            render "show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => sender_pii, :receiver_pii => receiver_pii, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
         end # end if message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_nick:#{sender_ep_arr[0].nick}, receiver nick:#{receiver_ep_arr[0].nick}, message_type:#{message_type}")
         if message_type.nil?
-            render "show_endpoints_endpoints.html.erb", :layout => true, :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr }
+            render "show_endpoints_endpoints.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr, :find_any_input => decoded_find_any_input }
             return
         else
-            render "show_endpoints_endpoints_with_message_type.html.erb", :layout => true, :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr, :message_type => message_type }
+            render "show_endpoints_endpoints_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_endPoints => sender_ep_arr, :receiver_endPoints => receiver_ep_arr, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
         end # end if message_type.nil?
       elsif sender_pii.nil? and !sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_nick:#{sender_ep_arr[0].nick}, receiver pii.inspect:#{receiver_pii.inspect}, message_type:#{message_type}")
         if message_type.nil?
-            render "show_endpoints_pii", :layout => true, :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii=> receiver_pii }
+            render "show_endpoints_pii", :layout => "find_any", :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii=> receiver_pii, :find_any_input => decoded_find_any_input }
             return
         else
-            render "show_endpoints_pii_with_message_type", :layout => true, :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii => receiver_pii, :message_type => message_type }
+            render "show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => sender_ep_arr, :pii => receiver_pii, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
         end # end if message_type.nil?
       elsif !sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender pii.inspect:#{sender_pii.inspect}, receiver_nick:#{receiver_ep_arr[0].nick}, message_type:#{message_type}")
         if message_type.nil?
-            render "show_endpoints_pii.html", :layout => true, :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii=> sender_pii }
+            render "show_endpoints_pii.html", :layout => "find_any", :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii=> sender_pii, :find_any_input => decoded_find_any_input }
             return
         else
-            render "show_endpoints_pii_with_message_type", :layout => true, :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii => sender_pii, :message_type => message_type }
+            render "show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii => sender_pii, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
         end # end if message_type.nil?
       end # end if sender_pii.nil? ...

@@ -1,8 +1,16 @@
 <% require 'validators' %>
 <% require 'constants' %>
 <p id="notice"><%= notice %></p>
+<div class='container'>
+  <div class='span-24'>
+<p>
+<b>Meant.It</b> List
+</p>
 <% if !meantItRels.empty? and !meantItRels.nil? %>
   <ul><li>
   <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => meantItRels %>
   </li></ul>
 <% end %>
+
+  </div>
+</div>
