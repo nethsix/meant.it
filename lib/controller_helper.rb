@@ -105,8 +105,7 @@ module ControllerHelper
       receiver_pii_arr = input_str_arr.find_all { |str| str.match(/.+@.+\..+/) }
       receiver_pii_str = receiver_pii_arr[0] if !receiver_pii_arr.empty?
       receiver_pii_arr.each { |rec_pii_elem|
-        input_str_dup.sub!(/:#{Regexp.escape(rec_pii_elem)}/, '') 
-        rec_pii_elem.strip!
+        input_str_arr.delete(rec_pii_elem)
       } # end receiver_pii_arr.each ...
     end # if receiver_pii_str.nil?
     receiver_pii_str.strip! if !receiver_pii_str.nil?
@@ -185,6 +184,10 @@ module ControllerHelper
     # NOTE: <kuromi@sanrio.com> will give email_nick_str = '' instead of nil
     email_nick_str = nil if email_nick_str.nil? or email_nick_str.empty?
     email_str = email_str_match_arr[2].strip if !email_str_match_arr.nil?
+    if (email_str_arr = email_str.match(/(.+)#{Constants::MEANT_IT_PII_SUFFIX}/))
+      # Not an email but a pii
+      email_str = email_str_arr[1]
+    end # end if !email_str.index(Constants::MEANT_IT_PII_SUFFIX).nil?
     email_nick_str ||= email_str
     { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
   end # end self.parse_email

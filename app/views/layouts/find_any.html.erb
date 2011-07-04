@@ -27,7 +27,7 @@ find_any_input ||= nil
           <fieldset>
             <legend>Find Meant.It</legend>
             <p>
-              <input type="text" class="span-15 title rounded" name="<%= Constants::FIND_ANY_INPUT %>" id="find_meant_it_input" size="500" value="<%= find_any_input %>" />
+              <input type="text" class="span-12 title rounded" name="<%= Constants::FIND_ANY_INPUT %>" id="<%= Constants::FIND_ANY_INPUT %>" size="500" value="<%= find_any_input %>" />
                &nbsp;
               <input class="superlarge rounded" type="submit" value="find" />
             </p>
@@ -35,21 +35,25 @@ find_any_input ||= nil
         </form>
       </div>
       <div class="span-24 lightbg2" id="send_meant_it_div">
-        <form id="send_meant_it_form" action="" method="post">
+        <form id="send_meant_it_form" action="/send_inbound_emails" method="post">
 
           <fieldset>
             <legend >Send Meant.It</legend>
             <p>
-              <input type="text" class="span-15 title rounded" name="send_meant_it_input" id="send_meant_it_input" value=""/>
+              <input type="hidden" name="from" id="from" value="anonymous@pii.meant.it"/>
+              <input type="hidden" name="envelope" id="envelope" value="meant_it_index"/>
+              <input type="hidden" name="headers" id="envelope" value="meant_it_index"/>
+              <input type="hidden" name="attachment_count" id="attachment_count" value="0"/>
+              <input type="text" class="span-12 title rounded" name="subject" id="subject" value=""/>
               &nbsp;
               <input class="superlarge rounded" type="submit" value="send" />
               &nbsp;
-              <select>id="message_type_input" name="message_type_input">
-                <option value="thank">thank</option>
-                <option value="resent">resent</option>
-                <option value="like">like</option>
-                <option value="sorry">sorry</option>
-                <option value="join">join</option>
+              <select id="to" name="to">
+                <option value="thank@meant.it">thank</option>
+                <option value="resent@meant.it">resent</option>
+                <option value="like@meant.it">like</option>
+                <option value="sorry@meant.it">sorry</option>
+                <option value="join@meant.it">join</option>
               </select>
               &nbsp;
               <span class="superlarge">@meant.it</span>

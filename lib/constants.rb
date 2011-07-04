@@ -6,6 +6,8 @@ class Constants
   END_POINT_NICK_INPUT = "end_point_nick_input"
   END_POINT_CREATOR_END_POINT_INPUT = "end_point_creator_end_point_input"
 
+  MEANT_IT_PII_SUFFIX = "@pii.meant.it"
+
   WEB_MAX_MEANTIT_IN = 1
   WEB_MAX_MEANTIT_OUT = 1
 

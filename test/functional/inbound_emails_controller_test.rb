@@ -741,9 +741,11 @@ p "#AAAAAAA after body_text:#{body_text}"
 
   test "pick up pii without colon" do
     receiver_pii_str = "kuromi@sanrio.com"
-    input_str = "kurochan lawson12 hakusan12 ;you're evil!; #{receiver_pii_str}"
+    receiver_nick_str = "kurochan"
+    input_str = "#{receiver_pii_str} #{receiver_nick_str} lawson12 hakusan12 ;you're evil!;"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
     assert_equal receiver_pii_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    assert_equal receiver_nick_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
   end # end test "pick up pii without colon" do
 
   test "aaa" do

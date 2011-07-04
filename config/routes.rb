@@ -122,6 +122,7 @@ MeantIt::Application.routes.draw do
   match "/find_any" => FindAny.action(:index)
 
   match "/inbound_emails_200" => "inbound_emails#create", :defaults => { :format => 'xml' }
+  match "/send_inbound_emails" => "inbound_emails#create"
 #  match "/send_email" => SendEmail.action(:index)
 
 #  root :to => "people#index"

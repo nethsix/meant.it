@@ -47,6 +47,7 @@ Rails.logger.level = Logger::DEBUG
   # POST /inbound_emails
   # POST /inbound_emails.xml
   def create
+# puts "request.inspect:#{request.inspect}"
     logtag = ControllerHelper.gen_logtag
      # Stores objs that causes problem except inbound_email
      # which is handled by different error handler in :action => new
@@ -468,6 +469,17 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
       render :xml => @inbound_email, :status => 200
       return
     end # end if self.request.path.match(/inbound_emails_200/)
+    # This is from meant_it find/send main page
+    if self.request.path.match(/send_inbound_emails/)
+      if !@sender_pii.nil? and !@receiver_pii.nil?
+        find_any_input_str = "#{@sender_pii.pii_value} #{message_type_str} #{@receiver_pii.pii_value}"
+        render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+      elsif !@sender_pii.nil? and @receiver_pii.nil? and !@receiver_endPoint.nil?
+        find_any_input_str = "#{@sender_pii.pii_value} #{message_type_str} #{@receiver_endPoint.nick}"
+        render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => @receiver_endPoint, :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+      end # end if !@sender_pii.nil? ...
+      return
+    end # end if self.request.path.match(/send_inbound_emails/)
     respond_to do |format|
       format.html { redirect_to(@inbound_email, :notice => 'Inbound email was successfully created.') }
       format.xml  { render :xml => @inbound_email, :status => :created, :location => @inbound_email }

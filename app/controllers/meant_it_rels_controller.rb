@@ -286,7 +286,7 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, params.inspect:#{params.inspect}")
     pii_str = params[Constants::PII_VALUE_INPUT]
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
-    find_any_input_str = "#{pii_nick} #{message_type}"
+    find_any_input_str = "#{pii_str} #{message_type}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, pii_str:#{pii_str}, message_type:#{message_type}")
     pii = Pii.find_by_pii_value(pii_str)
