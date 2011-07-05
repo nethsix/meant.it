@@ -21,6 +21,14 @@ find_any_input ||= nil
 </head>
 <body>
     <div class="container">
+      <div class="span-24">
+        <p>
+          <% why_elem = Constants.random_why %>
+          <span class="large">
+            <b>Why Meant.It?</b> <%= why_elem[0] %> - <i><%= why_elem[1] %></i> (<%= link_to "More", url_for("why") %>)
+          </span>
+        </p>
+      </div>
       <div class="span-24 lightbg1" id="find_meant_it_div">
         <form id="find_meant_it_form" action="/find_any" method="get">
 
@@ -31,6 +39,7 @@ find_any_input ||= nil
                &nbsp;
               <input class="superlarge rounded" type="submit" value="find" />
             </p>
+            Try entering <i>meant.it</i> (<%= link_to "Learn more", url_for("learn_find") %>)
           </fieldset>
         </form>
       </div>
@@ -58,6 +67,7 @@ find_any_input ||= nil
               &nbsp;
               <span class="superlarge">@meant.it</span>
             </p>
+            Try entering <i>:meant.it ;thanks for making life better;</i> (<%= link_to "Learn more", url_for("learn_send") %>)
           </fieldset>
         </form>
       </div>

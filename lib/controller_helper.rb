@@ -61,7 +61,11 @@ module ControllerHelper
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, after receiver_pii_str_arr remove, input_str_dup:#{input_str_dup}")
     # Check for pii starting with colon
     receiver_pii_str_arr2 = input_str_dup.scan(/:(.*?)\s/).collect { |elem| elem[0] }
-    receiver_pii_str_arr2 += input_str_dup.scan(/:(.*?)$/).collect { |elem| elem[0] }
+    # We need the \s otherwise ':xxx ' will also match, e.g.,
+    # ':xxx ;thanks;' will be reduced to ':xxx ' which will match this
+    receiver_pii_str_arr2 += input_str_dup.scan(/\s:(.*?)$/).collect { |elem| elem[0] }
+    # Match the word itself, e.g., ':xxx'
+    receiver_pii_str_arr2 += input_str_dup.scan(/^:(.*?)$/).collect { |elem| elem[0] }
     receiver_pii_str_idx2 = input_str.index(":#{receiver_pii_str_arr2[0]}") if !receiver_pii_str_arr2.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr2:#{receiver_pii_str_arr2.inspect}, receiver_pii_str_idx2:#{receiver_pii_str_idx2}")
     get_from_this_receiver_pii_arr = nil

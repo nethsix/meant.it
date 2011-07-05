@@ -1,0 +1,15 @@
+<div class="container">
+  <div class="span-24">
+  <p>
+    <h3>Why Meant.It?</h3>
+  </p>
+  <ul>
+    <% Constants::WHY_ENUM.each { |why_elem| %>
+      <li>
+        <%= why_elem[0] %> - <i><%= why_elem[1] %></i>
+      </li>
+    <% } %>
+  </ul>
+  </div>
+  <%= link_to "Home", url_for("/") %>
+</div>

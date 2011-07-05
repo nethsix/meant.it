@@ -1,0 +1,42 @@
+<div class="container">
+  <div class="span-24">
+  <p>
+    <h3>Find Meant.It</h3>
+  </p>
+    Enter in any order most intuitive to you:
+    <ul>
+      <li>Nickname</li>
+      <li>Personally identifiable information (pii)
+        <ul>
+          <li>Email, well-known name, etc.</li>
+        </ul>
+      </li>
+      <li>Message type
+        <ul>
+          <li>thank, sorry, etc.</li>
+        </ul>
+      </li>
+    </ul>
+    Meant.It tries to understand what you want and return the results.<br/>
+    Some stuff that lead to perhaps incorrect Meant.It results:
+    <ul>
+      <li>More than 2 nicknames/piis (end points) combined</li>
+      <li>Misspelt messages will be interpreted as tags belonging to end points</li>
+    </ul>
+
+    <h4>Details</h4>
+    The following characters have special meaning that you can use to convey to Meant.It.
+    <ul>
+      <li>: indicates pii</li>
+      <ul>
+        <li>:fifa</li>
+        <li>:hello kitty:</li>
+      </ul>
+      <li>' or " encloses tags with spaces</li>
+      <ul>
+        <li>'lala land'</li>
+        <li>"coca cola"</li>
+      </ul>
+    </ul>
+  <%= link_to "Home", url_for("/") %>
+</div>

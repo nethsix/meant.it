@@ -1,0 +1,61 @@
+<% require 'validators' %>
+<div class="container">
+  <div class="span-24">
+  <p>
+    <h3>Send Meant.It</h3>
+  </p>
+    You can send Meant.It from <%= link_to "http://meant.it/", url_for("/") %> or from email.  The only 2 differences are:
+    <ul>
+     <li>Meant.It sent from webpage has 'anonymous' as sender</li>
+     <li>For email Meant.It, just send to thank@meant.it or whatever that is available on the webpage pulldown</li>
+    </ul>
+    The simplest message:
+    Send to thank@meant.it: <i>hello_kitty@sanrio.com</i> 
+    The 2nd simplest message:
+    Send to thank@meant.it: <i>:hello kitty:</i>
+    The 3rd simplest message:
+    Send to thank@meant.it: my_kitty
+
+    <h4>Details</h4>
+    The following characters have special meaning that you can use to convey to Meant.It.
+    <ul>
+      <li>: <i>Personally Identifiable Information</i> (pii) (required if no nickname)
+        <ul>
+          <li>:hello kitty:</li>
+          <li>:hello_kitty</li>
+          <li>hello_kitty@sanrio.com</li>
+        </ul>
+      </li>
+      <li><i>Message Type</i> is select from pull-down</li>
+      <li><i>Long Message</i> (optional)
+        <ul>
+          <li>;hello world;</li>
+        </ul>
+      </li>
+      <li><i>Tags</i> (optional) are used to describe the receiver
+        <ul>
+          <li>cat</li>
+          <li>white</li>
+        </ul>
+      </li>
+      <li>' or " encloses <i>tags</i> with spaces
+        <ul>
+          <li>'red ribbon'</li>
+          <li>"no mouth"</li>
+        </ul>
+      </li>
+      <li><i>Nickname</i> (required if no pii), the first tag not enclosed by " or ' is used as nickname
+      <ul>
+        <li>my_kitty</li>
+      </ul>
+      </li>
+    </ul>
+    Thus, any of the following sends a 'thank' message (if you select thank@meant.it)
+    <ul>
+      <li>:hello_kitty ;hello hello kitty; cat white 'red ribbon'</li>
+      <li>:hello kitty: ;hello hello kitty; white "red ribbon" cat</li>
+      <li>hello_kitty@sanrio.com ;hello hello kitty; "red ribbon" white cat</li>
+      <li>;hello hello kitty; "red ribbon" my_kitty white cat</li>
+    </ul>
+  <%= link_to "Home", url_for("/") %>
+</div>

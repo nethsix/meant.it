@@ -61,7 +61,7 @@
   header_str = "Meant.It Out" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
   header_str_src = nil
   if !sender_pii_str.nil?
-    header_str_src = "[pii:#{sender_pii_str}]]"
+    header_str_src = "[pii:#{sender_pii_str}]"
   elsif !sender_endpoint_id.nil?
     header_str_src = "nick:#{sender_endpoint.nick}"
   elsif !sender_nick.nil?
@@ -77,7 +77,7 @@
   header_str = "Meant.It ' #{header_str_src} <=> #{header_str_dst}'" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and message_type.nil?
   header_str = "Meant.It ' #{header_str_src} #{message_type} #{header_str_dst} '" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and !message_type.nil?
 %>
-Last <%= Constants::WEB_MAX_MEANTIT_IN %> <%= header_str %> <br/>
+<b>Last <%= Constants::WEB_MAX_MEANTIT_IN %></b> <%= header_str %> <br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(query_hash).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN+1)
 %>

@@ -363,7 +363,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
       receiver_endPoint_no_nick_arr = our_receiver_pii_endPoints.select { |elem| elem.nick.nil? }
       @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 1
       if receiver_endPoint_no_nick_arr.size > 1
-        logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, more than one receiver_endPoints with nick = nil, receiver_endPoints_no_nick_arr:#{receiver_endPoints_no_nick_arr.inspect}")
+        logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, more than one receiver_endPoints with nick = nil, receiver_endPoint_no_nick_arr:#{receiver_endPoint_no_nick_arr.inspect}")
       end # end if receiver_endPoint_no_nick_arr.size > 1
 #20110628a : End
 #20110628a      @receiver_endPoint = EndPoint.create(:creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now)

@@ -109,6 +109,9 @@ MeantIt::Application.routes.draw do
   # just remember to delete public/index.html.
   # root :to => "welcome#index"
   root :to => "home#index"
+  match "/why" => "home#why"
+  match "/learn_find" => "home#learn_find"
+  match "/learn_send" => "home#learn_send"
 
   # See how all your routes lay out with "rake routes"
 
