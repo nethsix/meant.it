@@ -41,15 +41,20 @@ end # end class DocIdForeignKeylidator
 
 class MeantItMessageTypeValidator < ActiveModel::EachValidator
   MEANT_IT_MESSAGE_THANK = "thank"
-  MEANT_IT_MESSAGE_SYMPATHY = "sympathy"
-  MEANT_IT_MESSAGE_RESENT = "resent"
+  MEANT_IT_MESSAGE_LIKE = "like"
+  MEANT_IT_MESSAGE_CHEER = "cheer"
+  MEANT_IT_MESSAGE_SYMPATHY = "sympathy" # INACTIVE
+  MEANT_IT_MESSAGE_RESENT = "resent" # INACTIVE
   MEANT_IT_MESSAGE_OTHER = "other"
-  MEANT_IT_MESSAGE_ORGANIZE = "organize"
+  MEANT_IT_MESSAGE_ORGANIZE = "organize" # INACTIVE
   MEANT_IT_MESSAGE_SORRY = "sorry"
-  MEANT_IT_MESSAGE_LOST = "lost"
+  MEANT_IT_MESSAGE_LOST = "lost" # INACTIVE
   MEANT_IT_MESSAGE_FOUND = "found"
-  MEANT_IT_MESSAGE_REGRET = "regret"
-  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_SYMPATHY, MEANT_IT_MESSAGE_RESENT, MEANT_IT_MESSAGE_OTHER, MEANT_IT_MESSAGE_ORGANIZE, MEANT_IT_MESSAGE_SORRY, MEANT_IT_MESSAGE_LOST, MEANT_IT_MESSAGE_FOUND, MEANT_IT_MESSAGE_REGRET ]
+  MEANT_IT_MESSAGE_PROTEST = "protest"
+  MEANT_IT_MESSAGE_ADVISE = "advise"
+  MEANT_IT_MESSAGE_REGRET = "regret" # INACTIVE
+  
+  MEANT_IT_MESSAGE_TYPE_ENUM = [ MEANT_IT_MESSAGE_THANK, MEANT_IT_MESSAGE_LIKE, MEANT_IT_MESSAGE_CHEER, MEANT_IT_MESSAGE_OTHER, MEANT_IT_MESSAGE_SORRY, MEANT_IT_MESSAGE_FOUND, MEANT_IT_MESSAGE_PROTEST, MEANT_IT_MESSAGE_ADVISE ]
   def validate_each(record, attribute, value)
     msg_type_downcase = value.downcase if !value.nil?
     normalized_msg_type_downcase = MessageTypeMapper.get_message_type(msg_type_downcase)
@@ -130,12 +135,15 @@ class MessageTypeMapper
   @@msg_type_map_hash["sympathize"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
   @@msg_type_map_hash["sympathizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
   @@msg_type_map_hash["consoles"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
-  @@msg_type_map_hash["console"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_SYMPATHY
-  @@msg_type_map_hash["other"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
   @@msg_type_map_hash["others"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
   @@msg_type_map_hash["organizes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_ORGANIZE
   @@msg_type_map_hash["regrets"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_REGRET
   @@msg_type_map_hash["resents"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_RESENT
+  @@msg_type_map_hash["likes"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE
+  @@msg_type_map_hash["cheers"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_CHEER
+  @@msg_type_map_hash["protests"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_PROTEST
+  @@msg_type_map_hash["advises"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_ADVISE
+  @@msg_type_map_hash["advice"] = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_ADVISE
 
   def self.get_all_message_types
     @@msg_type_map_hash.keys
