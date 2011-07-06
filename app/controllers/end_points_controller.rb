@@ -95,10 +95,26 @@ class EndPointsController < ApplicationController
     @endPoint_arr = EndPoint.where("nick = ?", decoded_end_point_nick_input)
 
     respond_to do |format|
-      format.html { render "show_end_points", :layout => "find_any", :locals => { :find_any_input => decoded_end_point_nick_input } }
+      format.html { render "show_end_points_same_nick", :layout => "find_any", :locals => { :find_any_input => decoded_end_point_nick_input } }
       format.xml  { render :xml => @endPoint_arr }
     end
   end # end def show_by_nick
+
+  def show_by_ids
+    logtag = ControllerHelper.gen_logtag
+    title_str = params[Constants::TITLE_STR.to_sym]
+    id_arr = params[:ids]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_ids:#{logtag}, id_arr.inspect:#{id_arr.inspect}")
+    @endPoint_arr = []
+    id_arr.each { |id_no|
+      @endPoint_arr << EndPoint.find(id_no)
+    } # end id_arr.each { |id_no|
+
+    respond_to do |format|
+      format.html { render "show_end_points", :layout => "find_any", :locals => { :find_any_input => nil, :title_str => title_str } }
+      format.xml  { render :xml => @endPoint_arr }
+    end
+  end # end def show_by_ids
 
   def show_by_id
     logtag = ControllerHelper.gen_logtag
@@ -144,7 +160,7 @@ class EndPointsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_tags:#{logtag}, @endPoint_arr:#{@endPoint_arr.inspect}")
 
     respond_to do |format|
-      format.html { render "show_end_points", :layout => "find_any", :locals => { :find_any_input => decoded_tags_input } }
+      format.html { render "show_end_points", :layout => "find_any", :locals => { :find_any_input => decoded_tags_input, :title_str => "End point(s) with <b>tag(s)</b>: <i>#{decoded_tags_input}</i>" } }
       format.xml  { render :xml => @endPoint_arr }
     end
   end

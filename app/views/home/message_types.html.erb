@@ -1,0 +1,16 @@
+<% require 'validators' %>
+<div class="container">
+  <div class="span-24">
+  <p>
+    <h3>Meant.It Message Types</h3>
+  </p>
+  <ul>
+    <% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |msg_type_elem| %>
+      <li>
+        <%= msg_type_elem %>@meant.it
+      </li>
+    <% } %>
+  </ul>
+  </div>
+  <%= link_to "Home", url_for("/") %>
+</div>

@@ -166,7 +166,7 @@ class FindAny < ApplicationController
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show endpoint with tags, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
         if message_type.nil?
           if !@endPoint_arr.nil? and !@endPoint_arr.empty?
-            render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
+            render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input, :title_str => "End point(s) with <b>tag(s)</b>: <i>#{decoded_find_any_input}</i>" }
             return
           end # end if !@endPoint_arr.nil?
         else
@@ -192,7 +192,7 @@ class FindAny < ApplicationController
         @endPoint_arr = sender_ep_arr
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, sender_ep_arr => @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
         if message_type.nil?
-          render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
+          render "end_points/show_end_points_same_nick", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input }
           return
         else
           # Get eps with those message_types

@@ -40,6 +40,7 @@ MeantIt::Application.routes.draw do
       get 'find_by_tags'
       get 'show_by_tags'
       get "show_by_id/:id", :action => "show_by_id"
+      get "show_by_ids"
     end
   end
 
@@ -110,6 +111,7 @@ MeantIt::Application.routes.draw do
   # root :to => "welcome#index"
   root :to => "home#index"
   match "/why" => "home#why"
+  match "/message_types" => "home#message_types"
   match "/learn_find" => "home#learn_find"
   match "/learn_send" => "home#learn_send"
 

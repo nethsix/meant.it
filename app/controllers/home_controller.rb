@@ -14,4 +14,8 @@ class HomeController < ApplicationController
   def learn_send
     render "learn_send", :layout => true
   end
+
+  def message_types
+    render "message_types", :layout => true
+  end
 end

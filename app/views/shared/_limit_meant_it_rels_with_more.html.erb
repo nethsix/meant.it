@@ -77,7 +77,7 @@
   header_str = "Meant.It ' #{header_str_src} <=> #{header_str_dst}'" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and message_type.nil?
   header_str = "Meant.It ' #{header_str_src} #{message_type} #{header_str_dst} '" if !dst_endpoint_id.nil? and !src_endpoint_id.nil? and !message_type.nil?
 %>
-<b>Last <%= Constants::WEB_MAX_MEANTIT_IN %></b> <%= header_str %> <br/>
+<b>Latest <%= Constants::WEB_MAX_MEANTIT_IN %></b> <%= header_str %> <br/>
 <%
   lastXdstMeantItRels= MeantItRel.where(query_hash).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN+1)
 %>

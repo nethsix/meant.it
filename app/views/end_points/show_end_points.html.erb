@@ -3,7 +3,19 @@
 <div class='container'>
   <div class='span-24'>
 
-  The folowing has <b><%= @endPoint_arr[0].nick %></b> as <i>nick</i>.  Choose one:</b><br/>
+<% 
+    title_str ||= nil
+    if !title_str.nil? 
+%>
+    <% 
+      # Ensure that title str only has <b> or <i> tags
+      html_tag_arr = title_str.scan(/(<[\/]*.+?>)/)
+      html_tag_arr.each { |tag_elem|
+        title_str.sub!(Regexp.escape(tag_elem[0]), '') if tag_elem[0] != '<i>' and tag_elem[0] != '</i>' and tag_elem[0] != '<b>' and tag_elem[0] != '</b>'
+      } # end html_tag_arr.each ..
+    %>
+    <p><%= raw title_str %></p>
+  <% end %>
   <ul><li>
   <%= render :partial => "shared/end_point_nick_col", :collection => @endPoint_arr, :spacer_template => "shared/li_ruler", :locals => { :show_nick_force => true } %>
   </li></ul>

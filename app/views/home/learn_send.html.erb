@@ -4,30 +4,41 @@
   <p>
     <h3>Send Meant.It</h3>
   </p>
-    You can send Meant.It from <%= link_to "http://meant.it/", url_for("/") %> or from email.  The only 2 differences are:
+    You can send Meant.It from <%= link_to "http://meant.it/", url_for("/") %> or from email.  The only differences are:
     <ul>
-     <li>Meant.It sent from webpage has 'anonymous' as sender</li>
-     <li>For email Meant.It, just send to thank@meant.it or whatever that is available on the webpage pulldown</li>
+     <li>Meant.It sent from the webpage has 'anonymous' as sender</li>
+     <li>To email Meant.It, just send to thank@meant.it, sorry@meant.it, <%= link_to "etc.", url_for("message_types") %>
     </ul>
-    The simplest message:
-    Send to thank@meant.it: <i>hello_kitty@sanrio.com</i> 
-    The 2nd simplest message:
-    Send to thank@meant.it: <i>:hello kitty:</i>
-    The 3rd simplest message:
-    Send to thank@meant.it: my_kitty
+    Send to <b>thank@meant.it</b>:<br/>
+    <ul>
+      <li><i>hello_kitty@sanrio.com</i>
+        <ul>
+          <li>Sends a 'thank' Meant.It to end point associated with <i>hello_kitty@sanrio.com</i></li>
+        </ul>
+      </li>
+      <li><i>:hello_kitty</i>
+        <ul>
+          <li>Sends a 'thank' Meant.It to end point associated with globally known name <i>hello kitty</i></li>
+        </ul>
+      </li>
+      <li><i>my_kitty</i>
+        <ul>
+          <li>Sends a 'thank' Meant.It to end point associated a nickname specific to you, <i>my_kitty</i></li>
+        </ul>
+      </li>
+   </ul>
 
     <h4>Details</h4>
     The following characters have special meaning that you can use to convey to Meant.It.
     <ul>
-      <li>: <i>Personally Identifiable Information</i> (pii) (required if no nickname)
+      <li>: exiplicitly indicates a <i>Personally Identifiable Information</i> (pii) (required if no nickname)
         <ul>
           <li>:hello kitty:</li>
           <li>:hello_kitty</li>
           <li>hello_kitty@sanrio.com</li>
         </ul>
       </li>
-      <li><i>Message Type</i> is select from pull-down</li>
-      <li><i>Long Message</i> (optional)
+      <li>; encloses a <i>Long Message</i> (optional)
         <ul>
           <li>;hello world;</li>
         </ul>
@@ -44,7 +55,8 @@
           <li>"no mouth"</li>
         </ul>
       </li>
-      <li><i>Nickname</i> (required if no pii), the first tag not enclosed by " or ' is used as nickname
+      <li><i>Message Type</i> is derived from the first tag that matches a Meant.It <%= link_to "message type", url_for("message_types") %>.</li>
+      <li><i>Nickname</i> (required if no pii), the first tag not enclosed by " or ' and is not a <i>message type</i> is used as nickname
       <ul>
         <li>my_kitty</li>
       </ul>
