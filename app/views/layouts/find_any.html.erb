@@ -22,6 +22,14 @@ find_any_input ||= nil
 <body>
     <div class="container">
       <div class="span-24">
+<% 
+  error_msg ||= nil
+  if error_msg
+%>
+  <p id="error" class="large"><b>Error:</b> <%= error_msg  %></p>
+<% else %>
+  <p class="large"> &nbsp; </p>
+<% end %>
         <p>
           <% why_elem = Constants.random_why %>
           <span class="large">
@@ -58,11 +66,9 @@ find_any_input ||= nil
               <input class="superlarge rounded" type="submit" value="send" />
               &nbsp;
               <select id="to" name="to">
-                <option value="thank@meant.it">thank</option>
-                <option value="resent@meant.it">resent</option>
-                <option value="like@meant.it">like</option>
-                <option value="sorry@meant.it">sorry</option>
-                <option value="join@meant.it">join</option>
+                <% MeantItMessageTypeValidator::MEANT_IT_MESSAGE_TYPE_ENUM.each { |msg_type|  %>
+                <option value="<%= msg_type %>@meant.it"><%= msg_type %></option>
+                <% } %>
               </select>
               &nbsp;
               <span class="superlarge">@meant.it</span>

@@ -164,18 +164,26 @@ class FindAny < ApplicationController
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show endpoint with tags_arr.inspect:#{tags_arr.inspect}")
         @endPoint_arr = EndPoint.tagged(tags_arr)
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show endpoint with tags, @endPoint_arr.inspect:#{@endPoint_arr.inspect}")
-        if message_type.nil?
-          if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+        if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+          if message_type.nil?
             render "end_points/show_end_points", :layout => "find_any", :locals => { :notice => nil, :find_any_input => decoded_find_any_input, :title_str => "End point(s) with <b>tag(s)</b>: <i>#{decoded_find_any_input}</i>" }
             return
-          end # end if !@endPoint_arr.nil?
-        else
-          # These are all just tags but with a message_type
-          if !@endPoint_arr.nil? and !@endPoint_arr.empty?
+          else
+            # These are all just tags but with a message_type
             render "show_endpoints_with_message_type", :layout => "find_any", :locals => { :notice => nil, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
-          end # end if !@endPoint_arr.nil?
-        end # end elsif !message_type.nil?
+          end # end elsif !message_type.nil?
+        else
+          if !message_type.nil? and !message_type.empty?
+            error_msg = "We're sorry but searching for only message type return too many results!"
+            render "home/index", :layout => true, :locals => { :error_msg => error_msg, :find_any_input => decoded_find_any_input }
+            return
+          else
+            error_msg = "We're sorry but no end points possess all the tags described"
+            render "home/index", :layout => true, :locals => { :error_msg => error_msg, :find_any_input => decoded_find_any_input }
+            return
+          end # end if !message_type.nil?
+        end # end if !@endPoint_arr.nil? ...
       elsif !sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
         @pii = sender_pii
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii => @pii.inspect:#{@pii.inspect}")
@@ -203,10 +211,13 @@ class FindAny < ApplicationController
         end # end elsif !message_type.nil?
       elsif !sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty? 
         # NOT POSSIBLE since we only get either sender_pii or sender_eps
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, SHOULDN'T BE HERE, !sender_pii.nil? and !sender_ep_arr.empty? and receiver_pii.nil? and receiver_ep_arr.empty?")
       elsif sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         # NOT POSSIBLE if there are no senders then receivers can't exist
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, SHOULDN'T BE HERE, sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty?")
       elsif sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty? 
         # NOT POSSIBLE if there are no senders then receivers can't exist
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, SHOULDN'T BE HERE, sender_pii.nil? and sender_ep_arr.empty? and receiver_pii.nil? and !receiver_ep_arr.empty?")
       elsif !sender_pii.nil? and sender_ep_arr.empty? and !receiver_pii.nil? and receiver_ep_arr.empty? 
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, show sender_pii.inspect:#{sender_pii.inspect}, receiver_pii.inspect:#{receiver_pii.inspect}, message_type:#{message_type}")
         if message_type.nil?
@@ -243,6 +254,10 @@ class FindAny < ApplicationController
             render "show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => receiver_ep_arr, :pii => sender_pii, :message_type => message_type, :find_any_input => decoded_find_any_input }
             return
         end # end if message_type.nil?
+      else
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:index:#{logtag}, SHOULDN'T BE HERE!!!")
+        flash[:notice] = "boohoo!!!"
+        render "/"
       end # end if sender_pii.nil? ...
     end # end if decoded_find_any_input.nil? or decoded_find_any_input.empty?
   end # end def index

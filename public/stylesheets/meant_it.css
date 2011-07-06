@@ -5,6 +5,10 @@
   background: #dee;
 }
 
+p#error {
+  color: red;
+}
+
 /* Rounded Corners */
 .rounded, a.btn{
 -webkit-border-radius:6px;
