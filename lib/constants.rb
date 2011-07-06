@@ -19,7 +19,7 @@ class Constants
     ["Better than disinterested thank you emails", "Each Meant.It builds the receiver's global reputation"],
     ["Portable reputation", "Reputation that follows even when you relocate, switch jobs, etc."],
     ["Declare a found item", "Returning lost item makes the owner's day; who knows what awaits you"],
-    ["Communicate anonymously", "Avoid awkward moments; hint at something and help someone change"],
+    ["Communicate anonymously", "Avoid awkward moments; hint something to help someone change"],
     ["A voice for you and me", "If enough people share the same voice, we can bring change"],
     ["A rendezvous", "A place to wait for someone who threw you a smile"]
   ]
