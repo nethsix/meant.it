@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class InboundEmailsControllerTest < ActionController::TestCase
+  SENDGRID_PARSE_URL = "/inbound_emails_200"
   setup do
 # To use inbound_emails() we need to use fixtures(?)
 #    @inbound_email = inbound_emails(:nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email)
@@ -91,7 +92,10 @@ class InboundEmailsControllerTest < ActionController::TestCase
    common_code(email_elem)
   end # end test "xxx_no_colon_inbound_email"
 
-  def common_code(email_elem)
+  # NOTE: if post_url is not inbound_emails_200 which is hidden
+  # then from: is not used to prevent people from faking email senders
+  # instead anon or session login id is used.  See controller for details.
+  def common_code(email_elem, post_url = "/inbound_emails_200")
     p "testing inbound_email.inspect:#{email_elem.inspect}"
 
     input_str = email_elem.subject
@@ -136,13 +140,18 @@ p "message_type_str:#{message_type_str}"
       ['MeantItRel.count', 1],
       ['MeantItMoodTagRel.count', non_exist_mood_tag_arr.size]
       ]) do
+      @request.path = post_url if !post_url.nil?
       post :create, :inbound_email => email_elem.attributes
     end
 
 p "MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
 p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
 
-    assert_redirected_to inbound_email_path(assigns(:inbound_email))
+    if post_url == SENDGRID_PARSE_URL
+      assert_response :success
+    else
+      assert_redirected_to inbound_email_path(assigns(:inbound_email))
+    end # end if post_url == SENDGRID_PARSE_URL
 
     # Check that email is created
     inbound_email_from_db = InboundEmail.find_by_id(assigns(:inbound_email)["id"])
@@ -152,6 +161,10 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_pii_email_hash = ControllerHelper.parse_email(email_elem.from)
     sender_pii_str = sender_pii_email_hash[ControllerHelper::EMAIL_STR]
     sender_pii_nick_str = sender_pii_email_hash[ControllerHelper::EMAIL_NICK_STR]
+    if post_url !=  "/inbound_emails_200"
+      sender_pii_str = "anonymous"
+      sender_pii_nick_str = nil
+    end # end if post_url !=  "/inbound_emails_200"
     sender_pii_hash = ControllerHelper.get_pii_hash(sender_pii_str)
     sender_pii = Pii.find_by_pii_value(sender_pii_hash[ControllerHelper::PII_VALUE_STR])
     assert_not_nil sender_pii
@@ -162,7 +175,11 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_endPoint_arr = sender_pii.endPoints
     assert_equal 1, sender_endPoint_arr.size
     sender_endPoint = sender_endPoint_arr[0]
-    assert_equal sender_pii_str, sender_endPoint.pii.pii_value
+    if post_url !=  "/inbound_emails_200"
+      assert_equal "anonymous", sender_endPoint.pii.pii_value
+    else
+      assert_equal sender_pii_str, sender_endPoint.pii.pii_value
+    end # end if post_url !=  "/inbound_emails_200"
 
     # Check that sender Entity is created
     sender_entities = sender_endPoint.entities
@@ -748,7 +765,18 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal receiver_nick_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
   end # end test "pick up pii without colon" do
 
+  test "send meant.it from webpage results in sender anon or login id" do
+    email_elem = inbound_emails(:nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)
+    common_code(email_elem, nil)
+  end # end test "send meant.it from webpage results in sender anon or login id"
+
   test "aaa" do
+    # Test abuse of inbound_emails_200
+    # i.e., REMOTE_ADDR don't match
+ 
+    # Test ib not inbound_emails_200, and logged in with id
+    # meantItRel created should have pii as logged in id
+
     # Test find_any relationship
     # nick :xxx
     # :xxx :xxx

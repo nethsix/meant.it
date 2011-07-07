@@ -8,6 +8,8 @@ class Constants
   END_POINT_CREATOR_END_POINT_INPUT = "end_point_creator_end_point_input"
 
   MEANT_IT_PII_SUFFIX = "@pii.meant.it"
+  SENDGRID_SMTP_WHITELIST = []
+  TEST_SMTP_WHITELIST = ['127.0.0.1']
 
   WEB_MAX_MEANTIT_IN = 1
   WEB_MAX_MEANTIT_OUT = 1

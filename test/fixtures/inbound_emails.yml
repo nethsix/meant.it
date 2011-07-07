@@ -11,7 +11,7 @@ nick_y_xxx_n_yyy_n_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty1 lawson1 hakusan1
-  to: regrets@meant.it
+  to: like@meant.it
   from: mama1@gmail.com
   attachment_count: 0
 nick_y_xxx_n_yyy_y_tags_n_sender_idable_inbound_email:
@@ -25,69 +25,69 @@ nick_y_xxx_n_yyy_n_tags_n_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty3
-  to: resents@meant.it
+  to: cheer@meant.it
   from: mama3@gmail.com
   attachment_count: 0
 nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty4 hakusan4 lawson4 ;lost my mouth; :hello_kitty4@yahoo.co.jp
-  to: lost@meant.it
+  to: found@meant.it
   from: mama4@gmail.com
   attachment_count: 0
 nick_y_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty5 hakusan5 lawson5 :hello_kitty5@yahoo.co.jp
-  to: organizes@meant.it
+  to: protest@meant.it
   from: mama5@gmail.com
   attachment_count: 0
 nick_y_xxx_y_yyy_y_tags_n_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty6 ;found dog6; :hello_kitty6@yahoo.co.jp
-  to: found@meant.it
+  to: advise@meant.it
   from: mama6@gmail.com
   attachment_count: 0
 nick_y_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: hello_kitty7 :hello_kitty7@yahoo.co.jp
-  to: sympathizes@meant.it
+  to: thanks@meant.it
   from: mama7@gmail.com
   attachment_count: 0
 nick_n_xxx_y_yyy_y_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: '"hakusan8" "lawson8" ;thank you for the great service8; :hello_kitty8@yahoo.co.jp'
-  to: other@meant.it
+  to: others@meant.it
   from: mama8@gmail.com
   attachment_count: 0
 nick_n_xxx_y_yyy_n_tags_y_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: '"hakusan9" "lawson9" :hello_kitty9@yahoo.co.jp'
-  to: thank@meant.it
+  to: cheers@meant.it
   from: mama9@gmail.com
   attachment_count: 0
 nick_n_xxx_y_yyy_y_tags_n_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: ;thank you for the great service10; :hello_kitty10@yahoo.co.jp
-  to: thank@meant.it
+  to: likes@meant.it
   from: mama10@gmail.com
   attachment_count: 0
 nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: ':hello_kitty11@yahoo.co.jp'
-  to: thank@meant.it
+  to: protests@meant.it
   from: mama11@gmail.com
   attachment_count: 0
 xxx_no_colon_inbound_email:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
   body_text: kurochan lawson12 hakusan12 ;you're evil!; kuromi@sanrio.com
-  to: lost@meant.it
+  to: advises@meant.it
   from: kuromi_dad@gmail.com
   attachment_count: 0

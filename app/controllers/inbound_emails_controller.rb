@@ -96,6 +96,14 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created inbound_email with id:#{@inbound_email.id}")
     sender_str = inbound_email_params[field_mapper[:from]]
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
+    # If not from sendgrid server url then don't use the sender_str
+    # make it anonymous or use session
+    if !self.request.path.match(/inbound_emails_200/) # or !Constants::SENDGRID_SMTP_WHITELIST.include?(self.request.env['REMOTE_ADDR'])
+      # Check for session id
+      # CODE!!!
+      # else use anonymous
+      sender_str = "anonymous#{Constants::MEANT_IT_PII_SUFFIX}"
+    end # end if !self.request.path.match(/inbound_emails_200/)
     sender_email_hash = ControllerHelper.parse_email(sender_str)
     sender_str = sender_email_hash[ControllerHelper::EMAIL_STR]
     sender_nick_str = sender_email_hash[ControllerHelper::EMAIL_NICK_STR]
@@ -442,7 +450,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
       @meantItRel = @sender_endPoint.srcMeantItRels.create(:message_type => message_type_str, :message => message_str, :src_endpoint_id => @sender_endPoint.id, :dst_endpoint_id => @receiver_endPoint.id, :inbound_email_id => @inbound_email.id)
       unless @meantItRel.errors.empty?
         @error_obj_arr << @meantItRel
-        error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, receiver_endPoint.id#{receiver_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
+        error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, @receiver_endPoint.id#{@receiver_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
         return
       end # end unless @meantItRel.errors.empty?
       if @meantItRel.errors.empty?
