@@ -1,7 +1,7 @@
 <div class="container">
   <div class="span-24">
 <%
-  meantItRels_arr = MeantItRel.find(:all, :order => "id desc", :limit => Constants::WEB_MAIN_MAX_MEANTIT).reverse
+  meantItRels_arr = MeantItRel.find(:all, :order => "id desc", :limit => Constants::WEB_MAIN_MAX_MEANTIT)
   if !meantItRels_arr.nil? and !meantItRels_arr.empty?
 %>
   Last <%= Constants::WEB_MAIN_MAX_MEANTIT %> Meant.It(s):
