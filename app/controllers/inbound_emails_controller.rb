@@ -98,12 +98,12 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_str = inbound_email_params[field_mapper[:from]]:#{inbound_email_params[field_mapper[:from]]}")
     # If not from sendgrid server url then don't use the sender_str
     # make it anonymous or use session
-    if !self.request.path.match(/inbound_emails_200/) # or !Constants::SENDGRID_SMTP_WHITELIST.include?(self.request.env['REMOTE_ADDR'])
+    if !self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/) # or !Constants::SENDGRID_SMTP_WHITELIST.include?(self.request.env['REMOTE_ADDR'])
       # Check for session id
       # CODE!!!
       # else use anonymous
       sender_str = "anonymous#{Constants::MEANT_IT_PII_SUFFIX}"
-    end # end if !self.request.path.match(/inbound_emails_200/)
+    end # end if !self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
     sender_email_hash = ControllerHelper.parse_email(sender_str)
     sender_str = sender_email_hash[ControllerHelper::EMAIL_STR]
     sender_nick_str = sender_email_hash[ControllerHelper::EMAIL_NICK_STR]
@@ -473,10 +473,10 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
     end # end if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
     # Things that require 200 otherwise they'll keep resending, e.g.
     # sendgrid
-    if self.request.path.match(/inbound_emails_200/)
+    if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
       render :xml => @inbound_email, :status => 200
       return
-    end # end if self.request.path.match(/inbound_emails_200/)
+    end # end if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
     # This is from meant_it find/send main page
     if self.request.path.match(/send_inbound_emails/)
       if !@sender_pii.nil? and !@receiver_pii.nil?
@@ -526,7 +526,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
   private
     def error_display(message, errors, message_type =:error, logtag=nil)
       if @inbound_email.errors.any?
-        if self.request.path.match(/inbound_emails_200/)
+        if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
           logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:error_display:#{logtag}: inbound email with params:#{message}, generated errors:#{errors.inspect}")
           # Problem with inbound_email saving, this is the fault
           # automated sender.  Only automated sender uses inbound_emails_200
@@ -534,7 +534,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           @inbound_email_logs = InboundEmailLog.create(:params_txt => params.inspect.to_s, :error_msgs => message, :error_objs => @inbound_email.errors.inspect.to_s)
         else
           # We don't worry cause user will see error message
-        end # end if self.request.path.match(/inbound_emails_200/)
+        end # end if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
       else
         logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:error_display:#{logtag}: inbound email saved but controller processing resulted in message:#{message}, and errors:#{errors.inspect}")
         @inbound_email.error_msgs = message.to_s
@@ -545,10 +545,10 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
       flash[message_type] = message
       # Things that require 200 otherwise they'll keep resending, e.g.
       # sendgrid
-      if self.request.path.match(/inbound_emails_200/)
+      if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
         render :xml => errors, :status => 200
         return
-      end # end if self.request.path.match(/inbound_emails_200/)
+      end # end if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
       respond_to do |format|
         format.html { render :action => "new" }
         format.xml  { render :xml => errors, :status => :unprocessable_entity }

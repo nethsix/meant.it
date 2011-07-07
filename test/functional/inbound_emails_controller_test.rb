@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class InboundEmailsControllerTest < ActionController::TestCase
-  SENDGRID_PARSE_URL = "/inbound_emails_200"
   setup do
 # To use inbound_emails() we need to use fixtures(?)
 #    @inbound_email = inbound_emails(:nick_y_xxx_n_yyy_y_tags_y_sender_idable_inbound_email)
@@ -95,7 +94,7 @@ class InboundEmailsControllerTest < ActionController::TestCase
   # NOTE: if post_url is not inbound_emails_200 which is hidden
   # then from: is not used to prevent people from faking email senders
   # instead anon or session login id is used.  See controller for details.
-  def common_code(email_elem, post_url = "/inbound_emails_200")
+  def common_code(email_elem, post_url = Constants::SENDGRID_PARSE_URL)
     p "testing inbound_email.inspect:#{email_elem.inspect}"
 
     input_str = email_elem.subject
@@ -147,11 +146,11 @@ p "message_type_str:#{message_type_str}"
 p "MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
 p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
 
-    if post_url == SENDGRID_PARSE_URL
+    if post_url == Constants::SENDGRID_PARSE_URL
       assert_response :success
     else
       assert_redirected_to inbound_email_path(assigns(:inbound_email))
-    end # end if post_url == SENDGRID_PARSE_URL
+    end # end if post_url == Constants::SENDGRID_PARSE_URL
 
     # Check that email is created
     inbound_email_from_db = InboundEmail.find_by_id(assigns(:inbound_email)["id"])
@@ -161,10 +160,10 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_pii_email_hash = ControllerHelper.parse_email(email_elem.from)
     sender_pii_str = sender_pii_email_hash[ControllerHelper::EMAIL_STR]
     sender_pii_nick_str = sender_pii_email_hash[ControllerHelper::EMAIL_NICK_STR]
-    if post_url !=  "/inbound_emails_200"
+    if post_url !=  Constants::SENDGRID_PARSE_URL
       sender_pii_str = "anonymous"
       sender_pii_nick_str = nil
-    end # end if post_url !=  "/inbound_emails_200"
+    end # end if post_url !=  Constants::SENDGRID_PARSE_URL
     sender_pii_hash = ControllerHelper.get_pii_hash(sender_pii_str)
     sender_pii = Pii.find_by_pii_value(sender_pii_hash[ControllerHelper::PII_VALUE_STR])
     assert_not_nil sender_pii
@@ -175,11 +174,11 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_endPoint_arr = sender_pii.endPoints
     assert_equal 1, sender_endPoint_arr.size
     sender_endPoint = sender_endPoint_arr[0]
-    if post_url !=  "/inbound_emails_200"
+    if post_url !=  Constants::SENDGRID_PARSE_URL
       assert_equal "anonymous", sender_endPoint.pii.pii_value
     else
       assert_equal sender_pii_str, sender_endPoint.pii.pii_value
-    end # end if post_url !=  "/inbound_emails_200"
+    end # end if post_url != Constants::SENDGRID_PARSE_URL
 
     # Check that sender Entity is created
     sender_entities = sender_endPoint.entities
@@ -277,7 +276,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -293,7 +292,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -316,7 +315,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -339,7 +338,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -365,7 +364,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -387,7 +386,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -416,7 +415,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -435,7 +434,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -462,7 +461,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -483,7 +482,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -518,7 +517,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200.xml"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -550,7 +549,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -575,7 +574,7 @@ p "#### first_inbound_email:#{first_inbound_email.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -599,7 +598,7 @@ p "#### first_inbound_email:#{first_inbound_email.inspect}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     p "#### inbound_email_last #1:#{InboundEmail.last.body_text}"
@@ -618,7 +617,7 @@ p "#AAAAAAA after body_text:#{body_text}"
       # We accept that inbound_emails_200 will lead to action
       # create here.  We do this testing elsewhere.
       # See "/inbound_emails_200 should lead to create action and xml"
-      @request.path = "/inbound_emails_200"
+      @request.path = Constants::SENDGRID_PARSE_URL
       post :create, :inbound_email => first_inbound_email.attributes
     end
     assert_response :success
@@ -657,7 +656,7 @@ p "#AAAAAAA after body_text:#{body_text}"
   end
 
   test "inbound_emails_200 should lead to create action and xml" do
-    assert_recognizes({:controller => "inbound_emails", :action => "create", :format => "xml"}, {:path => '/inbound_emails_200', :method => :post})
+    assert_recognizes({:controller => "inbound_emails", :action => "create", :format => "xml"}, {:path => Constants::SENDGRID_PARSE_URL, :method => :post})
   end
 
   test "pii with only preceding colon" do
