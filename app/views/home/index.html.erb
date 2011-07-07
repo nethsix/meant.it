@@ -1,0 +1,15 @@
+<div class="container">
+  <div class="span-24">
+<%
+  meantItRels_arr = MeantItRel.find(:all, :order => "id desc", :limit => Constants::WEB_MAIN_MAX_MEANTIT).reverse
+  if !meantItRels_arr.nil? and !meantItRels_arr.empty?
+%>
+  Last <%= Constants::WEB_MAIN_MAX_MEANTIT %> Meant.It(s):
+  <ul><li>
+  <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => meantItRels_arr %>
+  </li></ul>
+<%
+  end # end if !meantItRels_arr.nil? and !meantItRels_arr.empty?
+%>
+  </div>
+</div>
