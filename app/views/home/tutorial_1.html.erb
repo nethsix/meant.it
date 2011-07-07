@@ -3,12 +3,24 @@
   <p>
     <h3>Meant.It 101</h3>
   </p>
-  The two important concepts are:
+  Meant.It is for sending messages to any end point, e.g., object/human/animal, etc, and statistically tracking them:
   <ul>
-      <li>Personally Identifiable Information (pii)</li>
-      <li>Nickname (nick)</li>
+    <li>Send messages to any end point without knowing how/where it actually receives messages
+      <ul>
+        <li>Here is <%= link_to "why", url_for("/why") %> that can be useful
+      </ul>
+    </li>
+    <li>Send messages anonymously or use nicknames</li>
+    <li>Use sent/received messages as 'reputation'</li>
   </ul>
-  Important things about pii:
+  Identify end points using 3 concepts:
+  <ul>
+      <li>Personally Identifiable Information (pii) (optional if nick provided)</li>
+      <li>Nickname (nick) (optional if pii provided)</li>
+      <li>Tags (optional)</li>
+  </ul>
+  <h4>Details</h4>
+  <b>pii</b>:
   <ul>
     <li>Pii is unique to an object/human/animal
       <ul>
@@ -23,24 +35,35 @@
       </ul>
     </li>
   </ul>
-  Important things about nick:
+  <b>nick</b>:
   <ul>
-    <li>Each user can assign a pii a different nick; nicks are not a global concept like pii.
+    <li>Each user can assign the same pii a different nick; nicks are not a global concept like pii.
       <ul>
         <li>cat_with_no_mouth</li>
         <li>my_kitty</li>
       </ul>
     </li>
-    <li>When a nick is shown, it is accompanied by the owner (abbreviated as own:)
+    <li>When a nick is shown, for disambiguation, it is accompanied by the owner
       <ul>
         <li>nick:cat_with_no_mouth (own:kuromi)</li>
       </ul>
+    </li>
+  </ul>
+  <b>tag</b>:
+  <ul>
+    <li>It is associated with an end point</li>
+    <li>It is key for people to 'communicate' when they do know have each other's contact
+       <ul>
+         <li>You met eyes with someone somewhere</li>
+         <li>You found a lost item somewhere</li>
+       </ul>
     </li>
   </ul>
   Why do we need nick and pii?  
   <ul>
     <li>Pii is not shown if it is something confidential, e.g., email</li>
     <li>Communicating using nicks, preserves some form of privacy</li>
+    <li>An end point is refered to as (<b>id</b>:xx) when nick is not provided and the pii is confidential.
   </ul>
   </div>
   <%= link_to "Home", url_for("/") %>
