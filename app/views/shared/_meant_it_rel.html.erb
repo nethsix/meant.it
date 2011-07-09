@@ -100,3 +100,5 @@
 <% if !meant_it_rel.message.nil? and !meant_it_rel.message.empty? %>
   <%= ControllerHelper.random_say %> '<i><%= meant_it_rel.message %></i>'
 <% end %>
+
+- <%= time_ago_in_words(meant_it_rel.created_at) %> ago
