@@ -480,10 +480,23 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
     # This is from meant_it find/send main page
     if self.request.path.match(/send_inbound_emails/)
       if !@sender_pii.nil? and !@receiver_pii.nil?
-        find_any_input_str = "#{@sender_pii.pii_value} #{message_type_str} #{@receiver_pii.pii_value}"
+        # Check for space
+        sender_pii_pii_value_str = @sender_pii.pii_value
+        receiver_pii_pii_value_str = @receiver_pii.pii_value
+        if !@sender_pii.pii_value.scan(' ').empty?
+          sender_pii_pii_value_str = "'#{@sender_pii.pii_value}'"
+        end # end if @sender_pii.pii_value.scan(' ').empty?
+        if !@receiver_pii.pii_value.scan(' ').empty?
+          receiver_pii_pii_value_str = "'#{@receiver_pii.pii_value}'"
+        end # end if @receiver_pii.pii_value.scan(' ').empty?
+        find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{receiver_pii_pii_value_str}"
         render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
       elsif !@sender_pii.nil? and @receiver_pii.nil? and !@receiver_endPoint.nil?
-        find_any_input_str = "#{@sender_pii.pii_value} #{message_type_str} #{@receiver_endPoint.nick}"
+        sender_pii_pii_value_str = @sender_pii.pii_value
+        if !@sender_pii.pii_value.scan(' ').empty?
+          sender_pii_pii_value_str = "'#{@sender_pii.pii_value}'"
+        end # end if @sender_pii.pii_value.scan(' ').empty?
+        find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{@receiver_endPoint.nick}"
         render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => @receiver_endPoint, :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
       end # end if !@sender_pii.nil? ...
       return
