@@ -28,6 +28,10 @@ find_any_input ||= nil
   if error_msg
 %>
   <p id="error" class="large"><b>Error:</b> <%= error_msg  %></p>
+<% elsif flash[:notice] %>
+  <p id="notice" class="large"><b>Notice:</b> <%= flash[:notice] %></p>
+<% elsif flash[:alert] %>
+  <p id="alert" class="large"><b>Alert:</b> <%= flash[:alert] %></p>
 <% else %>
   <p class="large"> &nbsp; </p>
 <% end %>
