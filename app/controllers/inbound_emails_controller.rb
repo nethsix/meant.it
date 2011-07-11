@@ -152,6 +152,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
       end # end unless @sender_endPoint.save
+      @sender_pii.reload
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
@@ -301,6 +302,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
           return
         end # end unless @receiver_endPoint.save
+        @receiver_pii.reload
       end # end if our_receiver_pii_endPoints.index(@receiver_endPoint).nil?
 #20110628a : End
 #20110628a : End
@@ -383,6 +385,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end unless @receiver_endPoint.save
+      @receiver_pii.reload
     end # end if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?)  ...
     
     # For Case 4. receiver_pii_str: empty, receiver_nick_str: yes
@@ -490,6 +493,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           receiver_pii_pii_value_str = "'#{@receiver_pii.pii_value}'"
         end # end if @receiver_pii.pii_value.scan(' ').empty?
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{receiver_pii_pii_value_str}"
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_pii.inspect:#{@receiver_pii.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
         render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
       elsif !@sender_pii.nil? and @receiver_pii.nil? and !@receiver_endPoint.nil?
         sender_pii_pii_value_str = @sender_pii.pii_value
@@ -497,6 +501,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           sender_pii_pii_value_str = "'#{@sender_pii.pii_value}'"
         end # end if @sender_pii.pii_value.scan(' ').empty?
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{@receiver_endPoint.nick}"
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_endPoint.inspect#{@receiver_endPoint.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
         render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => @receiver_endPoint, :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
       end # end if !@sender_pii.nil? ...
       return

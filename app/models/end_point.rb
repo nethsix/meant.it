@@ -37,7 +37,8 @@ class EndPoint < ActiveRecord::Base
 
   # Find intersection of tags
   def EndPoint.tagged(tg, *tgs)
-    tgs = tgs.unshift(*tg)
+    tgs_raw = tgs.unshift(*tg)
+    tgs = tgs_raw.collect { |raw_elem| raw_elem.gsub(/\\/, '\&\&').gsub(/'/, "''") }
     joins(:tags).where("lower(tags.name) = '" + 
       tgs.uniq.collect{ |t| t.to_s.downcase }.join("' OR lower(tags.name) = '") + 
       "'").group("end_points.id", "end_points.creator_endpoint_id", 
