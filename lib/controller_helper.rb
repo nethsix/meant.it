@@ -189,7 +189,12 @@ module ControllerHelper
     email_nick_str = email_str_match_arr[1].strip if !email_str_match_arr.nil?
     email_nick_str = strip_quotes(email_nick_str)
     # NOTE: <kuromi@sanrio.com> will give email_nick_str = '' instead of nil
-    email_nick_str = nil if email_nick_str.nil? or email_nick_str.empty?
+    if email_nick_str.nil? or email_nick_str.empty?
+      email_nick_str = nil 
+    else
+      # We don't want space in nicks
+      email_nick_str.sub!(' ', '_')
+    end # end if email_nick_str.nil? or email_nick_str.empty?
     email_str = email_str_match_arr[2].strip if !email_str_match_arr.nil?
     if (email_str_arr = email_str.match(/(.+)#{Constants::MEANT_IT_PII_SUFFIX}/))
       # Not an email but a pii
