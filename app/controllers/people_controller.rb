@@ -1,4 +1,6 @@
 class PeopleController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
+
   def index
     @people = Person.all
   end

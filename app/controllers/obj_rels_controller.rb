@@ -1,4 +1,6 @@
 class ObjRelsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
+
   # GET /obj_rels
   # GET /obj_rels.xml
   def index

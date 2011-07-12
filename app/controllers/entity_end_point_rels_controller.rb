@@ -1,4 +1,5 @@
 class EntityEndPointRelsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
   # GET /entity_end_point_rels
   # GET /entity_end_point_rels.xml
   def index

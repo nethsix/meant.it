@@ -1,4 +1,6 @@
 class MeantItMoodTagRelsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
+
   # GET /meant_it_mood_tag_rels
   # GET /meant_it_mood_tag_rels.xml
   def index

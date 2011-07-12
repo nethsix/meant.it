@@ -2,6 +2,8 @@ require 'controller_helper'
 require 'constants'
 
 class EndPointsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create, :show_by_nick, :show_by_ids, :show_by_id, :show_by_nick_and_creator_endpoint_id, :show_by_tags ]
+
   # GET /end_points
   # GET /end_points.xml
   def index

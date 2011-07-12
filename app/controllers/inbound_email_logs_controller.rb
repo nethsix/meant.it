@@ -1,4 +1,5 @@
 class InboundEmailLogsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
   # GET /inbound_email_logs
   # GET /inbound_email_logs.xml
   def index

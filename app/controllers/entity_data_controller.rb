@@ -1,4 +1,6 @@
 class EntityDataController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
+
   # GET /entity_data
   # GET /entity_data.xml
   def index

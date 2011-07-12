@@ -95,7 +95,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
           query_str = "ids%5b%5d="
           dst_endpoint_arr = srcMeantItRelDstUniqs.collect{ |mi_elem_elem| mi_elem_elem.id }
           query_str += dst_endpoint_arr.join("&ids%5b%5d=")
-          title_str = CGI.escape("Unique Receivers of <b>nick:</b>#{@endPoint_arr[0].nick} and <b>Message Type</b>:#{message_type}")
+          title_str = CGI.escape("Unique Receivers of <b>nick:</b>#{@endPoint_arr[0].nick} and <b>message type</b>:#{message_type}")
         %>
         <%= link_to "#{srcMeantItRelDstUniqs.size}", url_for("/end_points/show_by_ids?#{query_str}&#{Constants::TITLE_STR}=#{title_str}") %>
       </td>

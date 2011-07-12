@@ -58,7 +58,8 @@
 <% dstMeantItRelTypeHash.each { |mi_type, mi_elem| %>
     <tr>
       <td>
-         <%= mi_type %>
+         <% find_any_input_custom_str = "#{endPoint.nick} #{mi_type}" %>
+         <%= link_to "#{mi_type}", url_for("/find_any?#{Constants::FIND_ANY_INPUT}=#{CGI.escape(find_any_input_custom_str)}")  %>
       </td>
       <td>
         <% if !dstMeantItRelTypeHash[mi_type].nil? %>
@@ -106,7 +107,8 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <% srcMeantItRelTypeHash.each { |mi_type, mi_elem| %>
     <tr>
       <td>
-         <%= mi_type %>
+         <% find_any_input_custom_str = "#{endPoint.nick} #{mi_type}" %>
+         <%= link_to "#{mi_type}", url_for("/find_any?#{Constants::FIND_ANY_INPUT}=#{CGI.escape(find_any_input_custom_str)}")  %>
       </td>
       <td>
         <% if !srcMeantItRelTypeHash[mi_type].nil? %>
@@ -119,7 +121,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
             query_str = "ids%5b%5d="
             dst_endpoint_arr = srcMeantItRelTypeUniqHash[mi_type].collect{ |mi_elem_elem| mi_elem_elem.dst_endpoint_id }
             query_str += dst_endpoint_arr.join("&ids%5b%5d=")
-            title_str = CGI.escape("Unique Receivers of <b>nick:</b>#{@endPoint.nick} and <b>Message Type</b>:#{mi_type}")
+            title_str = CGI.escape("Unique Receivers of <b>nick:</b>#{@endPoint.nick} and <b>message type</b>:#{mi_type}")
           %>
           <%= link_to "#{srcMeantItRelTypeUniqHash[mi_type].size}", url_for("/end_points/show_by_ids?#{query_str}&#{Constants::TITLE_STR}=#{title_str}") %>
         <% end %>

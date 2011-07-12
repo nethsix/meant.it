@@ -1,6 +1,8 @@
 require 'constants'
 
 class MeantItRelsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii ]
+
   # GET /meant_it_rels
   # GET /meant_it_rels.xml
   def index
@@ -97,11 +99,13 @@ class MeantItRelsController < ApplicationController
     meantItRels = nil
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{pii_str} =&gt; <b>nick</b>:#{nick_str})"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => pii_endPoints, :dst_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{pii_str} <i>#{message_type}</i> <b>nick</b>:#{nick_str})"
     end # end if message_type.nil? or message_type.empty?
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_endpoint_nick
@@ -120,11 +124,13 @@ class MeantItRelsController < ApplicationController
     meantItRels = nil
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:dst_endpoint_id => pii_endPoints, :src_endpoint_id => nick_endPoints).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{nick_str} =&gt; <b>nick</b>:#{pii_str})"
     else
       meantItRels = MeantItRel.where(:dst_endpoint_id => pii_endPoints, :src_endpoint_id => nick_endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{nick_str} <i>#{message_type}</i> <b>nick</b>:#{pii_str})"
     end # end if message_type.nil? or message_type.empty?
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_endpoint_nick
@@ -145,12 +151,14 @@ class MeantItRelsController < ApplicationController
     sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC")
+      title_str = "<b>pii</b>:#{sender_pii_str} =&gt; <b>pii</b>:#{receiver_pii_str}"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "<b>pii</b>:#{sender_pii_str} <i>#{message_type}</i> <b>pii</b>:#{receiver_pii_str}"
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_pii_pii
@@ -169,13 +177,15 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{endpoint_nick_str} =&gt; all)"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>pii</b>:#{endpoint_nick_str} <i>#{message_type}</i> any)"
     end # end if message_type.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_out_by_endpoint_id
@@ -197,13 +207,15 @@ class MeantItRelsController < ApplicationController
 #AA    meantItRels = ControllerHelper.mir_from_find_match_dstEndPoints(sender_srcMeantItRels, receiver_endPoints)
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints).order("created_at DESC")
+      title_str = "(<b>nick</b>:#{sender_nick} &lt;=&gt; <b>nick</b>:#{receiver_nick})"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => sender_endPoints, :dst_endpoint_id => receiver_endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>nick</b>:#{sender_nick} <i>#{message_type}</i> <b>nick</b>:#{receiver_nick})"
     end # end if message_type.nil? or message_type.empty?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }, :title_str => title_str  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_endpoint_endpoint_nick
@@ -218,6 +230,7 @@ class MeantItRelsController < ApplicationController
     dst_endpoint_nick_str = dst_endPoint.nick if !dst_endPoint.nil?
     dst_endPoint = EndPoint.find(dst_endpoint_id)
     find_any_input_str = "#{src_endpoint_nick_str} #{dst_endpoint_nick_str}"
+    title_str = "(<b>nick:</b>#{src_endpoint_nick_str} =&gt; <b>nick:</b>#{dst_endpoint_nick_str})"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_endpoint_id:#{logtag}, endpoint_id:#{endpoint_id}")
     sender_endPoints = EndPoint.find(src_endpoint_id)
@@ -229,7 +242,7 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_by_endpoint_endpoint_id
@@ -246,12 +259,14 @@ class MeantItRelsController < ApplicationController
     meantItRels = nil
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(any =&gt; <b>nick:</b>#{endpoint_nick})"
     else
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(any <i>#{message_type}</i> <b>nick:</b>#{endpoint_nick})"
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_endpoint_nick
@@ -270,13 +285,15 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(any =&gt; <b>nick:</b>#{endpoint_nick_str})"
     else
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(any <i>#{message_type}</i> <b>nick:</b>#{endpoint_nick_str})"
     end # end if message_type.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_endpoint_id:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_endpoint_id
@@ -295,13 +312,15 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(<b>pii:</b>#{pii_str} =&gt; any)"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>pii:</b>#{pii_str} <i>#{message_type}</i> any)"
     end # end if message_type.nil? or message_type.empty?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_out_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end
@@ -318,12 +337,14 @@ class MeantItRelsController < ApplicationController
     meantItRels = nil
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(<b>nick:</b>#{endpoint_nick} =&gt; any)"
     else
       meantItRels = MeantItRel.where(:src_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(<b>nick:</b>#{endpoint_nick} <i>#{message_type}</i> any)"
     end # end if message_type.nil? or message_type.empty?
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_out_by_endpoint_nick
@@ -342,13 +363,15 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
     if message_type.nil? or message_type.empty?
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints).order("created_at DESC")
+      title_str = "(any =&gt; <b>pii:</b>#{pii_str})"
     else
       meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      title_str = "(any <i>#{message_type}</i> <b>pii:</b>#{pii_str})"
     end # end if message_type.nil? ...
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_pii

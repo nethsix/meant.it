@@ -5,6 +5,14 @@
   <div class='span-24'>
 <p>
 <b>Meant.It</b> List
+<%
+  title_str ||= nil
+  if !title_str.nil? 
+%>
+    <%= raw raw_display_only_b_and_i(title_str) %>
+<%  
+  end
+%>
 </p>
 <% if !meantItRels.empty? and !meantItRels.nil? %>
   <ul><li>

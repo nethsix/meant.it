@@ -1,4 +1,6 @@
 class EndPointTagRelsController < ApplicationController
+  before_filter :authorize, :except => [:index, :show, :create ]
+
   # GET /end_point_tag_rels
   # GET /end_point_tag_rels.xml
   def index
