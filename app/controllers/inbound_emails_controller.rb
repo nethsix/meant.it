@@ -114,7 +114,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # If sender_nick_str is email, e.g., some smtp servers provide
     # "hello_kitty@sanrio.com <hello_kitty@sanrio.com>" then we
     # don't use the nick
-    sender_nick_str = nil if !sender_nick_str.match(/.*@.*\..*/).nil?
+    sender_nick_str = nil if !sender_nick_str.nil? and !sender_nick_str.match(/.*@.*\..*/).nil?
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_str:#{sender_str}")
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_nick_str:#{sender_nick_str}")
     sender_email_addr = inbound_email_params[field_mapper[:to]]

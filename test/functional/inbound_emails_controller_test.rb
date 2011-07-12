@@ -744,14 +744,14 @@ p "#AAAAAAA after body_text:#{body_text}"
     email_hash = ControllerHelper.parse_email(email_str)
     email = email_hash[ControllerHelper::EMAIL_STR]
     email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
-    assert_equal "kuromi@sanrio.com", email_nick
+    assert_nil email_nick
     assert_equal "kuromi@sanrio.com", email
 
     email_str = "kuromi@sanrio.com"
     email_hash = ControllerHelper.parse_email(email_str)
     email = email_hash[ControllerHelper::EMAIL_STR]
     email_nick = email_hash[ControllerHelper::EMAIL_NICK_STR]
-    assert_equal "kuromi@sanrio.com", email_nick
+    assert_nil email_nick
     assert_equal "kuromi@sanrio.com", email
   end # end test "parse email to get nick and email
 
@@ -768,6 +768,13 @@ p "#AAAAAAA after body_text:#{body_text}"
     email_elem = inbound_emails(:nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)
     common_code(email_elem, nil)
   end # end test "send meant.it from webpage results in sender anon or login id"
+
+  test "no space in nick from email" do
+    email = "hello kitty <hello_kitty@sanrio.com>"
+    email_hash = ControllerHelper.parse_email(email)
+    assert_equal "hello_kitty", email_hash[ControllerHelper::EMAIL_NICK_STR]
+    assert_equal "hello_kitty@sanrio.com", email_hash[ControllerHelper::EMAIL_STR]
+  end # end test "no space in nick from email"
 
   test "aaa" do
     # Test abuse of inbound_emails_200

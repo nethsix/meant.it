@@ -200,7 +200,7 @@ module ControllerHelper
       # Not an email but a pii
       email_str = email_str_arr[1]
     end # end if !email_str.index(Constants::MEANT_IT_PII_SUFFIX).nil?
-    email_nick_str ||= email_str
+#    email_nick_str ||= email_str
     { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
   end # end self.parse_email
 
