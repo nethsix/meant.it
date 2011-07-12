@@ -1,7 +1,8 @@
 require 'controller_helper'
 
 class PiisController < ApplicationController
-  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
+#  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
+  before_filter :authorize, :except => [:create, :show_by_pii_value ]
 
   # GET /piis
   # GET /piis.xml
