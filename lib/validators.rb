@@ -58,7 +58,7 @@ class MeantItMessageTypeValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     msg_type_downcase = value.downcase if !value.nil?
     normalized_msg_type_downcase = MessageTypeMapper.get_message_type(msg_type_downcase)
-    record.errors[attribute] << "permits only '#{MessageTypeMapper.get_all_message_types.join('\', \'').strip}'" if normalized_msg_type_downcase.nil?
+    record.errors[attribute] << "message_type:#{normalized_msg_type_downcase} not allowed, permits only '#{MessageTypeMapper.get_all_message_types.join('\', \'').strip}, #{MEANT_IT_MESSAGE_TYPE_ENUM.join('\', \'').strip}'" if normalized_msg_type_downcase.nil?
   end # end def validate_each
 end # end class MeantItMessageTypeValidator
 

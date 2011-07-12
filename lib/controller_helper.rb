@@ -18,7 +18,10 @@ module ControllerHelper
   def self.parse_message_type_from_email_addr(email_addr, logtag = nil)
     message_type_str = nil
     email_addr_match_arr = nil
-    email_addr_match_arr = email_addr.match /(.+)@.+\..+/ if !email_addr.nil?
+    # NOTE: email_addr may be long for, i.e., "hello kitty <hello_kitty@sanrio.com>"
+    email_hash = parse_email(email_addr)
+    short_email_addr = email_hash[EMAIL_STR]
+    email_addr_match_arr = short_email_addr.match /(.+)@.+\..+/ if !short_email_addr.nil?
     if email_addr_match_arr.nil?
       message_type_str = MeantItMessageTypeValidator::MEANT_IT_MESSAGE_THANK
     else
