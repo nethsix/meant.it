@@ -82,7 +82,7 @@ nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email:
   envelope: <%= envelope.to_s %>
   body_text: ':hello_kitty11@yahoo.co.jp'
   to: protests@meant.it
-  from: mama11@gmail.com
+  from: 'mama 11 <mama11@gmail.com>'
   attachment_count: 0
 xxx_no_colon_inbound_email:
   headers: <%= headers.to_s %>
