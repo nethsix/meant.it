@@ -155,40 +155,40 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
-    if @sender_endPoint.entities.empty?
-      # Create person
-      @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
-      unless @person.errors.empty?
-        @error_obj_arr << @person
-        error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
-        return
-      end # end unless @person.errors.empty?
-      # Create an entity having property_document with sender email
-      entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
-      logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
-      if entity_collection.empty?
-        @entity = Entity.create(:property_document_id => @person.id)
-      else
-        @entity = entity_collection[0]
-      end # end if entity_collection.empty?
-      unless @entity.errors.empty?
-        @error_obj_arr << @entity
-        error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
-        return
-      end # end unless @entity.errors.empty?
-      # Link entity to the @sender_endPoint
-      if @entity.errors.empty?
-        # We cannot just do @entity.endPoints << @sender_endPoint
-        # because EntityEndPointRels.verification_type must not be null
-        @entityEndPointRel1 = @entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_EMAIL)
-        @entityEndPointRel1.endpoint_id = @sender_endPoint.id
-        unless @entityEndPointRel1.save
-          @error_obj_arr << @entityEndPointRel1
-          error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
-          return
-        end # end unless @entityEndPointRel1.save
-      end # end if @entity.errors.empty?
-    end # end if @sender_endPoint.entities.empty?
+#20110713    if @sender_endPoint.entities.empty?
+#20110713      # Create person
+#20110713      @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
+#20110713      unless @person.errors.empty?
+#20110713        @error_obj_arr << @person
+#20110713        error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
+#20110713        return
+#20110713      end # end unless @person.errors.empty?
+#20110713      # Create an entity having property_document with sender email
+#20110713      entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
+#20110713      logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
+#20110713      if entity_collection.empty?
+#20110713        @entity = Entity.create(:property_document_id => @person.id)
+#20110713      else
+#20110713        @entity = entity_collection[0]
+#20110713      end # end if entity_collection.empty?
+#20110713      unless @entity.errors.empty?
+#20110713        @error_obj_arr << @entity
+#20110713        error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
+#20110713        return
+#20110713      end # end unless @entity.errors.empty?
+#20110713      # Link entity to the @sender_endPoint
+#20110713      if @entity.errors.empty?
+#20110713        # We cannot just do @entity.endPoints << @sender_endPoint
+#20110713        # because EntityEndPointRels.verification_type must not be null
+#20110713        @entityEndPointRel1 = @entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_EMAIL)
+#20110713        @entityEndPointRel1.endpoint_id = @sender_endPoint.id
+#20110713        unless @entityEndPointRel1.save
+#20110713          @error_obj_arr << @entityEndPointRel1
+#20110713          error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
+#20110713          return
+#20110713        end # end unless @entityEndPointRel1.save
+#20110713      end # end if @entity.errors.empty?
+#20110713    end # end if @sender_endPoint.entities.empty?
     # Look at subject if it's not nil
     # else use body_text
     input_str = inbound_email_params[field_mapper[:subject]]

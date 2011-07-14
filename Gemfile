@@ -34,3 +34,5 @@ gem 'rake', '~> 0.8.7'
 gem 'couchrest_model', :git => 'git://github.com/couchrest/couchrest_model'
 gem 'pg'
 gem 'devise'
+gem 'bcrypt-ruby', :require => 'bcrypt'
+gem "recaptcha", :require => "recaptcha/rails"

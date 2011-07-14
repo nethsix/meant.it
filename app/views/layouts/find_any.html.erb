@@ -4,6 +4,7 @@
 #  req_url_query_hash = CGI::parse(req_url.query) if !req_url.query.nil?
 #  find_any_input = req_url_query_hash.values.join("\n") if !req_url_query_hash.nil?
 find_any_input ||= nil
+show_new_user ||= nil
 %>
 
 <!DOCTYPE html>
@@ -23,15 +24,33 @@ find_any_input ||= nil
     <div class="container">
       <div class="span-20">
         <%= link_to "Home", url_for("/") %>
+        <% if current_entity %>
+          Logged in as <b><%= current_entity.login_name %></b>
+          <%= link_to "Log out", log_out_path %>
+        <% elsif show_new_user.nil? %>
+          <form accept-charset='UTF-8' action='/sessions' class='session_new' id='session_new' method='post'>
+            Login name:<input type='text' id='session_login_name' name='session[login_name]' size='15'/>
+            Password:<input type='password' id='session_password' name='session[password]' size='15'/>
+            <input id="session_submit" name="commit" type="submit" value="Go" />
+          </form>
+        <% else %>
+          About to create new user <b><%= show_new_user %></b>
+          <form method='get' action='<%= verify_captcha_path %>'>
+            <%= recaptcha_tags %>
+            <input type='hidden' id='session_login_name' name='session[login_name]' value='<%= show_new_user %>'/>
+            <input type='hidden' id='session_password' name='session[password]' value='<%= show_pword %>'/>
+          </form>
+        <% end %>
+Flash<%= flash.inspect %>
 <% 
   error_msg ||= nil
   if error_msg
 %>
   <p id="error" class="large"><b>Error:</b> <%= error_msg  %></p>
 <% elsif flash[:notice] %>
-  <p id="notice" class="large"><b>Notice:</b> <%= flash[:notice] %></p>
+  <p id="info" class="large"><b>Notice:</b> <%= flash[:notice] %></p>
 <% elsif flash[:alert] %>
-  <p id="alert" class="large"><b>Alert:</b> <%= flash[:alert] %></p>
+  <p id="error" class="large"><b>Alert:</b> <%= flash[:alert] %></p>
 <% else %>
   <p class="large"> &nbsp; </p>
 <% end %>

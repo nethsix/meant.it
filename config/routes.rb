@@ -1,4 +1,14 @@
 MeantIt::Application.routes.draw do
+
+#  get "sessions/new"
+  get "log_in" => "sessions#new", :as => "log_in"  
+  get "log_out" => "sessions#destroy", :as => "log_out"
+  get "verify_captcha" => "sessions#verify_captcha", :as => "verify_captcha"
+
+  devise_for :users
+
+  resources :sessions
+
   resources :inbound_email_logs
 
   resources :yes_emails

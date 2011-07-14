@@ -191,6 +191,10 @@ module ControllerHelper
     if (email_str_arr = email_str.match(/(.+)#{Constants::MEANT_IT_PII_SUFFIX}/))
       # Not an email but a pii
       email_str = email_str_arr[1]
+    elsif email_str_arr.nil? or email_str_arr.empty?
+      # Check if it's an email
+      email_str_arr = email_str.match(/(.+?)@(.+)\.(.+?)/)
+      email_str = nil if email_str_arr.nil?
     end # end if !email_str.index(Constants::MEANT_IT_PII_SUFFIX).nil?
     email_nick_str ||= email_str
     { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
@@ -347,4 +351,18 @@ module ControllerHelper
   def self.random_say
     SAY_ENUM[rand(SAY_ENUM.size)]
   end # def self.random_say
+
+  def self.create_entity(login_name, password, logtag = nil)
+    entity = Entity.new(:login_name => login_name, :password => password)
+    # If login_name is email then create propertyDocument/entityDatum
+    email_hash = ControllerHelper.parse_email(login_name)
+    name = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create_entity:#{logtag}, name:#{name}, email:#{email}")
+    new_person = ControllerHelper.find_or_create_person_by_email(name, email) if !email.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create_entity:#{logtag}, new_person.inspect:#{new_person.inspect}")
+    entity.property_document_id = new_person.id if !new_person.nil?
+    entity.save
+    entity
+  end # end def self.createEntity
 end # end module ControllerHelper
