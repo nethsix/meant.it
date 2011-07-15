@@ -4,6 +4,7 @@ MeantIt::Application.routes.draw do
   get "log_in" => "sessions#new", :as => "log_in"  
   get "log_out" => "sessions#destroy", :as => "log_out"
   get "verify_captcha" => "sessions#verify_captcha", :as => "verify_captcha"
+  get "manage" => "sessions#manage", :as => "manage"
 
   devise_for :users
 

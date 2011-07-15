@@ -13,7 +13,7 @@ class Entity < ActiveRecord::Base
 #  validates :property_document_id, :uniqueness => true, :property_document_id_foreign_key => true
   validates :login_name, :presence => true, :uniqueness => true, :simple_name => true
   validates_presence_of :password, :on => :create
-  validates_length_of :password, :minimum => 6
+  validates :password, :length => { :minimum => 6}, :on => :create
   validates :status, :presence => true, :status_type => true
 
   after_initialize :default_values

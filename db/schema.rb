@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110713104128) do
+ActiveRecord::Schema.define(:version => 20110715132104) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -73,11 +73,11 @@ ActiveRecord::Schema.define(:version => 20110713104128) do
     t.integer  "credit_card_no_2"
     t.integer  "credit_card_no_3"
     t.integer  "credit_card_no_4"
-    t.string   "credit_card_exp_yyyy"
-    t.string   "credit_card_exp_mm"
     t.integer  "credit_card_ccv"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "credit_card_exp_yyyy"
+    t.integer  "credit_card_exp_mm"
   end
 
   add_index "entity_data", ["email"], :name => "by_email", :unique => true

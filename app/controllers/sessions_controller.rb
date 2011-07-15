@@ -1,6 +1,16 @@
 class SessionsController < ApplicationController
+
+  before_filter :logged_in, :only => [:manage]
+
   def new
   end
+
+  def manage
+    logtag = ControllerHelper.gen_logtag
+    respond_to do |format|
+      format.html # render 
+    end
+  end # end def manage
 
   def create  
     logtag = ControllerHelper.gen_logtag
@@ -17,7 +27,7 @@ class SessionsController < ApplicationController
       redirect_to root_url, :alert => "Invalid username/password!"
     else
       # Attempt to create id but make user go through captcha
-      render "/home/index.html.erb", :layout => "find_any", :locals => { :notice => "Please solve recaptcha", :show_new_user => login_name, :show_pword => pword }
+      render "/home/index.html.erb", :layout => "find_any", :locals => { :notice => "Please solve re-captcha", :show_new_user => login_name, :show_pword => pword }
     end
   end # end def create
 
@@ -25,9 +35,9 @@ class SessionsController < ApplicationController
     if verify_recaptcha
       new_entity = ControllerHelper.create_entity(params[:session][:login_name], params[:session][:password])
       session[:entity_id] = new_entity.id
-      redirect_to root_url, :notice => "Welcome #{new_entity.login_name}!"
+      redirect_to root_url, :notice => "Welcome '#{new_entity.login_name}'!"
     else
-      redirect_to root_url, :alert => "Re-captcha failed"
+      redirect_to root_url, :alert => "Re-captcha failed. User '#{params[:session][:login_name]}' not created!"
     end # end if verify_recaptcha
   end # end def verify_captcha
 
