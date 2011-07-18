@@ -7,6 +7,8 @@
 <b>Meant.It</b> List
 <%
   title_str ||= nil
+  up_url ||= nil
+  down_url ||= nil
   if !title_str.nil? 
 %>
     <%= raw raw_display_only_b_and_i(title_str) %>
@@ -18,6 +20,12 @@
   <ul><li>
   <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => meantItRels %>
   </li></ul>
+<% end %>
+<% if !down_url.nil? %>
+  <%= link_to "<-", url_for(down_url) %> 
+<% end %>
+<% if !up_url.nil? %>
+  <%= link_to "->", url_for(up_url) %>
 <% end %>
 
   </div>

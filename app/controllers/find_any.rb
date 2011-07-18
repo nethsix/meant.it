@@ -175,8 +175,7 @@ class FindAny < ApplicationController
           end # end elsif !message_type.nil?
         else
           if !message_type.nil? and !message_type.empty?
-            error_msg = "We're sorry but searching for only message type return too many results!"
-            render "home/index", :layout => true, :locals => { :error_msg => error_msg, :find_any_input => decoded_find_any_input }
+            redirect_to "/meant_it_rels/show_by_message_type?#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}"
             return
           else
             error_msg = "We're sorry but no end points possess all the tags described"

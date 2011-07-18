@@ -27,6 +27,7 @@ MeantIt::Application.routes.draw do
       get 'show_by_pii_pii' 
       get 'show_by_pii_endpoint_nick'
       get 'show_by_endpoint_nick_pii'
+      get 'show_by_message_type'
     end
   end
 

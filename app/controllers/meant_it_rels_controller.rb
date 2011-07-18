@@ -1,7 +1,7 @@
 require 'constants'
 
 class MeantItRelsController < ApplicationController
-  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii ]
+  before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type ]
 
   # GET /meant_it_rels
   # GET /meant_it_rels.xml
@@ -375,4 +375,52 @@ class MeantItRelsController < ApplicationController
       format.xml  { render :xml => meantItRels }
     end
   end # end def show_in_by_pii
+
+  def show_by_message_type
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, params.inspect:#{params.inspect}")
+    message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    last_id = params[Constants::MEANT_IT_REL_LAST_ID]
+    start_id = params[Constants::MEANT_IT_REL_START_ID]
+    page_size = params[Constants::MEANT_IT_REL_PAGE_SIZE]
+    find_any_input_str = "#{message_type}"
+    meantItRels = nil
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, message_type:#{message_type}")
+    if last_id.nil? and start_id.nil?
+      # Get from latest backwards if nothing specified
+      last_id ||= MeantItRel.last.id
+      last_id = last_id.to_i
+    elsif !last_id.nil? and start_id.nil?
+      # Naturally last_id is used
+      last_id = last_id.to_i
+    elsif !start_id.nil? and last_id.nil?
+      # Naturally start_id is used
+      start_id = start_id.to_i
+    elsif !start_id.nil? and !last_id.nil?
+      # The logic below will prefer the last_id
+      last_id = last_id.to_i
+      start_id = start_id.to_i
+    end # end if last_id.nil? ...
+    page_size ||= Constants::WEB_PAGE_RESULT_SIZE
+    page_size = page_size.to_i
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, start_id:#{start_id}, last_id:#{last_id}, page_size:#{page_size}")
+    if !last_id.nil?
+      meantItRels = MeantItRel.reverse_paginate_by_id("message_type = '#{message_type}'", last_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
+    elsif !start_id.nil?
+      meantItRels = MeantItRel.paginate_by_id("message_type = '#{message_type}'", start_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
+    end # end elsif !start_id.nil?
+    if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.up_more("message_type = '#{message_type}'", meantItRels[0].id.to_i)
+      up_url = "/meant_it_rels/show_by_message_type?#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}"
+    end # end if !meantItRels.nil? ...
+    if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.down_more("message_type = '#{message_type}'", meantItRels[meantItRels.size-1].id.to_i)
+      down_url = "/meant_it_rels/show_by_message_type?#{Constants::MEANT_IT_REL_LAST_ID}=#{meantItRels[meantItRels.size-1].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}"
+    end # end if !meantItRels.nil? ...
+    title_str = "(any <i>#{message_type}</i> any)"
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
+
+    respond_to do |format|
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
+      format.xml  { render :xml => meantItRels }
+    end
+  end # end def show_by_message_type
 end

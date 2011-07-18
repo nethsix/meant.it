@@ -6,6 +6,11 @@ class Constants
   TAGS_INPUT = "tags_input"
   END_POINT_NICK_INPUT = "end_point_nick_input"
   END_POINT_CREATOR_END_POINT_INPUT = "end_point_creator_end_point_input"
+  MEANT_IT_REL_PAGE_SIZE = "pg_size"
+  MEANT_IT_REL_LAST_ID = "last_id"
+  MEANT_IT_REL_START_ID = "start_id"
+
+  PAGINATE_BATCH_SIZE = 5
 
   MEANT_IT_PII_SUFFIX = "@pii.meant.it"
   SENDGRID_SMTP_WHITELIST = []
@@ -16,6 +21,7 @@ class Constants
   WEB_MAX_MEANTIT_IN = 3
   WEB_MAX_MEANTIT_OUT = 3
   WEB_MAIN_MAX_MEANTIT = 5
+  WEB_PAGE_RESULT_SIZE = 10
 
   MEANT_IT_RELS_DETAILS_SRC = :src
   MEANT_IT_RELS_DETAILS_DST = :dst

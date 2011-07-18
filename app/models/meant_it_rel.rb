@@ -1,6 +1,7 @@
 require 'validators'
 
 class MeantItRel < ActiveRecord::Base
+  FIRST_INDEX = 1
   has_many :meantItMoodTagRels
   has_many :tags, :through => :meantItMoodTagRels
 #  belongs_to :srcEndPoint, :class_name => "EndPoint"
