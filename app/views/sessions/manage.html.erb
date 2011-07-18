@@ -1,0 +1,21 @@
+<div class='container'>
+  <%= render :partial => "shared/top_menu" %>
+  <span class="large"><b>Claim:</b></span>
+  <%
+    pii = Pii.find_by_pii_value(current_entity.login_name)
+    user = User.find_by_email(current_entity.login_name)
+    if user.nil?
+  %>
+      <a href=''>current_entity.login_name</a>
+  <%
+    else
+  %>
+      
+  <%
+    end # end if user.nil?
+  %>
+  <div class='span-20'>
+  </div>
+  <div class='span-4 last'>
+  </div>
+</div>

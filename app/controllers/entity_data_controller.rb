@@ -95,7 +95,7 @@ class EntityDataController < ApplicationController
 
     respond_to do |format|
       if @entity_datum.update_attributes(params[:entity_datum])
-        format.html { redirect_to(@entity_datum, :notice => 'Entity datum was successfully updated.') }
+        format.html { redirect_to("/", :notice => 'Entity datum updated.') }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
