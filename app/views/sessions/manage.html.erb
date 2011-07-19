@@ -1,21 +1,27 @@
 <div class='container'>
   <%= render :partial => "shared/top_menu" %>
-  <span class="large"><b>Claim:</b></span>
-  <%
-    pii = Pii.find_by_pii_value(current_entity.login_name)
-    user = User.find_by_email(current_entity.login_name)
-    if user.nil?
-  %>
-      <a href=''>current_entity.login_name</a>
-  <%
-    else
-  %>
-      
-  <%
-    end # end if user.nil?
-  %>
-  <div class='span-20'>
-  </div>
-  <div class='span-4 last'>
+  <div class='span-24'>
+    <span class="large"><b>Claim</b><br /></span>
+    <%
+      email_hash = ControllerHelper.parse_email(current_entity.login_name)
+      # If it's an email allow user to claim
+      if !email_hash[ControllerHelper::EMAIL_STR].nil?
+        user = User.find_by_email(current_entity.login_name)
+        if user.nil? or (!user.nil? and user.confirmed_at.nil?)
+          new_user = User.create(:email => current_entity.login_name, :password => current_entity.password_hash) if user.nil?
+    %>
+          <ul>
+            <li>
+              <a href='/resend_confirmation?<%= Constants::EMAIL_VALUE_INPUT %>=<%= current_entity.login_name %>'><%= current_entity.login_name %></a>
+            </li>
+          </ul>
+    <%  end # end if user.nil? or (!user.nil?  ...
+      else %>
+      Search for <b>pii</b> to claim:
+      <form method="get" action="/piis/show_by_pii_value.xml" class="user_new" id="user_new">
+      </form>
+    <%
+      end # end if user.nil?
+    %>
   </div>
 </div>

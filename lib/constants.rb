@@ -1,5 +1,6 @@
 class Constants
   TITLE_STR = "title_str"
+  EMAIL_VALUE_INPUT = "email"
   PII_VALUE_INPUT = "pii_value_input"
   MESSAGE_TYPE_INPUT= "message_type_input"
   FIND_ANY_INPUT = "find_any_input"

@@ -45,4 +45,17 @@ class SessionsController < ApplicationController
     session[:entity_id] = nil  
     redirect_to root_url, :notice => "Logged out!"  
   end 
+
+  def resend_confirmation
+    logtag = ControllerHelper.gen_logtag
+    email = params[Constants::EMAIL_VALUE_INPUT]
+    user = User.find_by_email(email)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:resend_confirmation:#{logtag}, email:#{email}, user.inspect:#{user.inspect}")
+    if user.nil?
+      new_user = User.create(:email => email, :password => current_entity.password_hash)
+    elsif
+      user.resend_confirmation_token
+    end # end if user.nil?
+    redirect_to "/", :notice => "Confirmation email sent to '#{email}'"
+  end # end
 end
