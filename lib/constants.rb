@@ -14,6 +14,9 @@ class Constants
 
   SENDGRID_PARSE_URL = "/inbound_emails_200"
 
+  SESSION_CONFIRM_EMAIL_ENDPOINT_ID= :session_confirm_email_endpoint_id
+  SESSION_ENTITY_ID = :session_entity_id
+
   WEB_MAX_MEANTIT_IN = 3
   WEB_MAX_MEANTIT_OUT = 3
   WEB_MAIN_MAX_MEANTIT = 5

@@ -1,2 +1,10 @@
-<h1>Sessions#new</h1>
-<p>Find me in app/views/sessions/new.html.erb</p>
+<div class="container">
+  <div class="span-24">
+    <h3>Login</h3>
+    <%= form_tag(sessions_path, :method => "post") do %>
+      Login name:<input type='text' id='session_login_name' name='session[login_name]' size='15'/>
+      Password:<input type='password' id='session_password' name='session[password]' size='15'/>
+      <input id="session_submit" name="commit" type="submit" value="Sign In" />
+    <% end %>
+  </div>
+</div>

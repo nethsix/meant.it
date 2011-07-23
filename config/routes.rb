@@ -7,7 +7,7 @@ MeantIt::Application.routes.draw do
   get "manage" => "sessions#manage", :as => "manage"
   get "resend_confirmation" => "sessions#resend_confirmation", :as => "resend_confirmation"
 
-  devise_for :users
+  devise_for :users, :controllers => { :confirmations => "meant_it_confirmations" }
 
   resources :sessions
 

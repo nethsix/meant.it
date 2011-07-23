@@ -34,7 +34,7 @@ class ApplicationController < ActionController::Base
 
   private
   def current_entity
-    @current_entity ||= Entity.find(session[:entity_id]) if session[:entity_id]
+    @current_entity ||= Entity.find(session[Constants::SESSION_ENTITY_ID]) if session[Constants::SESSION_ENTITY_ID]
   end
 
   def logged_in

@@ -8,7 +8,6 @@
       if !email_hash[ControllerHelper::EMAIL_STR].nil?
         user = User.find_by_email(current_entity.login_name)
         if user.nil? or (!user.nil? and user.confirmed_at.nil?)
-          new_user = User.create(:email => current_entity.login_name, :password => current_entity.password_hash) if user.nil?
     %>
           <ul>
             <li>
