@@ -42,13 +42,15 @@ class EntitiesController < ApplicationController
   # POST /entities
   # POST /entities.xml
   def create
-    @entity = Entity.new(params[:entity])
+    logtag = ControllerHelper.gen_logtag
+    @entity = ControllerHelper.create_entity(params[:entity][:login_name], params[:entity][:password])
 
     respond_to do |format|
-      if @entity.save
+      if !@entity.nil? and !@entity.errors.any?
         format.html { redirect_to(@entity, :notice => 'Entity was successfully created.') }
         format.xml  { render :xml => @entity, :status => :created, :location => @entity }
       else
+        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @entity.errors.inspect:#{@entity.errors.inspect}")
         format.html { render :action => "new" }
         format.xml  { render :xml => @entity.errors, :status => :unprocessable_entity }
       end
@@ -61,7 +63,7 @@ class EntitiesController < ApplicationController
     @entity = Entity.find(params[:id])
 
     respond_to do |format|
-      if @entity.update_attributes(params[:entity])
+      if @entity.update_attributes({:login_name => params[:entity][:login_name], :password => params[:entity][:password]})
         format.html { redirect_to(@entity, :notice => 'Entity was successfully updated.') }
         format.xml  { head :ok }
       else

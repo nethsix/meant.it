@@ -4,6 +4,9 @@
 #  req_url_query_hash = CGI::parse(req_url.query) if !req_url.query.nil?
 #  find_any_input = req_url_query_hash.values.join("\n") if !req_url_query_hash.nil?
 find_any_input ||= nil
+show_new_user ||= nil
+show_pword ||= nil
+error_msg ||= nil
 %>
 
 <!DOCTYPE html>
@@ -21,16 +24,8 @@ find_any_input ||= nil
 </head>
 <body>
     <div class="container">
+      <%= render :partial => "shared/top_menu", :locals => { :show_new_user => show_new_user, :show_pword => show_pword, :error_msg => error_msg }%>
       <div class="span-20">
-        <%= link_to "Home", url_for("/") %>
-<% 
-  error_msg ||= nil
-  if error_msg
-%>
-  <p id="error" class="large"><b>Error:</b> <%= error_msg  %></p>
-<% else %>
-  <p class="large"> &nbsp; </p>
-<% end %>
         <p>
           <% why_elem = Constants.random_why %>
           <span class="large">
@@ -44,7 +39,7 @@ find_any_input ||= nil
         <a href='http://getsatisfaction.com/meant_it'>Get Help!</a>
       </div>
       <div class="span-24 lightbg1" id="find_meant_it_div">
-        <form id="find_meant_it_form" action="/find_any" method="get">
+        <%= form_tag("/find_any", :method => "get") do %>
 
           <fieldset>
             <legend>Find Meant.It</legend>
@@ -55,10 +50,10 @@ find_any_input ||= nil
             </p>
             Try entering <b><i>meant.it</i></b> (<%= link_to "Learn more", url_for("/learn_find") %>)
           </fieldset>
-        </form>
+        <% end %>
       </div>
       <div class="span-24 lightbg2" id="send_meant_it_div">
-        <form id="send_meant_it_form" action="/send_inbound_emails" method="post">
+        <%= form_tag("/send_inbound_emails", :method=> "post") do %>
 
           <fieldset>
             <legend >Send Meant.It</legend>
@@ -82,7 +77,7 @@ find_any_input ||= nil
             Try entering <b><i>:meant.it ;thanks for making life better;</i></b> here<br/>
             or send email with subject/body <b><i>:meant.it ;thanks for making life better;</i></b> to thank@meant.it. (<%= link_to "Learn more", url_for("/learn_send") %>)
           </fieldset>
-        </form>
+        <% end %>
       </div>
       <div class='span-21'>
         &nbsp;

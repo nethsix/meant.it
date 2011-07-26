@@ -9,6 +9,10 @@ p#error {
   color: red;
 }
 
+p#info {
+  color: blue;
+}
+
 /* Rounded Corners */
 .rounded, a.btn{
 -webkit-border-radius:6px;

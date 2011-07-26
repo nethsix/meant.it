@@ -1,0 +1,43 @@
+<% show_new_user ||= nil %>
+<div class="span-20">
+  <%= link_to "Home", url_for("/") %>
+  <% if current_entity %>
+    <%= link_to "Manage", manage_path %>
+    <% if current_entity.property_document_id.nil? %>
+      <%= link_to "Profile", new_entity_datum_path %>
+    <% else %>
+      <%= link_to "Profile", edit_entity_datum_path(current_entity.property_document_id) %>
+    <% end %>
+    <%= link_to "Log out", log_out_path %>
+    Logged in as <b><%= current_entity.login_name %></b>
+  <% elsif show_new_user.nil? %>
+    <form style='display:inline' accept-charset='UTF-8' action='/sessions' class='session_new' id='session_new' method='post'>
+      Login name:<input type='text' id='session_login_name' name='session[login_name]' size='15'/>
+      Password:<input type='password' id='session_password' name='session[password]' size='15'/>
+      <input id="session_submit" name="commit" type="submit" value="Sign In/Up" />
+    </form>
+  <% else %>
+    About to create new user <b><%= show_new_user %></b>
+    <form method='get' action='<%= verify_captcha_path %>'>
+      <%= recaptcha_tags %>
+      <input type='hidden' id='session_login_name' name='session[login_name]' value='<%= show_new_user %>'/>
+      <input type='hidden' id='session_password' name='session[password]' value='<%= show_pword %>'/>
+    </form>
+  <% end %>
+  <% 
+    error_msg ||= nil
+    if error_msg
+  %>
+    <p id="error" class="large"><b>Error:</b> <%= error_msg  %></p>
+  <% elsif flash[:notice] %>
+    <p id="info" class="large"><b>Notice:</b> <%= flash[:notice] %></p>
+  <% elsif flash[:alert] %>
+    <p id="error" class="large"><b>Alert:</b> <%= flash[:alert] %></p>
+  <% else %>
+    <p class="large"> &nbsp; </p>
+  <% end %>
+</div>
+<div class="span-4 last">
+  <img height='20' src='/images/nethseven_meant_it.png' />
+  <a href='http://twitter.com/nethseven'>twitter.com/nethseven</a>
+</div>

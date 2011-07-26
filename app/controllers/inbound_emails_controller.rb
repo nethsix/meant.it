@@ -151,48 +151,54 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       @sender_endPoint.nick = sender_nick_str
       @sender_endPoint.creator_endpoint_id = @sender_endPoint.id
       unless @sender_endPoint.save
-       @error_obj_arr << @sender_endPoint
+        @error_obj_arr << @sender_endPoint
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
       end # end unless @sender_endPoint.save
       @sender_pii.reload
+#20110725add_auth      @sender_pii.endPoints << @sender_endPoint
+#20110725add_auth      unless @sender_pii.save
+#20110725add_auth        @error_obj_arr << @sender_pii
+#20110725add_auth        error_display("Error saving @sender_pii'#{@sender_pii.inspect}:#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
+#20110725add_auth        return
+#20110725add_auth      end # end unless @sender_pii.save
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
-    if @sender_endPoint.entities.empty?
-      # Create person
-      @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
-      unless @person.errors.empty?
-        @error_obj_arr << @person
-        error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
-        return
-      end # end unless @person.errors.empty?
-      # Create an entity having property_document with sender email
-      entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
-      logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
-      if entity_collection.empty?
-        @entity = Entity.create(:property_document_id => @person.id)
-      else
-        @entity = entity_collection[0]
-      end # end if entity_collection.empty?
-      unless @entity.errors.empty?
-        @error_obj_arr << @entity
-        error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
-        return
-      end # end unless @entity.errors.empty?
-      # Link entity to the @sender_endPoint
-      if @entity.errors.empty?
-        # We cannot just do @entity.endPoints << @sender_endPoint
-        # because EntityEndPointRels.verification_type must not be null
-        @entityEndPointRel1 = @entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_EMAIL)
-        @entityEndPointRel1.endpoint_id = @sender_endPoint.id
-        unless @entityEndPointRel1.save
-          @error_obj_arr << @entityEndPointRel1
-          error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
-          return
-        end # end unless @entityEndPointRel1.save
-      end # end if @entity.errors.empty?
-    end # end if @sender_endPoint.entities.empty?
+#20110713    if @sender_endPoint.entities.empty?
+#20110713      # Create person
+#20110713      @person = ControllerHelper.find_or_create_person_by_email(sender_nick_str, sender_str, logtag)
+#20110713      unless @person.errors.empty?
+#20110713        @error_obj_arr << @person
+#20110713        error_display("Error creating person 'name:#{sender_nick_str}, email:#{sender_str}:#{@person.errors}", @person.errors, :error, logtag)
+#20110713        return
+#20110713      end # end unless @person.errors.empty?
+#20110713      # Create an entity having property_document with sender email
+#20110713      entity_collection = Entity.where("property_document_id = ?", @person.id.to_s)
+#20110713      logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, for @person.id:#{@person.id}, entity_collection.inspect:#{entity_collection.inspect}")
+#20110713      if entity_collection.empty?
+#20110713        @entity = Entity.create(:property_document_id => @person.id)
+#20110713      else
+#20110713        @entity = entity_collection[0]
+#20110713      end # end if entity_collection.empty?
+#20110713      unless @entity.errors.empty?
+#20110713        @error_obj_arr << @entity
+#20110713        error_display("Error creating entity 'property_document_id:#{@person.id}':#{@entity.errors}", @entity.errors, :error, logtag)
+#20110713        return
+#20110713      end # end unless @entity.errors.empty?
+#20110713      # Link entity to the @sender_endPoint
+#20110713      if @entity.errors.empty?
+#20110713        # We cannot just do @entity.endPoints << @sender_endPoint
+#20110713        # because EntityEndPointRels.verification_type must not be null
+#20110713        @entityEndPointRel1 = @entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_EMAIL)
+#20110713        @entityEndPointRel1.endpoint_id = @sender_endPoint.id
+#20110713        unless @entityEndPointRel1.save
+#20110713          @error_obj_arr << @entityEndPointRel1
+#20110713          error_display("Error creating entityEndPointRel 'entity:#{@entity.name} relate @sender_endPoint:#{@sender_endPoint.id}':#{@entityEndPointRel1.errors}", @entityEndPointRel1.errors, :error, logtag)
+#20110713          return
+#20110713        end # end unless @entityEndPointRel1.save
+#20110713      end # end if @entity.errors.empty?
+#20110713    end # end if @sender_endPoint.entities.empty?
     # Look at subject if it's not nil
     # else use body_text
     input_str = inbound_email_params[field_mapper[:subject]]
@@ -306,6 +312,12 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           return
         end # end unless @receiver_endPoint.save
         @receiver_pii.reload
+#20110725add_auth        @receiver_pii.endPoints << @receiver_endPoint
+#20110725add_auth        unless @receiver_pii.save
+#20110725add_auth          @error_obj_arr << @receiver_pii
+#20110725add_auth          error_display("Error saving @receiver_pii'#{@receiver_pii.inspect}:#{@receiver_pii.errors}", @receiver_pii.errors, :error, logtag)
+#20110725add_auth          return
+#20110725add_auth        end # end unless @receiver_pii.save
       end # end if our_receiver_pii_endPoints.index(@receiver_endPoint).nil?
 #20110628a : End
 #20110628a : End
@@ -374,7 +386,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
 #20110628a : Start
       # Check if we already have endPoint with no nick.  If so use it.
       receiver_endPoint_no_nick_arr = our_receiver_pii_endPoints.select { |elem| elem.nick.nil? }
-      @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 1
+      @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 0
       if receiver_endPoint_no_nick_arr.size > 1
         logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, more than one receiver_endPoints with nick = nil, receiver_endPoint_no_nick_arr:#{receiver_endPoint_no_nick_arr.inspect}")
       end # end if receiver_endPoint_no_nick_arr.size > 1
@@ -389,6 +401,12 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         return
       end # end unless @receiver_endPoint.save
       @receiver_pii.reload
+#20110725add_auth      @receiver_pii.endPoints << @receiver_endPoint
+#20110725add_auth      unless @receiver_pii.save
+#20110725add_auth        @error_obj_arr << @receiver_pii
+#20110725add_auth        error_display("Error saving @receiver_pii'#{@receiver_pii.inspect}:#{@receiver_pii.errors}", @receiver_pii.errors, :error, logtag)
+#20110725add_auth        return
+#20110725add_auth      end # end unless @receiver_pii.save
     end # end if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?)  ...
     
     # For Case 4. receiver_pii_str: empty, receiver_nick_str: yes
@@ -486,6 +504,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
     # This is from meant_it find/send main page
     if self.request.path.match(/send_inbound_emails/)
       if !@sender_pii.nil? and !@receiver_pii.nil?
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: send_inbound_emails: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_pii.inspect:#{@receiver_pii.inspect}, message_type_str:#{message_type_str}")
         # Check for space
         sender_pii_pii_value_str = @sender_pii.pii_value
         receiver_pii_pii_value_str = @receiver_pii.pii_value

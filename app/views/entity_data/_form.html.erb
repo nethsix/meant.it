@@ -1,7 +1,13 @@
+<div class='container'>
+  <%= render :partial => "shared/top_menu" %>
+  <div class='span-24'>
+
+<h3>Profile</h3>
+
 <%= form_for(@entity_datum) do |f| %>
   <% if @entity_datum.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@entity_datum.errors.count, "error") %> prohibited this entity_datum from being saved:</h2>
+      <h4 style='color:red'><%= pluralize(@entity_datum.errors.count, "error") %> prohibited this profile from being saved:</h4>
 
       <ul>
       <% @entity_datum.errors.full_messages.each do |msg| %>
@@ -11,26 +17,29 @@
     </div>
   <% end %>
 
+<div class="span-12">
   <div class="field">
     <%= f.label :first_name %><br />
     <%= f.text_field :first_name %>
   </div>
   <div class="field">
+    <%= f.label "Date of birth (YYYY-MM-DD)" %><br />
+    <%= f.text_field :dob_yyyy, :size => 4 %> - 
+    <%= f.text_field :dob_mm, :size => 2 %> - 
+    <%= f.text_field :dob_dd, :size => 2 %>
+  </div>
+</div>
+<div class="span-12 last">
+  <div class="field">
     <%= f.label :last_name %><br />
     <%= f.text_field :last_name %>
   </div>
   <div class="field">
-    <%= f.label :dob_yyyy %><br />
-    <%= f.text_field :dob_yyyy %>
+    <%= f.label :email %><br />
+    <%= f.text_field :email %>
   </div>
-  <div class="field">
-    <%= f.label :dob_mm %><br />
-    <%= f.text_field :dob_mm %>
-  </div>
-  <div class="field">
-    <%= f.label :dob_dd %><br />
-    <%= f.text_field :dob_dd %>
-  </div>
+</div>
+<div class="span-12">
   <div class="field">
     <%= f.label :address_1 %><br />
     <%= f.text_field :address_1 %>
@@ -41,8 +50,10 @@
   </div>
   <div class="field">
     <%= f.label :address_3 %><br />
-    <%= f.text_area :address_3 %>
+    <%= f.text_field:address_3 %>
   </div>
+</div>
+<div class="span-12 last">
   <div class="field">
     <%= f.label :city %><br />
     <%= f.text_field :city %>
@@ -55,35 +66,32 @@
     <%= f.label :country %><br />
     <%= f.text_field :country %>
   </div>
+</div>
+<div class="span-12">
   <div class="field">
-    <%= f.label :credit_card_no_1 %><br />
-    <%= f.text_field :credit_card_no_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :credit_card_no_2 %><br />
-    <%= f.text_field :credit_card_no_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :credit_card_no_3 %><br />
-    <%= f.text_field :credit_card_no_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :credit_card_no_4 %><br />
-    <%= f.text_field :credit_card_no_4 %>
-  </div>
-  <div class="field">
-    <%= f.label :credit_card_exp_yyyy %><br />
-    <%= f.text_field :credit_card_exp_yyyy %>
-  </div>
-  <div class="field">
-    <%= f.label :credit_card_exp_mm %><br />
-    <%= f.text_field :credit_card_exp_mm %>
+    <%= f.label "Credit Card No." %><br />
+    <%= f.text_field :credit_card_no_1, :size => 4 %> - 
+    <%= f.text_field :credit_card_no_2, :size => 4 %> - 
+    <%= f.text_field :credit_card_no_3, :size => 4 %> - 
+    <%= f.text_field :credit_card_no_4, :size => 4 %>
   </div>
   <div class="field">
     <%= f.label :credit_card_ccv %><br />
-    <%= f.text_field :credit_card_ccv %>
+    <%= f.text_field :credit_card_ccv, :size => 3 %>
   </div>
+  <br/>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit "Update Profile" %>
   </div>
+</div>
+<div class="span-12 last">
+  <div class="field">
+    <%= f.label "Credit Card Expiry (mm-yyyy)" %><br />
+    <%= f.text_field :credit_card_exp_mm, :size => 2 %> - 
+    <%= f.text_field :credit_card_exp_yyyy, :size => 4 %>
+  </div>
+</div>
 <% end %>
+
+  </div>
+</div>

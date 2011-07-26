@@ -1,9 +1,11 @@
 class Constants
   TITLE_STR = "title_str"
+  EMAIL_VALUE_INPUT = "email"
   PII_VALUE_INPUT = "pii_value_input"
   MESSAGE_TYPE_INPUT= "message_type_input"
   FIND_ANY_INPUT = "find_any_input"
   TAGS_INPUT = "tags_input"
+  CLAIM_INPUT = "claim_input"
   END_POINT_NICK_INPUT = "end_point_nick_input"
   END_POINT_CREATOR_END_POINT_INPUT = "end_point_creator_end_point_input"
   MEANT_IT_REL_PAGE_SIZE = "pg_size"
@@ -17,6 +19,9 @@ class Constants
   TEST_SMTP_WHITELIST = ['127.0.0.1']
 
   SENDGRID_PARSE_URL = "/inbound_emails_200"
+
+  SESSION_CONFIRM_EMAIL_ENDPOINT_ID= :session_confirm_email_endpoint_id
+  SESSION_ENTITY_ID = :session_entity_id
 
   WEB_MAX_MEANTIT_IN = 3
   WEB_MAX_MEANTIT_OUT = 3

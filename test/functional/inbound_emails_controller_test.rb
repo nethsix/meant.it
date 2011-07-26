@@ -131,9 +131,9 @@ p "message_type_str:#{message_type_str}"
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
       ['Pii.count', 1+receiver_pii_count],
-      ['Entity.count', 1],
-      ['EntityDatum.count', 1],
-      ['EntityEndPointRel.count', 1],
+#20110713      ['Entity.count', 1],
+#20110713      ['EntityDatum.count', 1],
+#20110713      ['EntityEndPointRel.count', 1],
       ['Tag.count', non_exist_endpoint_tag_arr.size + non_exist_mood_tag_arr.size],
       ['EndPointTagRel.count', endpoint_tag_arr.size],
       ['MeantItRel.count', 1],
@@ -180,19 +180,19 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       assert_equal sender_pii_str, sender_endPoint.pii.pii_value
     end # end if post_url != Constants::SENDGRID_PARSE_URL
 
-    # Check that sender Entity is created
-    sender_entities = sender_endPoint.entities
-    assert_equal 1, sender_entities.size
-    sender_entity = sender_entities[0]
-    assert_not_nil sender_entity
-    # Check that sender Entity has the same pii
-    person = ControllerHelper.find_person_by_id(sender_entity.property_document_id)
-    assert_equal person.email, sender_pii.pii_value
+#20110713    # Check that sender Entity is created
+#20110713    sender_entities = sender_endPoint.entities
+#20110713    assert_equal 1, sender_entities.size
+#20110713    sender_entity = sender_entities[0]
+#20110713    assert_not_nil sender_entity
+#20110713    # Check that sender Entity has the same pii
+#20110713    person = ControllerHelper.find_person_by_id(sender_entity.property_document_id)
+#20110713    assert_equal person.email, sender_pii.pii_value
 
-    # Check that verification_type is email
-    assert_equal 1, sender_entity.entityEndPointRels.size
-    sender_entity_entityEndPointRel = sender_entity.entityEndPointRels[0]
-    assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
+#20110713    # Check that verification_type is email
+#20110713    assert_equal 1, sender_entity.entityEndPointRels.size
+#20110713    sender_entity_entityEndPointRel = sender_entity.entityEndPointRels[0]
+#20110713    assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
 
     # Check receiver_endPoint
     receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
@@ -269,7 +269,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 2],
       ['MeantItRel.count', 1]
       ]) do
@@ -285,7 +285,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 0],
-      ['Entity.count', 0],
+#20110713      ['Entity.count', 0],
       ['Pii.count', 0],
       ['MeantItRel.count', 1]
       ]) do
@@ -308,7 +308,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 2],
       ['MeantItRel.count', 1]
       ]) do
@@ -331,7 +331,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 0],
-      ['Entity.count', 0],
+#20110713      ['Entity.count', 0],
       ['Pii.count', 0],
       ['MeantItRel.count', 1]
       ]) do
@@ -357,7 +357,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 2],
       ['MeantItRel.count', 1]
       ]) do
@@ -379,7 +379,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 1],
-      ['Entity.count', 0],
+#20110713      ['Entity.count', 0],
       ['Pii.count', 0],
       ['MeantItRel.count', 1]
       ]) do
@@ -408,7 +408,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 2],
       ['MeantItRel.count', 1]
       ]) do
@@ -427,7 +427,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 0],
-      ['Entity.count', 0],
+#20110713      ['Entity.count', 0],
       ['Pii.count', 0],
       ['MeantItRel.count', 1]
       ]) do
@@ -454,7 +454,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 2],
       ['MeantItRel.count', 1]
       ]) do
@@ -475,7 +475,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2], # kuromi sender, and kuromi's receiver
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 1], # kuromi sender
       ['MeantItRel.count', 1]
       ]) do
@@ -510,7 +510,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2],
-      ['Entity.count', 1],
+#20110713      ['Entity.count', 1],
       ['Pii.count', 1],
       ['MeantItRel.count', 1]
       ]) do
@@ -542,7 +542,7 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 0],
-      ['Entity.count', 0],
+#20110713      ['Entity.count', 0],
       ['Pii.count', 1],
       ['MeantItRel.count', 1]
       ]) do
@@ -775,6 +775,11 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal "hello_kitty", email_hash[ControllerHelper::EMAIL_NICK_STR]
     assert_equal "hello_kitty@sanrio.com", email_hash[ControllerHelper::EMAIL_STR]
   end # end test "no space in nick from email"
+
+  test "anonymous sender from web page" do
+    email_elem = inbound_emails(:anonymous_inbound_email_from_web_page)
+    common_code(email_elem, nil)
+  end # end "test anonymous sender from web page"
 
   test "aaa" do
     # Test abuse of inbound_emails_200

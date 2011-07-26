@@ -1,0 +1,113 @@
+<% require 'constants' %>
+<div class='container'>
+  <%= render :partial => "shared/top_menu" %>
+  <div class='span-24'>
+    <h3>Manage</h3>
+    <%
+      if @claim
+    %>
+        <span class="large" style="color:blue"><b>New Click-to-Claim</b><br /></span>
+        <ul>
+          <li>
+    <%
+        # Check if it's email
+        email_hash = ControllerHelper.parse_email(@claim)
+        if !email_hash[ControllerHelper::EMAIL_STR].nil?
+    %>
+            <a href='/resend_confirmation?<%= Constants::EMAIL_VALUE_INPUT %>=<%= @claim %>'><%= @claim %></a>
+    <%      
+        else
+    %>
+            <%= @claim %> (<span style="color:red">Automated claims on non-email pii is not possible. </span>Please contact <img height='20' src='/images/nethseven_meant_it.png'/>)
+    <%      
+        end # end if !email_hash[ControllerHelper::EMAIL_STR].nil?
+    %>
+          </li>
+        </ul>
+    <%
+      end # end if @claim.nil?
+    %>
+      <span class="large"><b>Search Pii to Claim</b></span>
+      <% form_tag(manage_path, :method => "get") do %>
+        <%= text_field_tag(Constants::CLAIM_INPUT) %>
+        <%= submit_tag("Search") %>
+      <% end %>
+      <br/>
+      <span class="large"><b>Claimed Pii(s)</b></span>
+      <table summary="Claimed Pii(s)"  border="0" cellspacing="0" cellpadding="0">
+        <thead>
+          <tr>
+            <th class='span-12'>Pii</th>
+            <th class='span-4'>Sent</th>
+            <th class='span-4'>Latest Sent</th>
+            <th class='span-4'>Received</th>
+            <th class='span-4'>Latest Received</th>
+          </tr>
+        </thead>
+        <tbody>
+<%
+        if !current_entity.endPoints.nil? and !current_entity.endPoints.empty?
+          current_entity.endPoints.each do |endpoint_elem|
+%>
+            <tr>
+              <td>
+                <%= link_to "#{endpoint_elem.pii.pii_value}", url_for("/piis/show_by_pii_value?#{Constants::PII_VALUE_INPUT}=#{endpoint_elem.pii.pii_value}") %>
+              </td>
+              <td>
+                <% 
+                  sent_count = (endpoint_elem.nil? or endpoint_elem.srcMeantItRels.nil? or endpoint_elem.srcMeantItRels.empty?) ? 0 : endpoint_elem.srcMeantItRels.size
+                %>
+                <%= sent_count %>
+              </td>
+              <td>
+                <% 
+                  lastSrcMeantItRels = MeantItRel.where(:src_endpoint_id => endpoint_elem.id).order("created_at DESC").limit(1) 
+                  time_ago_str = "NA"
+                  if !lastSrcMeantItRels.nil? and !lastSrcMeantItRels.empty?
+                    time_ago_str = time_ago_in_words(lastSrcMeantItRels[0].created_at) + " ago"
+                  end # end if !lastSrcMeantItRels.nil? and !lastSrcMeantItRels.empty?
+                %>
+                  <%= time_ago_str %>
+              </td>
+              <td>
+                <% 
+                  received_count = 0
+                  endpoint_pii = endpoint_elem.pii
+                  all_endpoints = nil
+                  if !endpoint_pii.nil?
+                    pii = Pii.find_by_pii_value(endpoint_pii.pii_value)
+                    all_endpoints = pii.endPoints
+                    all_endpoints.each { |all_ep_elem|
+                      this_received_count = (all_ep_elem.dstMeantItRels.nil? or all_ep_elem.dstMeantItRels.empty?) ? 0 : all_ep_elem.dstMeantItRels.size
+                      received_count += this_received_count
+                    } # end all_endpoints.each ...
+                  end # end if !endpoint_pii.nil?
+                %>
+                <%= received_count %>
+              </td>
+              <td>
+                <% 
+                  time_ago_str = "NA"
+                  if !all_endpoints.nil?
+                    dst_endpoint_ids = all_endpoints.collect { |all_ep_elem| all_ep_elem.id }
+                    lastDstMeantItRels = MeantItRel.where(:dst_endpoint_id => dst_endpoint_ids).order("created_at DESC").limit(1) 
+                    if !lastDstMeantItRels.nil? and !lastDstMeantItRels.empty?
+                      time_ago_str = time_ago_in_words(lastDstMeantItRels[0].created_at) + " ago"
+                    end # end if !lastSrcMeantItRels.nil? and !lastSrcMeantItRels.empty?
+                  end # end if !all_endpoints.nil?
+                %>
+                  <%= time_ago_str %>
+              </td>
+            </tr>
+<%
+          end
+        else
+%>
+          None
+<%
+        end # end if current_entity.endPoints.nil? ...
+%>
+          </tbody>
+        </table>
+  </div>
+</div>

@@ -32,7 +32,7 @@ class PropertyDocumentIdForeignKeyValidator < ActiveModel::EachValidator
 #      record.errors[attribute] << "does not point to a valid doc in couchdb: #{e.inspect}"
       # Check active record
       entityData = EntityDatum.find_by_id(value)
-      if !entityData.errors.empty?
+      if entityData.nil? or !entityData.errors.empty?
       record.errors[attribute] << "does not point to a valid doc in couchdb: #{e.inspect}, nor point to a valid record in EntityData table"
       end # end if !entityData.errors.empty?
     end # end @db.get ...
@@ -123,6 +123,12 @@ class MoodReasonerValidator < ActiveModel::EachValidator
     record.errors[attribute] << "permits only '#{MOOD_REASONER_ENUM.join('\', \'').strip}'" if value.nil? or MOOD_REASONER_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class MoodValidator
+
+class SimpleNameValidator < ActiveModel::EachValidator
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "only alphabets, numbers, and underscore" if value.nil? or value.empty? or !value.match(/[^0-9a-zA-Z_\-+.@]/).nil?
+  end # end def validate_each(record, attribute, value)
+end # end class SimpleNameValidator
 
 # This is to help meant_it_rels message_type DRY
 # Note this is not intended to keep message_type in MEANT_IT_MESSAGE_OTHER

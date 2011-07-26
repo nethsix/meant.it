@@ -199,6 +199,10 @@ module ControllerHelper
     if (email_str_arr = email_str.match(/(.+)#{Constants::MEANT_IT_PII_SUFFIX}/))
       # Not an email but a pii
       email_str = email_str_arr[1]
+    elsif email_str_arr.nil? or email_str_arr.empty?
+      # Check if it's an email
+      email_str_arr = email_str.match(/(.+?)@(.+)\.(.+?)/)
+      email_str = nil if email_str_arr.nil?
     end # end if !email_str.index(Constants::MEANT_IT_PII_SUFFIX).nil?
 #    email_nick_str ||= email_str
     { EMAIL_NICK_STR => email_nick_str, EMAIL_STR => email_str }
@@ -355,4 +359,56 @@ module ControllerHelper
   def self.random_say
     SAY_ENUM[rand(SAY_ENUM.size)]
   end # def self.random_say
+
+  def self.create_entity(login_name, password, logtag = nil)
+    logtag = ControllerHelper.gen_logtag
+    entity = Entity.new(:login_name => login_name, :password => password)
+    # If login_name is email then create propertyDocument/entityDatum
+    email_hash = ControllerHelper.parse_email(login_name)
+    name = email_hash[ControllerHelper::EMAIL_NICK_STR]
+    email = email_hash[ControllerHelper::EMAIL_STR]
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create_entity:#{logtag}, name:#{name}, email:#{email}")
+    new_person = ControllerHelper.find_or_create_person_by_email(name, email) if !email.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create_entity:#{logtag}, new_person.inspect:#{new_person.inspect}")
+    entity.property_document_id = new_person.id if !new_person.nil?
+    entity.save
+    entity
+  end # end def self.createEntity
+
+  def self.get_sender_endPoint_from_endPoints(endPoints)
+    logtag = ControllerHelper.gen_logtag
+    sender_endPoint = nil
+    sender_endPoints = endPoints.select { |elem| elem.creator_endpoint_id == elem.id }
+    if !sender_endPoints.nil?
+      sender_endPoint = sender_endPoints[0]
+      if sender_endPoints.size > 1
+        Rails.logger.warn("#{File.basename(__FILE__)}:#{self.class}:get_sender_endPoint_from_endPoints:#{logtag}, sender_endPoints > 1, sender_endPoints.inspect:#{sender_endPoints.inspect}")
+      end # end if sender_endPoints_arr.size > 1
+    end # end if endPoints.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:get_sender_endPoint_from_endPoints:#{logtag}, sender_endPoint:#{sender_endPoint}")
+    sender_endPoint
+  end # end def self.get_sender_endPoint_from_endPoints
+
+  def self.find_or_create_sender_endPoint_and_pii(pii_value, pii_type)
+    logtag = ControllerHelper.gen_logtag
+    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
+    if pii.nil? or pii.errors.any?
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.errors.inspect:#{pii.errors.inspect}")
+    else
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.inspect:#{pii.inspect}")
+    end # end if pii.nil? or pii.errors.any?
+    if !pii.nil?
+      sender_endPoint = ControllerHelper.get_sender_endPoint_from_endPoints(pii.endPoints)
+      if sender_endPoint.nil?
+        sender_endPoint = pii.endPoints.create(:start_time => Time.now)
+        sender_endPoint.pii = pii
+        sender_endPoint.creator_endpoint_id = sender_endPoint.id
+        unless sender_endPoint.save
+          Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, sender_endPoint.errors.inspect:#{sender_endPoint.errors.inspect}")
+        end # end unless sender_endPoint.save
+      end # end # end if sender_endPoint.nil?
+    end # end if pii.nil?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, sender_endPoint.inspect:#{sender_endPoint.inspect}")
+    sender_endPoint
+  end # end def self.find_or_create_sender_endPoint_and_pii
 end # end module ControllerHelper
