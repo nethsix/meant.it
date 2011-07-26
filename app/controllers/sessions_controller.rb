@@ -7,8 +7,18 @@ class SessionsController < ApplicationController
 
   def manage
     logtag = ControllerHelper.gen_logtag
+    @claim = params[Constants::CLAIM_INPUT]
+    if @claim.nil?
+      email_hash = ControllerHelper.parse_email(current_entity.login_name)
+      if !email_hash[ControllerHelper::EMAIL_STR].nil?
+        user = User.find_by_email(current_entity.login_name)
+        if user.nil? or (!user.nil? and user.confirmed_at.nil?)
+          @claim = current_entity.login_name
+        end # end if user.nil? or (!user.nil? and user.confirmed_at.nil?)
+      end # end if !email_hash[ControllerHelper::EMAIL_STR].nil?
+    end # end if @claim.nil?
     respond_to do |format|
-      format.html # render 
+      format.html # render
     end
   end # end def manage
 

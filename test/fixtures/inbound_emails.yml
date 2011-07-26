@@ -91,3 +91,10 @@ xxx_no_colon_inbound_email:
   to: advises@meant.it
   from: kuromi_dad@gmail.com
   attachment_count: 0
+anonymous_inbound_email_from_web_page:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: kuromi@sanrio.com ;you're evil!; 
+  to: sorry@meant.it
+  from: anonymous@pii.meant.it
+  attachment_count: 0

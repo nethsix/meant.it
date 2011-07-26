@@ -4,7 +4,11 @@
 
 <%
   sender_endPoints = sender_pii.endPoints
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}: sender_pii.inspect:#{sender_pii.inspect}")
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}: sender_pii.endPoints.inspect:#{sender_pii.endPoints.inspect}")
   receiver_endPoints = receiver_pii.endPoints
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}: receiver_pii.inspect:#{receiver_pii.inspect}")
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}: receiver_pii.endPoints.inspect:#{receiver_pii.endPoints.inspect}")
   sender_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(sender_endPoints)
   receiver_srcMeantItRels = ControllerHelper.mir_from_ep_srcMeantItRels(receiver_endPoints)
   # sender to receiver relationship

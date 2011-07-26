@@ -6,6 +6,7 @@
 find_any_input ||= nil
 show_new_user ||= nil
 show_pword ||= nil
+error_msg ||= nil
 %>
 
 <!DOCTYPE html>
@@ -23,7 +24,7 @@ show_pword ||= nil
 </head>
 <body>
     <div class="container">
-      <%= render :partial => "shared/top_menu", :locals => { :show_new_user => show_new_user, :show_pword => show_pword }%>
+      <%= render :partial => "shared/top_menu", :locals => { :show_new_user => show_new_user, :show_pword => show_pword, :error_msg => error_msg }%>
       <div class="span-20">
         <p>
           <% why_elem = Constants.random_why %>
@@ -33,7 +34,7 @@ show_pword ||= nil
         </p>
       </div>
       <div class="span-24 lightbg1" id="find_meant_it_div">
-        <form id="find_meant_it_form" action="/find_any" method="get">
+        <%= form_tag("/find_any", :method => "get") do %>
 
           <fieldset>
             <legend>Find Meant.It</legend>
@@ -44,10 +45,10 @@ show_pword ||= nil
             </p>
             Try entering <i>meant.it</i> (<%= link_to "Learn more", url_for("/learn_find") %>)
           </fieldset>
-        </form>
+        <% end %>
       </div>
       <div class="span-24 lightbg2" id="send_meant_it_div">
-        <form id="send_meant_it_form" action="/send_inbound_emails" method="post">
+        <%= form_tag("/send_inbound_emails", :method=> "post") do %>
 
           <fieldset>
             <legend >Send Meant.It</legend>
@@ -70,7 +71,7 @@ show_pword ||= nil
             </p>
             Try entering <i>:meant.it ;thanks for making life better;</i> (<%= link_to "Learn more", url_for("/learn_send") %>)
           </fieldset>
-        </form>
+        <% end %>
       </div>
       <div class='span-21'>
         &nbsp;

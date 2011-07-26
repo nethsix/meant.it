@@ -769,6 +769,11 @@ p "#AAAAAAA after body_text:#{body_text}"
     common_code(email_elem, nil)
   end # end test "send meant.it from webpage results in sender anon or login id"
 
+  test "anonymous sender from web page" do
+    email_elem = inbound_emails(:anonymous_inbound_email_from_web_page)
+    common_code(email_elem, nil)
+  end # end "test anonymous sender from web page"
+
   test "aaa" do
     # Test abuse of inbound_emails_200
     # i.e., REMOTE_ADDR don't match

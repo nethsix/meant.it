@@ -148,10 +148,16 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       @sender_endPoint.nick = sender_nick_str
       @sender_endPoint.creator_endpoint_id = @sender_endPoint.id
       unless @sender_endPoint.save
-       @error_obj_arr << @sender_endPoint
+        @error_obj_arr << @sender_endPoint
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
       end # end unless @sender_endPoint.save
+      @sender_pii.endPoints << @sender_endPoint
+      unless @sender_pii.save
+        @error_obj_arr << @sender_pii
+        error_display("Error saving @sender_pii'#{@sender_pii.inspect}:#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
+        return
+      end # end unless @sender_pii.save
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
@@ -301,6 +307,12 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
           return
         end # end unless @receiver_endPoint.save
+        @receiver_pii.endPoints << @receiver_endPoint
+        unless @receiver_pii.save
+          @error_obj_arr << @receiver_pii
+          error_display("Error saving @receiver_pii'#{@receiver_pii.inspect}:#{@receiver_pii.errors}", @receiver_pii.errors, :error, logtag)
+          return
+        end # end unless @receiver_pii.save
       end # end if our_receiver_pii_endPoints.index(@receiver_endPoint).nil?
 #20110628a : End
 #20110628a : End
@@ -369,7 +381,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
 #20110628a : Start
       # Check if we already have endPoint with no nick.  If so use it.
       receiver_endPoint_no_nick_arr = our_receiver_pii_endPoints.select { |elem| elem.nick.nil? }
-      @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 1
+      @receiver_endPoint = receiver_endPoint_no_nick_arr[0] if !receiver_endPoint_no_nick_arr.nil? and receiver_endPoint_no_nick_arr.size > 0
       if receiver_endPoint_no_nick_arr.size > 1
         logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, more than one receiver_endPoints with nick = nil, receiver_endPoint_no_nick_arr:#{receiver_endPoint_no_nick_arr.inspect}")
       end # end if receiver_endPoint_no_nick_arr.size > 1
@@ -383,6 +395,12 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         error_display("Error saving receiver_pii '#{@receiver_pii.inspect}' to receiver_endPoint '{@receiver_endPoint.inspect}'",  @receiver_endPoint.errors, :error, logtag) 
         return
       end # end unless @receiver_endPoint.save
+      @receiver_pii.endPoints << @receiver_endPoint
+      unless @receiver_pii.save
+        @error_obj_arr << @receiver_pii
+        error_display("Error saving @receiver_pii'#{@receiver_pii.inspect}:#{@receiver_pii.errors}", @receiver_pii.errors, :error, logtag)
+        return
+      end # end unless @receiver_pii.save
     end # end if ((!receiver_pii_str.nil? and !receiver_pii_str.empty?)  ...
     
     # For Case 4. receiver_pii_str: empty, receiver_nick_str: yes
@@ -480,6 +498,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
     # This is from meant_it find/send main page
     if self.request.path.match(/send_inbound_emails/)
       if !@sender_pii.nil? and !@receiver_pii.nil?
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: send_inbound_emails: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_pii.inspect:#{@receiver_pii.inspect}, message_type_str:#{message_type_str}")
         # Check for space
         sender_pii_pii_value_str = @sender_pii.pii_value
         receiver_pii_pii_value_str = @receiver_pii.pii_value
