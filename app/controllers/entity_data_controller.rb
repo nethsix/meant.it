@@ -1,6 +1,6 @@
 class EntityDataController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create ]
-  before_filter :authorize, :except => [:create ]
+#  before_filter :authorize, :except => [:create ]
   before_filter :logged_in, :except => [:new]
   before_filter :no_profile?, :only => [:new]
 

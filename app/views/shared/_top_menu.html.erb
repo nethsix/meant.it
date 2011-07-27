@@ -33,11 +33,14 @@
     <p id="info" class="large"><b>Notice:</b> <%= flash[:notice] %></p>
   <% elsif flash[:alert] %>
     <p id="error" class="large"><b>Alert:</b> <%= flash[:alert] %></p>
+  <% elsif flash[:error] %>
+    <p id="error" class="large"><b>Error:</b> <%= flash[:error] %></p>
   <% else %>
     <p class="large"> &nbsp; </p>
   <% end %>
 </div>
 <div class="span-4 last">
   <img height='20' src='/images/nethseven_meant_it.png' />
-  <a href='http://twitter.com/nethseven'>twitter.com/nethseven</a>
+  <a href='http://twitter.com/nethseven'>twitter.com/nethseven</a><br />
+  <a href='http://getsatisfaction.com/meant_it'>Get Help!</a>
 </div>

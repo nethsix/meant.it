@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   helper_method :current_entity
+  helper_method :logged_in
   helper_method :admin?
   helper_method :no_profile?
     
@@ -28,7 +29,6 @@ class ApplicationController < ActionController::Base
     unless admin?
       flash[:error] = "Unauthorized access"
       redirect_to url_for("/")
-      false
     end
   end
 
@@ -41,7 +41,6 @@ class ApplicationController < ActionController::Base
     unless current_entity
       flash[:error] = "Unauthorized access"
       redirect_to url_for("/")
-      false
     end
   end
 end
