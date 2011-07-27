@@ -126,10 +126,17 @@ p "message_type_str:#{message_type_str}"
     }  # end mood_tag_arr.each ...
     p "#AAAA non_exist_mood_tag_arr.inspect:#{non_exist_mood_tag_arr.inspect}"
 
+    receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    auto_entity = nil
+    if (auto_entity_arr = ControllerHelper.auto_entity_domain?(receiver_pii_str))
+      auto_entity = Entity.find(auto_entity_arr[ControllerHelper::AUTO_ENTITY_DOMAIN_ENTITY_ID]) if !auto_entity_arr.nil?
+    end # end if (auto_entity_arr = ControllerHelper.auto_entity_domain? ...
+    endPoint_count = auto_entity.nil? ? 2 : 3
+
     assert_differences([
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
-      ['EndPoint.count', 2],
+      ['EndPoint.count', endPoint_count],
       ['Pii.count', 1+receiver_pii_count],
 #20110713      ['Entity.count', 1],
 #20110713      ['EntityDatum.count', 1],
@@ -195,7 +202,6 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
 #20110713    assert_equal VerificationTypeValidator::VERIFICATION_TYPE_EMAIL, sender_entity_entityEndPointRel.verification_type
 
     # Check receiver_endPoint
-    receiver_pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
     receiver_nick_str =  meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
     receiver_pii_hash = ControllerHelper.get_pii_hash(receiver_pii_str)
     receiver_pii_str = receiver_pii_hash[ControllerHelper::PII_VALUE_STR]
@@ -252,6 +258,19 @@ p "MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
       assert_equal MeantItMoodTagRel::MOOD_TAG_TYPE, meantItMoodTag.desc
       assert_equal message_type_str, meantItMoodTag.name
     end # end if sender_endPoint.srcMeantItRels[0].message_type == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
+
+    # Check auto_entity association
+    if auto_entity
+      auto_entity.reload
+      assert_not_nil auto_entity.endPoints
+      auto_entity_endpoint_association_found = false
+      auto_entity.endPoints.each { |auto_entity_ep_elem|
+        if !auto_entity_ep_elem.pii.nil? and auto_entity_ep_elem.pii.pii_value == receiver_pii_str
+          auto_entity_endpoint_association_found = true if auto_entity_ep_elem.creator_endpoint_id == auto_entity_ep_elem.id
+        end # end if auto_entity_ep_elem.pii_value == receiver_pii_str
+      } # end auto_entity.endPoints.each ...
+      assert auto_entity_endpoint_association_found
+    end # end if auto_entity
       
 p "#AAAAA MeantItMoodTagRel.count:#{MeantItMoodTagRel.count}"
 p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
@@ -790,7 +809,12 @@ p "#AAAAAAA after body_text:#{body_text}"
   test "anonymous sender from web page" do
     email_elem = inbound_emails(:anonymous_inbound_email_from_web_page)
     common_code(email_elem, nil)
-  end # end "test anonymous sender from web page"
+  end # end test "anonymous sender from web page"
+
+  test "auto entity domain" do
+    email_elem = inbound_emails(:auto_entity_domain)
+    common_code(email_elem, nil)
+  end # end test "auto entity domain"
 
   test "aaa" do
     # Test abuse of inbound_emails_200

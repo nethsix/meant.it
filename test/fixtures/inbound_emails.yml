@@ -98,3 +98,10 @@ anonymous_inbound_email_from_web_page:
   to: sorry@meant.it
   from: anonymous@pii.meant.it
   attachment_count: 0
+auto_entity_domain:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===playboy'
+  to: like@meant.it
+  from: kuromi_papa@sanrio.com
+  attachment_count: 0

@@ -254,8 +254,8 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       end # end Pii.find_or_create_by_pii ...
       # If @receiver_pii has an entity prefix 
       # automatically tie it to the prefix
-      if (receiver_pii_match_arr = @receiver_pii.pii_value.match(/(\d+?)#{Constants::ENTITY_DOMAIN_MARKER}/))
-        receiver_entity = Entity.find(receiver_pii_match_arr[1])
+      if (receiver_pii_match_arr = ControllerHelper.auto_entity_domain?(@receiver_pii.pii_value))
+        receiver_entity = Entity.find(receiver_pii_match_arr[ControllerHelper::AUTO_ENTITY_DOMAIN_ENTITY_ID]) if !receiver_pii_match_arr.nil?
         if !receiver_entity.nil?
           # Since entity can only tie to endpoints, we use the sender endpoint
           receiver_sender_endPoint = ControllerHelper.find_or_create_sender_endPoint_and_pii(@receiver_pii.pii_value, @receiver_pii.pii_type, @receiver_pii.pii_hide)
@@ -266,7 +266,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
           end # end unless entityEndPointRel1.save
           receiver_sender_endPoint.reload
         end # end if !receiver_entity.nil?
-      end # end if @receiver_pii.match(/\d+#{Constants::ENTITY_DOMAIN_MARKER}/)
+      end # end if (receiver_pii_match_arr = ControllerHelper.auto_entity_domain? ...
       unless @receiver_pii.errors.empty?
         @error_obj_arr << @receiver_pii
         error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 

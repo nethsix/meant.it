@@ -11,6 +11,13 @@ module ControllerHelper
   MEANT_IT_INPUT_RECEIVER_NICK = :receiver_nick
   MEANT_IT_INPUT_TAGS = :tags
 
+  AUTO_ENTITY_DOMAIN_ENTITY_ID = 1
+  def self.auto_entity_domain?(pii_str)
+    pii_match_arr = nil
+    pii_match_arr = pii_str.match(/(\d+?)#{Constants::ENTITY_DOMAIN_MARKER}/) if !pii_str.nil?
+    pii_match_arr
+  end # end def self.auto_entity_domain?
+
   def self.gen_logtag
     rand(LOGTAG_MAX)
   end # end def gen_logtag
