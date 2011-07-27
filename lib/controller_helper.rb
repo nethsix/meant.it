@@ -31,6 +31,7 @@ module ControllerHelper
   end # end def self.parse_message_type_from_email
 
   def self.parse_meant_it_input(input_str, logtag = nil)
+    input_str_downcase = input_str.downcase
     input_str_dup = input_str.dup if !input_str.nil?
     input_str_dup.downcase! if !input_str_dup.nil?
     result_hash = {}
@@ -55,7 +56,7 @@ module ControllerHelper
     # Check for colon enclosed receiver pii
     receiver_pii_str_arr = input_str_dup.scan(/:(.*?):/).collect { |elem| elem[
 0] }
-    receiver_pii_str_idx = input_str.index(":#{receiver_pii_str_arr[0]}") if !receiver_pii_str_arr.empty?
+    receiver_pii_str_idx = input_str_downcase.index(":#{receiver_pii_str_arr[0]}") if !receiver_pii_str_arr.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr:#{receiver_pii_str_arr.inspect}, receiver_pii_str_idx:#{receiver_pii_str_idx}")
     receiver_pii_str_arr.each { |receiver_pii_elem| 
       input_str_dup.sub!(/:#{Regexp.escape(receiver_pii_elem)}:/, '')
@@ -69,7 +70,7 @@ module ControllerHelper
     receiver_pii_str_arr2 += input_str_dup.scan(/\s:(.*?)$/).collect { |elem| elem[0] }
     # Match the word itself, e.g., ':xxx'
     receiver_pii_str_arr2 += input_str_dup.scan(/^:(.*?)$/).collect { |elem| elem[0] }
-    receiver_pii_str_idx2 = input_str.index(":#{receiver_pii_str_arr2[0]}") if !receiver_pii_str_arr2.empty?
+    receiver_pii_str_idx2 = input_str_downcase.index(":#{receiver_pii_str_arr2[0]}") if !receiver_pii_str_arr2.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:parse_meant_it_input:#{logtag}, receiver_pii_str_arr2:#{receiver_pii_str_arr2.inspect}, receiver_pii_str_idx2:#{receiver_pii_str_idx2}")
     get_from_this_receiver_pii_arr = nil
     if receiver_pii_str_idx.nil? and !receiver_pii_str_idx2.nil?
@@ -389,9 +390,10 @@ module ControllerHelper
     sender_endPoint
   end # end def self.get_sender_endPoint_from_endPoints
 
-  def self.find_or_create_sender_endPoint_and_pii(pii_value, pii_type)
+  def self.find_or_create_sender_endPoint_and_pii(pii_value, pii_type, pii_hide=PiiHideTypeValidator::PII_HIDE_TRUE)
     logtag = ControllerHelper.gen_logtag
-    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
+#    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
+    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(:pii_value => pii_value, :pii_type => pii_type, :pii_hide => pii_hide)
     if pii.nil? or pii.errors.any?
       Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.errors.inspect:#{pii.errors.inspect}")
     else

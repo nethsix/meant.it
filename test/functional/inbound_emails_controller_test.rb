@@ -776,6 +776,17 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal "hello_kitty@sanrio.com", email_hash[ControllerHelper::EMAIL_STR]
   end # end test "no space in nick from email"
 
+  test "caps in input str pii" do
+    orig_pii_str = "25===P0001"
+    orig_message_str = "hello world"
+    input_str = ":#{orig_pii_str} ;#{orig_message_str};"
+    meantItInput_hash = ControllerHelper.parse_meant_it_input(input_str)
+    message_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_MESSAGE]
+    receiver_pii_str = meantItInput_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+   assert_equal orig_message_str.downcase, message_str
+   assert_equal orig_pii_str.downcase, receiver_pii_str
+  end # end test "caps in input str pii"
+
   test "anonymous sender from web page" do
     email_elem = inbound_emails(:anonymous_inbound_email_from_web_page)
     common_code(email_elem, nil)

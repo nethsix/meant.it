@@ -14,6 +14,8 @@ class Constants
 
   PAGINATE_BATCH_SIZE = 5
 
+  ENTITY_DOMAIN_MARKER = "==="
+
   MEANT_IT_PII_SUFFIX = "@pii.meant.it"
   SENDGRID_SMTP_WHITELIST = []
   TEST_SMTP_WHITELIST = ['127.0.0.1']

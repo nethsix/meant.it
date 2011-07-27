@@ -89,7 +89,8 @@ class VerificationTypeValidator < ActiveModel::EachValidator
   VERIFICATION_TYPE_PHONE = "phone"
   VERIFICATION_TYPE_PHYSICAL = "physical"
   VERIFICATION_TYPE_EMAIL = "email"
-  VERIFICATION_TYPE_ENUM = [ VERIFICATION_TYPE_PHONE, VERIFICATION_TYPE_PHYSICAL, VERIFICATION_TYPE_EMAIL ]
+  VERIFICATION_TYPE_AUTO_ENTITY_DOMAIN = "auto_entity_domain"
+  VERIFICATION_TYPE_ENUM = [ VERIFICATION_TYPE_PHONE, VERIFICATION_TYPE_PHYSICAL, VERIFICATION_TYPE_EMAIL, VERIFICATION_TYPE_AUTO_ENTITY_DOMAIN ]
   def validate_each(record, attribute, value)
     record.errors[attribute] << "permits only '#{VERIFICATION_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or VERIFICATION_TYPE_ENUM.index(value.downcase).nil?
   end # end def validate_each

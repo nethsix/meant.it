@@ -3,6 +3,12 @@
   <%= render :partial => "shared/top_menu" %>
   <div class='span-24'>
     <h3>Manage</h3>
+    <div>
+      <span class="large" style="color:green"><b>Unique Prefix:</b></span>
+      <span class="large">
+        <%= current_entity.id %><%= Constants::ENTITY_DOMAIN_MARKER %>
+      </span>
+    </div>
     <%
       if @claim
     %>

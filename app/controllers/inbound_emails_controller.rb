@@ -252,6 +252,21 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(receiver_pii_hash[ControllerHelper::PII_VALUE_STR], receiver_pii_hash[ControllerHelper::PII_TYPE], receiver_pii_hash[ControllerHelper::PII_HIDE]) do |pii_obj|
         logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created receiver_pii")
       end # end Pii.find_or_create_by_pii ...
+      # If @receiver_pii has an entity prefix 
+      # automatically tie it to the prefix
+      if (receiver_pii_match_arr = @receiver_pii.pii_value.match(/(\d+?)#{Constants::ENTITY_DOMAIN_MARKER}/))
+        receiver_entity = Entity.find(receiver_pii_match_arr[1])
+        if !receiver_entity.nil?
+          # Since entity can only tie to endpoints, we use the sender endpoint
+          receiver_sender_endPoint = ControllerHelper.find_or_create_sender_endPoint_and_pii(@receiver_pii.pii_value, @receiver_pii.pii_type, @receiver_pii.pii_hide)
+          entityEndPointRel1 = receiver_entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_AUTO_ENTITY_DOMAIN)
+          entityEndPointRel1.endpoint_id = receiver_sender_endPoint.id
+          unless entityEndPointRel1.save
+            logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, entityEndPointRel1.errors.inspect:#{entityEndPointRel1.errors.inspect}")
+          end # end unless entityEndPointRel1.save
+          receiver_sender_endPoint.reload
+        end # end if !receiver_entity.nil?
+      end # end if @receiver_pii.match(/\d+#{Constants::ENTITY_DOMAIN_MARKER}/)
       unless @receiver_pii.errors.empty?
         @error_obj_arr << @receiver_pii
         error_display("Error creating receiver_pii '#{receiver_pii_str}'",  @receiver_pii.errors, :error, logtag) 
