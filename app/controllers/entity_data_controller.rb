@@ -59,11 +59,17 @@ class EntityDataController < ApplicationController
   # POST /entity_data.xml
   def create
     logtag = ControllerHelper.gen_logtag
+    # Check if email already exists
     if admin? or current_entity.property_document_id.nil?
       @entity_datum = EntityDatum.new(params[:entity_datum])
     end # end if admin?
 
-    if @entity_datum.save
+    chosen_email = params[:entity_datum][:email]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, chosen_email:#{chosen_email}")
+    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
+
+    # Link to entity if entity data was successfully saved
+    if entity_datum_exist.nil? and @entity_datum.save
       current_entity.property_document_id = @entity_datum.id
       if current_entity.save
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
@@ -79,6 +85,7 @@ class EntityDataController < ApplicationController
         end # end respond_to
       end # end if current_entity.save
     else
+      flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
       respond_to do |format|
         format.html { render :action => "new" }
         format.xml  { render :xml => @entity_datum.errors, :status => :unprocessable_entity }
@@ -89,17 +96,24 @@ class EntityDataController < ApplicationController
   # PUT /entity_data/1
   # PUT /entity_data/1.xml
   def update
+    logtag = ControllerHelper.gen_logtag
     if admin?
       @entity_datum = EntityDatum.find(params[:id])
     else
       @entity_datum = EntityDatum.find current_entity.property_document_id
     end # end if admin?
 
+    # Check if email already exists
+    chosen_email = params[:entity_datum][:email]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, chosen_email:#{chosen_email}")
+    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
+
     respond_to do |format|
-      if @entity_datum.update_attributes(params[:entity_datum])
+      if entity_datum_exist.nil? and @entity_datum.update_attributes(params[:entity_datum])
         format.html { redirect_to("/", :notice => 'Entity datum updated.') }
         format.xml  { head :ok }
       else
+        flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
         format.html { render :action => "edit" }
         format.xml  { render :xml => @entity_datum.errors, :status => :unprocessable_entity }
       end
