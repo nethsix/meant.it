@@ -34,7 +34,7 @@
       end # end if @claim.nil?
     %>
       <span class="large"><b>Search Pii to Claim</b></span>
-      <% form_tag(manage_path, :method => "get") do %>
+      <%= form_tag(manage_path, :method => "get") do %>
         <%= text_field_tag(Constants::CLAIM_INPUT) %>
         <%= submit_tag("Search") %>
       <% end %>
@@ -52,10 +52,8 @@
           </tr>
         </thead>
         <tbody>
-<%
-        if !current_entity.endPoints.nil? and !current_entity.endPoints.empty?
-          current_entity.endPoints.each do |endpoint_elem|
-%>
+<% if !current_entity.endPoints.nil? and !current_entity.endPoints.empty? %>
+  <%          current_entity.endPoints.each do |endpoint_elem| %>
             <tr>
               <td>
                 <%= link_to "#{endpoint_elem.pii.pii_value}", url_for("/piis/show_by_pii_value?#{Constants::PII_VALUE_INPUT}=#{endpoint_elem.pii.pii_value}") %>
