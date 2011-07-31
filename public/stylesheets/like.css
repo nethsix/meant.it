@@ -1,0 +1,113 @@
+#liketree
+{
+position:relative;
+left: 200px;
+top: 0px;
+}
+.tagframe
+{
+font-size: 30px;
+background: #fff;
+border:0px solid #555;
+padding:3px;
+box-sizing: border-box;
+}
+.pixframe
+{
+background: #fff;
+border:3px dotted #555;
+padding:10px;
+box-sizing: border-box;
+}
+img.one
+{
+position:relative;
+left: 0px;
+top: 0px;
+z-index:-1;
+}
+img.two
+{
+position:relative;
+left: -120px;
+top: -50px;
+z-index:-1;
+}
+img.three
+{
+position:relative;
+left: 25px;
+top:-180px;
+z-index:-1;
+}
+img.four
+{
+position:relative;
+left: 125px;
+top:-270px;
+z-index:-1;
+}
+img.five
+{
+position:relative;
+left: 10px;
+top:-360px;
+z-index:-1;
+}
+img.six
+{
+position:relative;
+left: -120px;
+top: -475px;
+z-index:-1;
+}
+span.tag_one
+{
+position:relative;
+left: 0px;
+top: -80px;
+}
+span.tag_two
+{
+position:relative;
+left: -120px;
+top: -100px;
+}
+span.tag_three
+{
+position:relative;
+left: 25px;
+top:-265px;
+}
+span.tag_four
+{
+position:relative;
+left: 125px;
+top:-300px;
+}
+span.tag_five
+{
+position:relative;
+left: 10px;
+top:-380px;
+}
+span.tag_six
+{
+position:relative;
+left: -120px;
+top: -490px;
+}
+a:hover {background:#ffffff; text-decoration:none;} /*BG color is a must for IE6*/
+a.vc_tooltip {text-decoration : none;}
+a.vc_tooltip img {border:none;}
+a.vc_tooltip span {display:none; padding:2px 3px; margin-left:8px;}
+a.vc_tooltip:hover span{display:inline; position:absolute; left:10px; top:10px; background:#ffffff; border:1px solid #cccccc; color:#3c3c3c;}
+
+.headerDivider {
+     border-left:5px dashed #38546d; 
+     border-right:0px dashed #16222c; 
+     height:500px;
+     position:relative;
+     top: 20px
+}
+

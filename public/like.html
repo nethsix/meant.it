@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script>
+      var TIMEOUT = 50000
+      var POLL_INTERVAL = 10000
+      var BACKOFF = 3
+      function waitForMsg()
+      {
+        jQuery.ajax({
+            type: "GET",
+            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like",
+
+            async: true, /* If set to non-async, browser shows page as "Loading.."*/
+            cache: false,
+            timeout:TIMEOUT, /* Timeout in ms */
+
+            success: function(data)
+            {
+//DEBUG                alert("data:"+data);
+                jQuery.each(data, function(key, val)
+                  {
+//DEBUG                    alert("key:"+key+", val:"+val);
+//DEBUG                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
+                    var mir_count = val.pii.mir_count;
+                    var thumbnail_url_data = val.pii.thumbnail_url_data;
+                    var short_desc_data = val.pii.short_desc_data;
+//DEBUG                    alert("mir_count:"+mir_count);
+//DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
+//DEBUG                    alert("short_desc_data:"+short_desc_data);
+                    var img_id = "#like_" + key;
+                    var tag_id = "#liketag_" + key;
+//DEBUG                    alert("img_id:"+img_id);
+                    var img_elem = jQuery(img_id);
+                    var tag_elem = jQuery(tag_id);
+//DEBUG                    alert("img_elem:"+img_elem);
+//DEBUG                    alert("img_elem.attr('src'):"+img_elem.attr('src'));
+                    if (mir_count != null)
+                    {
+                      var tooltip_desc = "Unknown";
+                      if (short_desc_data != null)
+                      {
+                        tooltip_desc = short_desc_data;
+                      }
+                      tag_elem.html(mir_count.toString()+"<span>"+tooltip_desc+"</span>");
+                    }
+                    else
+                    {
+                      tag_elem.text("0");
+                    }
+                    if (thumbnail_url_data != null)
+                    {
+                      img_elem.attr('src', thumbnail_url_data);
+                    }
+                    else
+                    {
+                      img_elem.attr('src', "images/unknown.jpg");
+                    }
+                    if (short_desc_data != null)
+                    {
+                      img_elem.attr('alt', short_desc_data);
+                      img_elem.attr('title', short_desc_data);
+                      tag_elem.attr('title', short_desc_data);
+                    }
+                    else
+                    {
+                      img_elem.attr('alt', "Unknown");
+                      img_elem.attr('title', "Unknown");
+                      tag_elem.attr('title', "Unknown");
+                    }
+                  }
+                );
+                setTimeout(
+                    'waitForMsg()', /* Request next message */
+                    POLL_INTERVAL /* ..after 1 seconds */
+                );
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+                alert("error", textStatus + " (" + errorThrown + ")");
+                setTimeout(
+                    'waitForMsg()', /* Try again after.. */
+                    POLL_INTERVAL*BACKOFF); /* milliseconds */
+            },
+        });
+    };
+
+    </script>
+  </head>
+  <body>
+    <script>
+/*
+      jQuery.getJSON("/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like", function(data) {
+          var items = [];
+          alert("data:"+data);
+          jQuery.each(data, function(key, val)
+            {
+              alert("key:"+key+", val:"+val);
+              alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
+            }
+          );
+        }
+      );
+*/
+      jQuery(document).ready(function(){
+        waitForMsg(); /* Start the inital request */
+      });
+    </script>
+  <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
+  <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+  <link rel="stylesheet" type="text/css" href="stylesheets/like.css" />
+</head>
+
+<body>
+<div class='container'>
+  <div class='span-10'>
+    <h1>Cool Shop</h1>
+    <p>
+      <img height='100' width='100' src='images/kuromi.jpg'/>
+    </p>
+    <p>
+      <img height='100' width='100' src='images/kitty.jpg'/>
+    </p>
+    <p>
+      <img height='100' width='100' src='images/cinnamoroll.jpg'/>
+    </p>
+    <p>
+      <img height='100' width='100' src='images/mymelody.jpg'/>
+    </p>
+    <p>
+      <img height='100' width='100' src='images/gloomy.jpg'/>
+    </p>
+  </div>
+  <div class='span-1'>
+   <div class='headerDivider'></div>
+  </div>
+  <div class='span-9 last'>
+    <h1>Like Board</h1>
+    <div id='liketree'>
+      <p>
+        <img id='like_1' class='one pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100"/>
+        <span class='tag_one tagframe' title='Like'><a id='liketag_1' class='vc_tooltip'>0<span>Like</span></a></span>
+      </p>
+      <p>
+        <span class='tag_two tagframe' title='Like'><a id='liketag_2' class='vc_tooltip'>0<span>Like</span></a></span>
+        <img id='like_2' class='two pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100" />
+      </p>
+      <p>
+        <img id='like_3' class='three pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100" />
+        <span class='tag_three tagframe' title='Like'><a id='liketag_3' class='vc_tooltip'>0<span>Like</span></a></span>
+      </p>
+      <p>
+        <img id='like_4' class='four pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100" />
+        <span class='tag_four tagframe' title='Like'><a id='liketag_4' class='vc_tooltip'>0<span>Like</span></a></span>
+      </p>
+      <p>
+        <img id='like_5' class='five pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100" />
+        <span class='tag_five tagframe' title='Like'><a id='liketag_5' class='vc_tooltip'>0<span>Like</span></a></span>
+      </p>
+      <p>
+        <span class='tag_six tagframe' title='Like'><a class='vc_tooltip'>0<span>Like</span></a></span>
+        <img id='like_6' class='six pixframe' alt='Like' title='Like' src="images/like.jpg" width="100" height="100" />
+      </p>
+    </div>
+  </div>
+
+  </body>
+</html>

@@ -11,6 +11,10 @@ class Constants
   MEANT_IT_REL_PAGE_SIZE = "pg_size"
   MEANT_IT_REL_LAST_ID = "last_id"
   MEANT_IT_REL_START_ID = "start_id"
+  REC_LIMIT_INPUT = "rec_limit"
+  COUNT_ORDER_INPUT = "count_order"
+  SQL_COUNT_ORDER_ASC = "asc"
+  SQL_COUNT_ORDER_DESC = "desc"
 
   PAGINATE_BATCH_SIZE = 5
 
@@ -29,6 +33,8 @@ class Constants
   WEB_MAX_MEANTIT_OUT = 3
   WEB_MAIN_MAX_MEANTIT = 5
   WEB_PAGE_RESULT_SIZE = 10
+
+  LIKEBOARD_REC_LIMIT = 10
 
   MEANT_IT_RELS_DETAILS_SRC = :src
   MEANT_IT_RELS_DETAILS_DST = :dst

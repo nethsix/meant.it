@@ -11,6 +11,27 @@ module ControllerHelper
   MEANT_IT_INPUT_RECEIVER_NICK = :receiver_nick
   MEANT_IT_INPUT_TAGS = :tags
 
+  SQL_ORDER_ENUM = [Constants::SQL_COUNT_ORDER_ASC, Constants::SQL_COUNT_ORDER_DESC]
+  def self.sql_validate_order(order_str, default_order)
+    default_order ||= SQL_ORDER_NUM[1]
+    if !order_str.nil?
+      cleansed_order_str = SQL_ORDER_ENUM.include?(order_str.downcase.strip) ? order_str : default_order
+    else
+      cleansed_order_str = default_order
+    end # end if !order_str.nil?
+    cleansed_order_str
+  end # end def self.sql_validate_order(order_str)
+
+  def self.validate_number(num_str, default_num)
+    default_num ||= nil
+    if !num_str.nil?
+      cleansed_num_str = num_str.strip.match(/^\d+$/) ? num_str : default_num
+    else
+      cleansed_num_str = default_num
+    end # end if !num_str.nil?
+    cleansed_num_str
+  end # end def def self.validate_number(num_str)
+
   AUTO_ENTITY_DOMAIN_ENTITY_ID = 1
   def self.auto_entity_domain?(pii_str)
     pii_match_arr = nil

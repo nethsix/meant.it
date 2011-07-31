@@ -3,6 +3,7 @@ require 'validators'
 class Pii < ActiveRecord::Base
 #20110628a  belongs_to :endPoint, :class_name => "EndPoint", :foreign_key => "endpoint_id"
   has_many :endPoints, :class_name => "EndPoint"
+  has_one :pii_property_set
 
   validates :pii_type, :presence => true, :pii_type => true
   validates :pii_value, :presence => true

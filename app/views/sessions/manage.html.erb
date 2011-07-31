@@ -44,10 +44,11 @@
         <thead>
           <tr>
             <th class='span-12'>Pii</th>
-            <th class='span-4'>Sent</th>
-            <th class='span-4'>Latest Sent</th>
-            <th class='span-4'>Received</th>
-            <th class='span-4'>Latest Received</th>
+            <th class='span-3'>Sent</th>
+            <th class='span-3'>Latest Sent</th>
+            <th class='span-3'>Received</th>
+            <th class='span-3'>Latest Received</th>
+            <th class='span-3'>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -58,6 +59,11 @@
             <tr>
               <td>
                 <%= link_to "#{endpoint_elem.pii.pii_value}", url_for("/piis/show_by_pii_value?#{Constants::PII_VALUE_INPUT}=#{endpoint_elem.pii.pii_value}") %>
+                <% 
+                  if !endpoint_elem.pii.pii_property_set.nil? and (!endpoint_elem.pii.pii_property_set.short_desc.nil? or !endpoint_elem.pii.pii_property_set.short_desc.empty?)
+                %>
+                  (<%= endpoint_elem.pii.pii_property_set.short_desc %>)
+                <% end %>
               </td>
               <td>
                 <% 
@@ -103,6 +109,20 @@
                   end # end if !all_endpoints.nil?
                 %>
                   <%= time_ago_str %>
+              </td>
+              <td>
+                <%
+                  if !endpoint_elem.pii.nil?
+                    if !endpoint_elem.pii.pii_property_set.nil?
+                      @pii_property_set = endpoint_elem.pii.pii_property_set
+                %>
+                    <%= link_to "Edit", edit_pii_property_set_path(@pii_property_set) %>
+                <%  else %>
+                    <%= link_to "Edit", new_pii_property_set_path(Constants::PII_VALUE_INPUT => endpoint_elem.pii.pii_value) %>
+                <%
+                    end # end if !endpoint_elem.pii.pii_property_set.nil?
+                  end # end if !endpoint_elem.pii.nil?
+                %>
               </td>
             </tr>
 <%

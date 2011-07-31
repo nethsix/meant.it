@@ -2,7 +2,7 @@ require 'controller_helper'
 
 class PiisController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
-  before_filter :authorize, :except => [:create, :show_by_pii_value ]
+  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count ]
 
   # GET /piis
   # GET /piis.xml
@@ -133,4 +133,79 @@ class PiisController < ApplicationController
       format.xml  { render :xml => @pii }
     end
   end
+
+  def show_by_message_type_uniq_sender_count
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, params.inspect:#{params.inspect}")
+    order = params[Constants::COUNT_ORDER_INPUT]
+    order = ControllerHelper.sql_validate_order(order, Constants::SQL_COUNT_ORDER_DESC)
+    rec_limit = params[Constants::REC_LIMIT_INPUT]
+    rec_limit = ControllerHelper.validate_number(rec_limit, Constants::LIKEBOARD_REC_LIMIT)
+    message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
+    if !message_type.nil? and !message_type.empty?
+      normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
+      options[:conditions] = ["meant_it_rels.message_type = ?", normalized_msg_type_downcase]
+    end # end if !message_type.nil? and !message_type.empty?
+    @pii = Pii.find(:all, options)
+    @pii.each { |pii_elem|
+    # NOTE: We cannot just use pii_elem.pii_property_set because it
+    # is nil since the @pii is only has fields that we selected using
+    # the options has that we feed into Pii.find
+    # NOTE: We also couldn't find (after some search) to include fields
+    # such as property_pii_set.pii_id into the options and if you think
+    # about it maybe we shouldn't since everything returned is suppose
+    # to be pii thus, the mashing together should be done here?
+    # NOTE: We didn't use as_json in the pii class since we may not
+    # always want those pii_property_set value attached.  Therefore
+    # we use some metaprogramming to only include those values for this
+    # pii.
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.inspect:#{pii_elem.inspect}")
+      class << pii_elem
+        def get_property_set_model
+          pii_id = Pii.find_by_pii_value(pii_value)
+          pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
+          pii_property_set_model
+        end
+
+        def short_desc_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def long_desc_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def thumbnail_url_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
+          return_value
+        end
+
+#        def as_json(options={})
+#          super(
+#            :methods => %w{:short_desc_data :long_desc_data :thumbnail_url_data }
+#          )
+#        end 
+      end
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.short_desc_data:#{pii_elem.short_desc_data}")
+    }
+    pii_to_json = @pii.to_json(:methods => [:short_desc_data, :long_desc_data, :thumbnail_url_data])
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_to_json:#{pii_to_json}")
+
+    respond_to do |format|
+#      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
+      format.xml  { render :xml => @pii }
+      format.json { render :json => pii_to_json }
+    end
+#      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
+#      format.xml  { render :xml => meantItRels }
+  end # end def show_by_message_type_uniq_sender_count
 end

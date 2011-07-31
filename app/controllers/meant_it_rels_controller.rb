@@ -1,7 +1,7 @@
 require 'constants'
 
 class MeantItRelsController < ApplicationController
-  before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type ]
+  before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type, :show_by_message_type_uniq_sender_count ]
 
   # GET /meant_it_rels
   # GET /meant_it_rels.xml

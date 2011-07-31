@@ -11,6 +11,8 @@ MeantIt::Application.routes.draw do
 
   resources :sessions
 
+  resources :pii_property_sets
+
   resources :inbound_email_logs
 
   resources :yes_emails
@@ -65,6 +67,7 @@ MeantIt::Application.routes.draw do
       get 'find_by_pii_value_debug'
       get 'show_by_pii_value'
       get 'show_by_pii_value_debug'
+      get 'show_by_message_type_uniq_sender_count'
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110718145733) do
+ActiveRecord::Schema.define(:version => 20110727120234) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -168,6 +168,21 @@ ActiveRecord::Schema.define(:version => 20110718145733) do
 
   create_table "physicians", :force => true do |t|
     t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "pii_property_sets", :force => true do |t|
+    t.string   "uniq_id"
+    t.string   "short_desc"
+    t.text     "long_desc"
+    t.string   "notify"
+    t.integer  "threshold"
+    t.integer  "pii_id"
+    t.string   "avatar_file_name"
+    t.string   "avatar_content_type"
+    t.integer  "avatar_file_size"
+    t.datetime "avatar_updated_at"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
