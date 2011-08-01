@@ -64,13 +64,30 @@ class EntityDataController < ApplicationController
       @entity_datum = EntityDatum.new(params[:entity_datum])
     end # end if admin?
 
-    chosen_email = params[:entity_datum][:email]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, chosen_email:#{chosen_email}")
-    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
+#20110801    chosen_email = params[:entity_datum][:email]
+#20110801    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, chosen_email:#{chosen_email}")
+#20110801    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
 
-    # Link to entity if entity data was successfully saved
-    if entity_datum_exist.nil? and @entity_datum.save
-      current_entity.property_document_id = @entity_datum.id
+#20110801    entity_datum_error = nil
+#20110801    if entity_datum_exist.nil?
+#20110801      @entity_datum.save
+#20110801      entity_datum_error = @entity_datum.errors.any? ? true : false
+#20110801    end # end if entity_datum_exist.nil?
+
+#20110801    # Possible conditions:
+#20110801    #                                entity_datum_error
+#20110801    # entity_datum_exist    |      nil      true           false
+#20110801    #       nil             |       x     show error      link (new)
+#20110801    #     not nil           | link (exist)      x            x
+   
+#20110801    # Link to entity if entity data was successfully saved
+#20110801    if (entity_datum_exist.nil? and entity_datum_error == false) or (!entity_datum_exist.nil? and entity_datum_error.nil?)
+#20110801      if (entity_datum_exist.nil? and entity_datum_error == false)
+#20110801        current_entity.property_document_id = @entity_datum.id
+#20110801      elsif (!entity_datum_exist.nil? and entity_datum_error.nil?)
+#20110801        current_entity.property_document_id = entity_datum_exist.id
+#20110801      end # end elsif (!entity_datum_exist.nil? and entity_datum_error.nil?)
+    if @entity_datum.save
       if current_entity.save
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
         respond_to do |format|
@@ -85,7 +102,7 @@ class EntityDataController < ApplicationController
         end # end respond_to
       end # end if current_entity.save
     else
-      flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
+#      flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
       respond_to do |format|
         format.html { render :action => "new" }
         format.xml  { render :xml => @entity_datum.errors, :status => :unprocessable_entity }
@@ -104,16 +121,17 @@ class EntityDataController < ApplicationController
     end # end if admin?
 
     # Check if email already exists
-    chosen_email = params[:entity_datum][:email]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, chosen_email:#{chosen_email}")
-    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
+#20110801    chosen_email = params[:entity_datum][:email]
+#20110801    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, chosen_email:#{chosen_email}")
+#20110801    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
 
     respond_to do |format|
-      if entity_datum_exist.nil? and @entity_datum.update_attributes(params[:entity_datum])
+#20110801      if entity_datum_exist.nil? and @entity_datum.update_attributes(params[:entity_datum])
+      if @entity_datum.update_attributes(params[:entity_datum])
         format.html { redirect_to("/", :notice => 'Entity datum updated.') }
         format.xml  { head :ok }
       else
-        flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
+#20110801        flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
         format.html { render :action => "edit" }
         format.xml  { render :xml => @entity_datum.errors, :status => :unprocessable_entity }
       end
