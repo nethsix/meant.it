@@ -1,12 +1,12 @@
 <% require 'constants' %>
-    <h3>Pii Properties</h3>
+    <h3>Pii Properties: <%= params[Constants::PII_VALUE_INPUT] %></h3>
     <%= form_for(@pii_property_set, :html => { :multipart => true }) do |f| %>
       <% if @pii_property_set.errors.any? %>
         <div id="error_explanation">
-          <h2><%= pluralize(@pii.errors.count, "error") %> prohibited this pii from being saved:</h2>
+          <h2><%= pluralize(@pii_property_set.errors.count, "error") %> prohibited this pii from being saved:</h2>
 
           <ul>
-          <% @pii.errors.full_messages.each do |msg| %>
+          <% @pii_property_set.errors.full_messages.each do |msg| %>
             <li><%= msg %></li>
           <% end %>
           </ul>
