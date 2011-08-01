@@ -142,11 +142,21 @@ class PiisController < ApplicationController
     rec_limit = params[Constants::REC_LIMIT_INPUT]
     rec_limit = ControllerHelper.validate_number(rec_limit, Constants::LIKEBOARD_REC_LIMIT)
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    pii_value = params[Constants::PII_VALUE_INPUT]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, message_type:#{message_type}, pii_value:#{pii_value}")
     options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
     if !message_type.nil? and !message_type.empty?
       normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
-      options[:conditions] = ["meant_it_rels.message_type = ?", normalized_msg_type_downcase]
+#      if options[:conditions].nil?
+#        options[:conditions] = ["meant_it_rels.message_type = ?", normalized_msg_type_downcase]
+#        options[:conditions] = { :meant_it_rels => { :message_type => normalized_msg_type_downcase} }
+#      end # end if options[:conditions].nil?
+      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, normalized_msg_type_downcase)
     end # end if !message_type.nil? and !message_type.empty?
+    if !pii_value.nil? and !pii_value.empty?
+      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
+    end # end if !pii_value.nil? and !pii_value.empty?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, options.inspect:#{options.inspect}")
     @pii = Pii.find(:all, options)
     @pii.each { |pii_elem|
     # NOTE: We cannot just use pii_elem.pii_property_set because it
@@ -166,6 +176,20 @@ class PiisController < ApplicationController
           pii_id = Pii.find_by_pii_value(pii_value)
           pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
           pii_property_set_model
+        end
+
+        def get_threshold
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def get_formula
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+          return_value
         end
 
         def short_desc_data
@@ -197,7 +221,7 @@ class PiisController < ApplicationController
       end
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.short_desc_data:#{pii_elem.short_desc_data}")
     }
-    pii_to_json = @pii.to_json(:methods => [:short_desc_data, :long_desc_data, :thumbnail_url_data])
+    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_to_json:#{pii_to_json}")
 
     respond_to do |format|

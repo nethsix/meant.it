@@ -441,4 +441,16 @@ module ControllerHelper
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_or_create_sender_endPoint_and_pii:#{logtag}, sender_endPoint.inspect:#{sender_endPoint.inspect}")
     sender_endPoint
   end # end def self.find_or_create_sender_endPoint_and_pii
+
+  def self.set_options(options, option_key_sym, table_name_sym, table_col_sym, value)
+    if options[option_key_sym].nil?
+      options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
+    else
+      if options[option_key_sym][table_name_sym].nil?
+        options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
+      else
+        options[option_key_sym][table_name_sym][table_col_sym] = value
+      end # end if options[option_key_sym][table_name_sym].nil?
+    end # end if options[table_name].nil?
+  end # end def self.set_options
 end # end module ControllerHelper

@@ -34,6 +34,11 @@
       </div>
 
       <div class="field">
+        <%= f.label "Formula:" %><br />
+        <%= f.text_field :formula %>
+      </div>
+
+      <div class="field">
         <%= hidden_field_tag(Constants::PII_VALUE_INPUT, params[Constants::PII_VALUE_INPUT]) %>
       </div>
 

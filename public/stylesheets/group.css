@@ -1,0 +1,34 @@
+.vDivider {
+     border-left:5px dashed #38546d; 
+     border-right:0px dashed #16222c; 
+     height: 50px;
+     position:relative;
+     top: 10px
+}
+.pixframe
+{
+background: #fff;
+border:3px dotted #555;
+padding:10px;
+box-sizing: border-box;
+}
+
+.hDivider {
+     background: #fff;
+     border-top: 5px dashed #38546d;
+     border-bottom: 0px;
+     margin-top: 5px;
+}
+.large
+{
+     font-size:20px;
+}
+.bluish
+{
+     color:#088;
+}
+.vertical-middle
+{
+    position: relative;
+    top: 20px;
+}

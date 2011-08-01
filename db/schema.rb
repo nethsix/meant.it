@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110801082428) do
+ActiveRecord::Schema.define(:version => 20110801103715) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -183,6 +183,7 @@ ActiveRecord::Schema.define(:version => 20110801082428) do
     t.datetime "avatar_updated_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "formula"
   end
 
   create_table "piis", :force => true do |t|
