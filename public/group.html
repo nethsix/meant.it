@@ -9,7 +9,7 @@
       {
         jQuery.ajax({
             type: "GET",
-            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_input_type=25%3d%3d%3dp001",
+            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=25%3d%3d%3dlabutan",
 
             async: true, /* If set to non-async, browser shows page as "Loading.."*/
             cache: false,
@@ -28,16 +28,27 @@
                     var threshold = val.pii.threshold;
                     var formula = val.pii.formula;
 //DEBUG                    alert("mir_count:"+mir_count);
+//DEBUG                    alert("threshold:"+threshold);
+//DEBUG                    alert("formula:"+formula);
 //DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
-                var TOTAL_WIDTH = 1000;
-                var hpos = mir_count * (TOTAL_WIDTH/threshold);
-                if (hpos > TOTAL_WIDTH)
-                {
-                  hpos = TOTAL_WIDTH;
-                }
-                document.getElementById('desiredItem').style.position="relative";
-                document.getElementById('desiredItem').style.left=+hpos;
+                    var TOTAL_WIDTH = 700;
+                    var hpos = mir_count * (TOTAL_WIDTH/threshold);
+//DEBUG                    alert("hpos:"+hpos);
+                    if (hpos > TOTAL_WIDTH)
+                    {
+                      hpos = TOTAL_WIDTH;
+                    }
+//                    document.getElementById('desiredItem').style.position="relative";
+                    jQuery('#desiredItem').css('position','relative');
+//                    document.getElementById('desiredItem').style.left=+hpos;
+                    jQuery('#desiredItem').css('left', hpos);
+                    jQuery('#liketag').css('position','relative');
+                    jQuery('#liketag').css('left', hpos-3);
+                    jQuery('#liketag').css('top', -11);
+                    jQuery('#liketag').text(mir_count.toString());
+                  }
+                );
                 setTimeout(
                     'waitForMsg()', /* Request next message */
                     POLL_INTERVAL /* ..after 1 seconds */
@@ -102,6 +113,7 @@
   </div>
   <div class='span-4'>
     <img id="desiredItem" class="pixframe" width="70" height="80" src="/images/labutan.jpg"/>
+    <span class='tagframe' position:relative;top:-11' id='liketag'>0</span>
   </div>
   <div class='span-5 vertical-middle'>
     <img width="100" src="/images/group_arrow.gif"/>

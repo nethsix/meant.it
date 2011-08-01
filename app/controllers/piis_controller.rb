@@ -178,14 +178,14 @@ class PiisController < ApplicationController
           pii_property_set_model
         end
 
-        def get_threshold
+        def threshold
           @pii_property_set_model ||= get_property_set_model
           return_value = nil
           return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
           return_value
         end
 
-        def get_formula
+        def formula
           @pii_property_set_model ||= get_property_set_model
           return_value = nil
           return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?

@@ -5,6 +5,17 @@
      position:relative;
      top: 10px
 }
+.tagframe
+{
+font-size: 30px;
+background: #fff;
+border:2px solid #555;
+padding:3px;
+box-sizing: border-box;
+position:relative;
+left:-3;
+top:-11;
+}
 .pixframe
 {
 background: #fff;
