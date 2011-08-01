@@ -91,14 +91,14 @@ class EntityDataController < ApplicationController
       if current_entity.save
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
         respond_to do |format|
-          format.html { redirect_to(@entity_datum, :notice => 'Entity datum was successfully created.') }
+          format.html { redirect_to("/", :notice => 'Entity datum was successfully created.') }
           format.xml  { render :xml => @entity_datum, :status => :created, :location => @entity_datum }
         end # end respond_to
       else
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id failed for pair: current_entity.inspect:#{current_entity.inspect}, entity_datum.inspect:#{@entity_datum.inspect}")
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, current_entity.errors.inspect:#{current_entity.errors.inspect}")
         respond_to do |format|
-          format.html { render "/" }
+          format.html { redirect_to "/", :error => "setting property_document_id failed failed" }
         end # end respond_to
       end # end if current_entity.save
     else
