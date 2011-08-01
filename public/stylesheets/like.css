@@ -106,7 +106,7 @@ a.vc_tooltip:hover span{display:inline; position:absolute; left:10px; top:10px; 
 .headerDivider {
      border-left:5px dashed #38546d; 
      border-right:0px dashed #16222c; 
-     height:500px;
+     height:550px;
      position:relative;
      top: 20px
 }
