@@ -88,6 +88,7 @@ class EntityDataController < ApplicationController
 #20110801        current_entity.property_document_id = entity_datum_exist.id
 #20110801      end # end elsif (!entity_datum_exist.nil? and entity_datum_error.nil?)
     if @entity_datum.save
+      current_entity.property_document_id = @entity_datum.id
       if current_entity.save
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
         respond_to do |format|
