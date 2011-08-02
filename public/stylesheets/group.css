@@ -5,6 +5,10 @@
      position:relative;
      top: 10px
 }
+.fg
+{
+     z-index: 5;
+}
 .tagframe
 {
 font-size: 30px;
