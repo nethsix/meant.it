@@ -1,3 +1,7 @@
+<!--- About the only reason we make this view of home controller is
+we want the labutan id to change depending on production/development,
+otherwise this can be just a page in public directory that uses ajax
+to communicate with meant.it using REST --->
 <html>
   <head>
     <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
@@ -9,7 +13,8 @@
       {
         jQuery.ajax({
             type: "GET",
-            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=9%3d%3d%3dlabutan",
+//            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=25%3d%3d%3dlabutan",
+            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=<%= ENV['GROUP_PII'] %>",
 
             async: true, /* If set to non-async, browser shows page as "Loading.."*/
             cache: false,

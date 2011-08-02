@@ -144,7 +144,9 @@ class PiisController < ApplicationController
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
     pii_value = params[Constants::PII_VALUE_INPUT]
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, message_type:#{message_type}, pii_value:#{pii_value}")
-    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
+# NOT DISTINCT src_endpoint_id so WRONG!!!
+#    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
+    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
     if !message_type.nil? and !message_type.empty?
       normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
 #      if options[:conditions].nil?

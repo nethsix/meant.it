@@ -43,4 +43,11 @@ class ApplicationController < ActionController::Base
       redirect_to url_for("/")
     end
   end
+
+if Rails.env.production?
+  ENV['GROUP_PII'] = '9%3d%3d%3dlabutan'
+else
+  ENV['GROUP_PII'] = '25%3d%3d%3dlabutan'
+end
+
 end
