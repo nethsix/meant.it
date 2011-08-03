@@ -22,4 +22,8 @@ class HomeController < ApplicationController
   def group
     render "group", :layout => false
   end
+
+  def like
+    render "like", :layout => false
+  end
 end

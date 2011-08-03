@@ -59,10 +59,14 @@ class EntityDataController < ApplicationController
   # POST /entity_data.xml
   def create
     logtag = ControllerHelper.gen_logtag
-    # Check if email already exists
     if admin? or current_entity.property_document_id.nil?
       @entity_datum = EntityDatum.new(params[:entity_datum])
     end # end if admin?
+    pword = params[:password]
+    new_password = params[:new_password]
+    new_password_confirmation = params[:new_password_confirmation]
+    precheck_error = check_password(pword, new_password, new_password_confirmation)
+    flash.now[:error] = precheck_error if !precheck_error.nil?
 
 #20110801    chosen_email = params[:entity_datum][:email]
 #20110801    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, chosen_email:#{chosen_email}")
@@ -87,19 +91,24 @@ class EntityDataController < ApplicationController
 #20110801      elsif (!entity_datum_exist.nil? and entity_datum_error.nil?)
 #20110801        current_entity.property_document_id = entity_datum_exist.id
 #20110801      end # end elsif (!entity_datum_exist.nil? and entity_datum_error.nil?)
-    if @entity_datum.save
+    if !precheck_error and @entity_datum.save
       current_entity.property_document_id = @entity_datum.id
+      if !new_password.nil? and !new_password.empty?
+        password_hash = BCrypt::Engine.hash_secret(new_password, current_entity.password_salt)
+        current_entity.password_hash = password_hash
+      end # end if !new_password.nil? and !new_password.empty?
       if current_entity.save
-        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id:#{@entity_datum.id} for current_entity.inspect:#{current_entity.inspect}")
         respond_to do |format|
           format.html { redirect_to("/", :notice => 'Entity datum was successfully created.') }
           format.xml  { render :xml => @entity_datum, :status => :created, :location => @entity_datum }
         end # end respond_to
       else
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, setting property_document_id failed for pair: current_entity.inspect:#{current_entity.inspect}, entity_datum.inspect:#{@entity_datum.inspect}")
+        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, OR password change failed for current_entity.inspect:#{current_entity.inspect}, entity_datum.inspect:#{@entity_datum.inspect}")
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, current_entity.errors.inspect:#{current_entity.errors.inspect}")
         respond_to do |format|
-          format.html { redirect_to "/", :error => "setting property_document_id failed failed" }
+          format.html { redirect_to "/", :error => "setting property_document_id failed failed or password change failed" }
         end # end respond_to
       end # end if current_entity.save
     else
@@ -121,21 +130,42 @@ class EntityDataController < ApplicationController
       @entity_datum = EntityDatum.find current_entity.property_document_id
     end # end if admin?
 
+    @entity_datum.attributes = params[:entity_datum]
+    pword = params[:password]
+    new_password = params[:new_password]
+    new_password_confirmation = params[:new_password_confirmation]
+    precheck_error = check_password(pword, new_password, new_password_confirmation)
+    flash.now[:error] = precheck_error if !precheck_error.nil?
+
     # Check if email already exists
 #20110801    chosen_email = params[:entity_datum][:email]
 #20110801    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, chosen_email:#{chosen_email}")
 #20110801    entity_datum_exist = EntityDatum.find_by_email(chosen_email)
 
-    respond_to do |format|
 #20110801      if entity_datum_exist.nil? and @entity_datum.update_attributes(params[:entity_datum])
-      if @entity_datum.update_attributes(params[:entity_datum])
-        format.html { redirect_to("/", :notice => 'Entity datum updated.') }
-        format.xml  { head :ok }
+    if !precheck_error and @entity_datum.update_attributes(params[:entity_datum])
+      if !new_password.nil? and !new_password.empty?
+        password_hash = BCrypt::Engine.hash_secret(new_password, current_entity.password_salt)
+        current_entity.password_hash = password_hash
+      end # end if !new_password.nil? and !new_password.empty?
+      if current_entity.save
+        respond_to do |format|
+          format.html { redirect_to("/", :notice => 'Entity datum updated.') }
+          format.xml  { head :ok }
+        end # end respond_to do |format|
       else
+        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, password change failed for current_entity.inspect:#{current_entity.inspect}, entity_datum.inspect:#{@entity_datum.inspect}")
+        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:update:#{logtag}, current_entity.errors.inspect:#{current_entity.errors.inspect}")
+        respond_to do |format|
+          format.html { redirect_to "/", :error => "setting property_document_id failed failed or password change failed" }
+        end # end respond_to
+      end # end if @entity_datum.errors.empty?
+    else
 #20110801        flash.now[:error] = "Another entity already using the email '#{chosen_email}'" if !entity_datum_exist.nil?
+      respond_to do |format|
         format.html { render :action => "edit" }
         format.xml  { render :xml => @entity_datum.errors, :status => :unprocessable_entity }
-      end
+      end # end respond_to do |format|
     end
   end
 
@@ -157,4 +187,25 @@ class EntityDataController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+  private
+  def check_password(pword, new_password, new_password_confirmation)
+    precheck_error = nil
+    entity = Entity.authenticate(current_entity.login_name, pword)
+    entity_instance = entity.instance_of?(Entity)
+    if entity_instance
+      # Check if new password is provided and if so ensure the confirmation password matches
+      if new_password != new_password_confirmation
+        precheck_error  = "New password and new password confirmation does not match"
+      else
+        if !new_password.nil? and !new_password.empty? and new_password.size < Constants::MIN_PASSWORD_LEN
+          precheck_error = "Password too short (must be > #{Constants::MIN_PASSWORD_LEN})"
+        end # end if !new_password.nil? and !new_password.empty? and ...
+      end # end if new_password != new_password_confirmation
+    else
+      precheck_error = "Incorrect password!"
+    end # end if entity_instance
+    return precheck_error
+  end # end def check_password
+  
 end

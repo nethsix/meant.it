@@ -25,14 +25,21 @@
                     var mir_count = val.pii.mir_count;
                     var thumbnail_url_data = val.pii.thumbnail_url_data;
                     var short_desc_data = val.pii.short_desc_data;
+                    var pii_value = val.pii.pii_value;
 //DEBUG                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
+                    var A_BASE_HREF="/group.html?<%= Constants::PII_VALUE_INPUT%>=<%= %>";
                     var img_id = "#like_" + key;
                     var tag_id = "#liketag_" + key;
 //DEBUG                    alert("img_id:"+img_id);
                     var img_elem = jQuery(img_id);
                     var tag_elem = jQuery(tag_id);
+                    // Add link to group
+                    if (pii_value.indexOf('labutan') != -1)
+                    {
+                      tag_elem.attr('href', A_BASE_HREF + pii_value);
+                    }
 //DEBUG                    alert("img_elem:"+img_elem);
 //DEBUG                    alert("img_elem.attr('src'):"+img_elem.attr('src'));
                     if (mir_count != null)

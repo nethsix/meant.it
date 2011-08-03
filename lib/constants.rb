@@ -17,6 +17,7 @@ class Constants
   SQL_COUNT_ORDER_DESC = "desc"
 
   PAGINATE_BATCH_SIZE = 5
+  MIN_PASSWORD_LEN = 6
 
   ENTITY_DOMAIN_MARKER = "==="
 
