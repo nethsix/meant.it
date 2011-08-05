@@ -136,30 +136,13 @@ class PiisController < ApplicationController
 
   def show_by_message_type_uniq_sender_count
     logtag = ControllerHelper.gen_logtag
-    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, params.inspect:#{params.inspect}")
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, params.inspect:#{params.inspect}")
     order = params[Constants::COUNT_ORDER_INPUT]
-    order = ControllerHelper.sql_validate_order(order, Constants::SQL_COUNT_ORDER_DESC)
     rec_limit = params[Constants::REC_LIMIT_INPUT]
-    rec_limit = ControllerHelper.validate_number(rec_limit, Constants::LIKEBOARD_REC_LIMIT)
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
     pii_value = params[Constants::PII_VALUE_INPUT]
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, message_type:#{message_type}, pii_value:#{pii_value}")
-# NOT DISTINCT src_endpoint_id so WRONG!!!
-#    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
-    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => rec_limit, :order => "mir_count #{order}" }
-    if !message_type.nil? and !message_type.empty?
-      normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
-#      if options[:conditions].nil?
-#        options[:conditions] = ["meant_it_rels.message_type = ?", normalized_msg_type_downcase]
-#        options[:conditions] = { :meant_it_rels => { :message_type => normalized_msg_type_downcase} }
-#      end # end if options[:conditions].nil?
-      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, normalized_msg_type_downcase)
-    end # end if !message_type.nil? and !message_type.empty?
-    if !pii_value.nil? and !pii_value.empty?
-      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
-    end # end if !pii_value.nil? and !pii_value.empty?
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_count:#{logtag}, options.inspect:#{options.inspect}")
-    @pii = Pii.find(:all, options)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, message_type:#{message_type}, pii_value:#{pii_value}")
+    @pii = ControllerHelper.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, rec_limit, order)
     @pii.each { |pii_elem|
     # NOTE: We cannot just use pii_elem.pii_property_set because it
     # is nil since the @pii is only has fields that we selected using

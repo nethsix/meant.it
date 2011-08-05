@@ -22,7 +22,9 @@ class ApplicationController < ActionController::Base
   end
 
   def admin?
-    false
+    is_admin = false
+    is_admin = true if current_entity.login_name = "nethsix@gmail.com"
+    is_admin
   end
 
   def authorize

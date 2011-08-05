@@ -453,4 +453,22 @@ module ControllerHelper
       end # end if options[option_key_sym][table_name_sym].nil?
     end # end if options[table_name].nil?
   end # end def self.set_options
+
+  def self.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, limit=nil, order=nil, logtag = nil)
+    limit = ControllerHelper.validate_number(limit, Constants::LIKEBOARD_REC_LIMIT)
+    order = ControllerHelper.sql_validate_order(order, Constants::SQL_COUNT_ORDER_DESC)
+# NOT DISTINCT src_endpoint_id so WRONG!!!
+#    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => limit, :order => "mir_count #{order}" }
+    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => limit, :order => "mir_count #{order}" }
+    if !message_type.nil? and !message_type.empty?
+      normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
+      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, normalized_msg_type_downcase)
+    end # end if !message_type.nil? and !message_type.empty?
+    if !pii_value.nil? and !pii_value.empty?
+      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
+    end # end if !pii_value.nil? and !pii_value.empty?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_pii_by_message_type_uniq_sender_count:#{logtag}, options.inspect:#{options.inspect}")
+    piis = Pii.find(:all, options)
+    piis
+  end # end def self.find_pii_by_message_type_uniq_sender_count
 end # end module ControllerHelper

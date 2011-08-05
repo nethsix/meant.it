@@ -39,6 +39,11 @@ to communicate with meant.it using REST --->
                     var thumbnail_url_data = val.pii.thumbnail_url_data;
                     var short_desc_data = val.pii.short_desc_data;
                     var threshold = val.pii.threshold;
+                    x_axis_1_str = (1*threshold/3).toString();
+                    x_axis_2_str = (2*threshold/3).toString();
+                    jQuery('#x_axis_1').text(x_axis_1_str.substring(0,3));
+                    jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
+                    jQuery('#x_axis_3').text(threshold);
                     var formula = val.pii.formula;
 //DEBUG                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("threshold:"+threshold);
@@ -104,19 +109,19 @@ to communicate with meant.it using REST --->
     <img height='120' width='120' src='images/like_labutan_qr.png'/>
   </div>
   <div class='span-5'>
-    <span class='large'>Qty:<span class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;1</span></span></br>
+    <span class='large'>Qty:<span id='x_axis_0' class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;1</span></span></br>
     <span class='large'>Cost:<span class='bluish'> $1B</span></span>
   </div>
   <div class='span-5'>
-    <span class='large bluish'>10</span></br>
+    <span id='x_axis_1' class='large bluish'>10</span></br>
     <span class='large bluish'>$1M</span>
   </div>
   <div class='span-5'>
-    <span class='large bluish'>20</span></br>
+    <span id='x_axis_2' class='large bluish'>20</span></br>
     <span class='large bluish'>$0.5M</span>
   </div>
   <div class='span-5 last'>
-    <span class='large bluish'>30</span></br>
+    <span id='x_axis_3' class='large bluish'>30</span></br>
     <span class='large bluish'>$10</span>
   </div>
   <div class='span-20'>

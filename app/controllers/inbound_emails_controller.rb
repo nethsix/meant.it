@@ -105,7 +105,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
       # Check for session id
       # CODE!!!
       # else use anonymous
-      sender_str = "anonymous#{Constants::MEANT_IT_PII_SUFFIX}"
+      sender_str = "anonymous#{Constants::MEANT_IT_PII_SUFFIX}" if !admin?
     end # end if !self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)
     sender_email_hash = ControllerHelper.parse_email(sender_str)
     sender_str = sender_email_hash[ControllerHelper::EMAIL_STR]
