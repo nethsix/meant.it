@@ -41,6 +41,5 @@ class UserMailer < ActionMailer::Base
       } # end pii_sender_endPoint.entities.each { |pii_entity_elem|
     end # end if !pii_sender_endPoint.entities.nil? and !pii_sender_endPoint.entities.empty?
     mail(:to => email, :subject => "Threshold of #{threshold} for pii:#{pii_value} (#{short_desc}) reached!")
-<% if @person.first_name
   end # end def threshold_mail
 end
