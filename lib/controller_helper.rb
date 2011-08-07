@@ -563,7 +563,7 @@ module ControllerHelper
     mirs = MeantItRel.find(:all, options)
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, mirs.inspect:#{mirs.inspect}")
     mirs
-  end # end def self.get_meant_it_rels_within_dates
+  end # end def self.get_meant_it_rels_by_pii_value_message_type_within_dates
 
   def self.sort_by_created_at(entries)
     sorted_entries = entries.sort { |elem1, elem2|
