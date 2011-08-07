@@ -1,4 +1,5 @@
 require 'validators'
+require 'date'
 
 module ControllerHelper
   LOGTAG_MAX = 2**32
@@ -454,7 +455,58 @@ module ControllerHelper
     end # end if options[table_name].nil?
   end # end def self.set_options
 
-  def self.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, limit=nil, order=nil, logtag = nil)
+  def self.set_options_str(options, option_key_sym, opt_str, logtag = nil)
+    if !opt_str.nil? and !opt_str.empty?
+      if options[option_key_sym].nil?
+        options[option_key_sym] = [opt_str]
+      else
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:set_options_str:#{logtag}, options[option_key_sym].class:#{options[option_key_sym].class}, options[option_key_sym].inspect:#{options[option_key_sym].inspect}")
+        if options[option_key_sym].is_a?(Hash)
+          opt_hash = options[option_key_sym]
+          options[option_key_sym] = [opt_str, opt_hash]
+        elsif options[option_key_sym].is_a?(Array)
+          options[option_key_sym] << opt_str
+        end # end if options[option_key_sym].is_a?(Hash)
+      end # end if options[option_key_sym].nil?
+    end # end if !opt_str.nil? ...
+  end # end def self.set_options_str
+
+  def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil)
+    pii_virtual = nil
+    after_date = nil
+    if !pii_value.nil? and !pii_value.empty?
+      options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide" }
+      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
+      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
+      # Get the last bill date
+      pii = Pii.find_by_pii_value(pii_value)
+      if !pii.pii_property_set.nil? and !pii.pii_property_set.email_bill_entries.empty?
+#20110806a        email_bill_entries = pii.pii_property_set.email_bill_entries.sort { |elem1, elem2|
+#20110806a          elem2.created_at <=> elem1.created_at
+#20110806a        } # end email_bill_entries.sort
+#20110806a        after_date = email_bill_entries[0].created_at
+        after_date = pii.pii_property_set.last_bill_date
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
+        if !after_date.nil?
+          ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '#{after_date}'")
+        end # end if !after_date.nil?
+      end # end if !pii.pii_property_set.nil? ...
+#DEBUG      ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '2011-08-05 11:12:20'") if after_date.nil?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, options.inspect:#{options.inspect}")
+      pii_virtual = Pii.find(:all, options)
+      # We expect only one
+      pii_virtual.each { |pii_elem|
+        class << pii_elem
+          attr_accessor :after_date
+        end
+        pii_elem.after_date = after_date
+      } # end pii_virtual.each ...
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+    end # end if !pii_value.nil? and !pii_value.empty?
+    pii_virtual
+  end # end def self.find_like_pii_value_uniq_sender_count_after_last_bill
+
+  def self.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, limit = nil, order = nil, logtag = nil)
     limit = ControllerHelper.validate_number(limit, Constants::LIKEBOARD_REC_LIMIT)
     order = ControllerHelper.sql_validate_order(order, Constants::SQL_COUNT_ORDER_DESC)
 # NOT DISTINCT src_endpoint_id so WRONG!!!
@@ -471,4 +523,115 @@ module ControllerHelper
     piis = Pii.find(:all, options)
     piis
   end # end def self.find_pii_by_message_type_uniq_sender_count
+
+  def self.validate_date(datetime_str, datetime_output_format_str = '%m/%d/%y %H:%M:%S', logtag = nil)
+    date_obj = DateTime.parse(datetime_str)
+    date_obj.strftime(datetime_output_format_str)
+  end # end def self.validate_date
+
+  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, logtag = nil)
+    mirs = nil
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, pii_value:#{pii_value}, message_type:#{message_type}, start_date:#{start_date}, end_date:#{end_date}")
+    if start_date.nil? or start_date.empty?
+      validated_start_date = nil
+    elsif start_date.is_a?(String)
+      validated_start_date = ControllerHelper.validate_date(start_date)
+    elsif start_date.is_a?(Date)
+      validated_start_date = start_date.to_s
+    else
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, start_date:#{start_date} is invalid.")
+      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, start_date:#{start_date} is invalid."
+    end # end if start_date.is_a?(String)
+    if end_date.nil? or end_date.empty?
+      validated_end_date = nil
+    elsif end_date.is_a?(String)
+      validated_end_date = ControllerHelper.validate_date(end_date)
+    elsif end_date.is_a?(Date)
+      validated_end_date = end_date.to_s
+    else
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, end_date:#{end_date} is invalid.")
+      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, end_date:#{end_date} is invalid."
+    end # end if end_date.is_a?(String)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, validated_start_date:#{validated_start_date}, validated_end_date:#{validated_end_date}")
+    options = { :select => "meant_it_rels.status, meant_it_rels.src_endpoint_id", :joins => ["JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id"], :group => "meant_it_rels.src_endpoint_id, meant_it_rels.status" }
+#20110807    options = { :joins => ["JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id"] }
+    ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, message_type) if !message_type.nil? and !message_type.empty?
+    ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value) if !pii_value.nil? and !pii_value.empty?
+    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '#{validated_start_date}'") if !validated_start_date.nil? and !validated_start_date.empty?
+    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at <= '#{validated_end_date}'") if !validated_end_date.nil? and !validated_end_date.empty? 
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, options.inspect:#{options.inspect}")
+    mirs = MeantItRel.find(:all, options)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, mirs.inspect:#{mirs.inspect}")
+    mirs
+  end # end def self.get_meant_it_rels_within_dates
+
+  def self.sort_by_created_at(entries)
+    sorted_entries = entries.sort { |elem1, elem2|
+      elem2.created_at <=> elem1.created_at
+    } # end entries.sort
+    sorted_entries
+  end # end def self.sort_by_created_at
+
+  # If email_bill_entry_id is nil then the likers after the last
+  # billing will be returned
+  def self.get_likers_by_email_bill_entry_id(pii_value, email_bill_entry_id = nil, logtag = nil)
+    likers = nil
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, pii_value:#{pii_value}, email_bill_entry_id:#{email_bill_entry_id}")
+    if !pii_value.nil? and !pii_value.empty? 
+      pii = Pii.find_by_pii_value(pii_value)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, pii.inspect:#{pii.inspect}")
+      pii_sender_endPoint = ControllerHelper.get_sender_endPoint_from_endPoints(pii.endPoints)
+      entity_no_match_arr = pii_value.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}/)
+      entity_no = entity_no_match_arr[1] if !entity_no_match_arr.nil?
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_likers_by_email_bill_entry_id:#{logtag}, entity_no:#{entity_no}")
+      entity = Entity.find(entity_no)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, entity.inspect:#{entity.inspect}")
+      start_bill_date = nil
+      end_bill_date = nil
+      if !pii.nil? and !pii.pii_property_set.nil?
+        if email_bill_entry_id.nil? or email_bill_entry_id.empty?
+          start_bill_date = pii.pii_property_set.last_bill_date
+          end_bill_date = nil
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, email_bill_entry_id is nil or empty, set start_bill_date.inspect:#{start_bill_date.inspect}, end_bill_date.inspect:#{end_bill_date.inspect}")
+        elsif !entity.nil? and !entity.email_bill.nil? and !entity.email_bill.email_bill_entries.nil? and !entity.email_bill.email_bill_entries.empty?
+          sorted_bill_entries = ControllerHelper.sort_by_created_at(entity.email_bill.email_bill_entries)
+          next_idx = nil
+          sorted_bill_entries.each_with_index { |bill_entry_elem, idx|
+             if bill_entry_elem.id = email_bill_entry_id
+               start_bill_date = bill_entry_elem.created_at
+               next_idx = idx + 1
+               break
+             end # end if bill_entry_elem.id = email_bill_entry_id
+          }
+          if start_bill_date.nil?
+            Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, no such email_bill_entry_id:#{email_bill_entry_id}")
+            raise ArugmentError, "#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, no such email_bill_entry_id:#{email_bill_entry_id}"
+          end # end if start_bill_date.nil?
+          if !next_idx.nil? and next_idx < sorted_bill_entries.size
+            end_bill_date = sorted_bill_entries[next_idx].created_at
+          end # end if !next_idx.nil? and next_idx < sorted_bill_entries.size
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, email_bill_entry_id is not nil nor empty, set start_bill_date.inspect:#{start_bill_date.inspect}, end_bill_date.inspect:#{end_bill_date.inspect}")
+        end # end if bill_id.nil? or bill_id.empty?
+        likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, logtag)
+      end # end if !pii.nil? and !pii.pii_property_set.nil?
+    end # end if !pii_value and !pii_value.empty? 
+    likers
+  end # end def self.get_likers_by_bill_id
+
+  def self.gen_contract_no(pii_value, liker_endpoint, logtag = nil)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:gen_contract_no:#{logtag}, pii_value:#{pii_value}, liker_endpoint.inspect:#{liker_endpoint.inspect}")
+    liker_endpoint_id = liker_endpoint.id
+    entity_no_match_arr = pii_value.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}/)
+    entity_no = entity_no_match_arr[1] if !entity_no_match_arr.nil?
+    entity = Entity.find(entity_no)
+    if entity.nil?
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:gen_contract_no:#{logtag}, no entity found for pii_value:#{pii_value}")
+      raise Exception, "#{File.basename(__FILE__)}:#{self.class}:gen_contract_no:#{logtag}, no entity found for pii_value:#{pii_value}"
+    end # end if entity.nil?
+    salt = entity.password_salt
+    combo_str = pii_value.to_s+liker_endpoint_id.to_s
+    contract_no = BCrypt::Engine.hash_secret(combo_str, salt)  
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:gen_contract_no:#{logtag}, pii_value:#{pii_value}, liker_endpoint_id:#{liker_endpoint_id}, contract_no:#{contract_no}")
+    contract_no
+  end # end def self.gen_contract_no(pii_value, mir)
 end # end module ControllerHelper

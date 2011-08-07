@@ -2,8 +2,7 @@ require 'controller_helper'
 class UserMailer < ActionMailer::Base
   default :from => "mailer@meant.it"
 
-  def threshold_mail(pii)
-    logtag = ControllerHelper.gen_logtag
+  def threshold_mail(pii, logtag = nil)
     @pii = pii
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:threshold_mail:#{logtag}, @pii.inspect:#{@pii.inspect}")
     pii_value = @pii.pii_value
@@ -42,4 +41,18 @@ class UserMailer < ActionMailer::Base
     end # end if !pii_sender_endPoint.entities.nil? and !pii_sender_endPoint.entities.empty?
     mail(:to => email, :subject => "Threshold of #{threshold} for pii:#{pii_value} (#{short_desc}) reached!")
   end # end def threshold_mail
+
+  def contract_mail(likee_pii_value, email, src_endpoint, logtag = nil)
+    @pii = src_endpoint.pii
+    @contract_no = ControllerHelper.gen_contract_no(likee_pii_value, src_endpoint)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:contract_mail:#{logtag}, @pii.inspect:#{@pii.inspect}")
+    short_desc = nil
+    threshold = nil
+    @likee_pii = Pii.find_by_pii_value(likee_pii_value)
+    if !@likee_pii.pii_property_set.nil?
+      short_desc = @likee_pii.pii_property_set.short_desc
+      threshold = @likee_pii.pii_property_set.threshold
+    end # end if !@likee_pii.pii_property_set.nil?
+    mail(:to => email, :subject => "pii:#{likee_pii_value} (#{short_desc}) is now ready for purchase!")
+  end # end def contract_mail
 end

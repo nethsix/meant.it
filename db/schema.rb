@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110801103715) do
+ActiveRecord::Schema.define(:version => 20110806094138) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -18,6 +18,19 @@ ActiveRecord::Schema.define(:version => 20110801103715) do
     t.datetime "updated_at"
     t.integer  "physician_id"
     t.integer  "patient_id"
+  end
+
+  create_table "email_bill_entries", :force => true do |t|
+    t.integer  "email_bill_id"
+    t.integer  "pii_property_set_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "email_bills", :force => true do |t|
+    t.integer  "entity_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "end_point_tag_rels", :force => true do |t|
@@ -184,6 +197,8 @@ ActiveRecord::Schema.define(:version => 20110801103715) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "formula"
+    t.string   "status"
+    t.string   "threshold_type"
   end
 
   create_table "piis", :force => true do |t|

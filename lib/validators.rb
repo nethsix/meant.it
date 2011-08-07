@@ -1,3 +1,14 @@
+class LikerStatusTypeValidator < ActiveModel::EachValidator
+  LIKER_STATUS_ACTIVE = "active"
+  LIKER_STATUS_INACTIVE = "inactive"
+  LIKER_STATUS_READY = "ready" # Threshold reached
+  LIKER_STATUS_BILLED = "billed"
+  LIKER_STATUS_ENUM = [ LIKER_STATUS_ACTIVE, LIKER_STATUS_INACTIVE, LIKER_STATUS_READY, LIKER_STATUS_BILLED ]
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{LIKER_STATUS_ENUM.join('\', \'').strip}'" if value.nil? or LIKER_STATUS_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class LikerStatusTypeValidator
+
 class StatusTypeValidator < ActiveModel::EachValidator
   STATUS_ACTIVE = "active"
   STATUS_INACTIVE = "inactive"
@@ -124,6 +135,15 @@ class MoodReasonerValidator < ActiveModel::EachValidator
     record.errors[attribute] << "permits only '#{MOOD_REASONER_ENUM.join('\', \'').strip}'" if value.nil? or MOOD_REASONER_ENUM.index(value.downcase).nil?
   end # end def validate_each
 end # end class MoodValidator
+
+class PiiPropertySetThresholdTypeValidator < ActiveModel::EachValidator
+  THRESHOLD_TYPE_ONETIME = "onetime"
+  THRESHOLD_TYPE_RECUR = "recur"
+  THRESHOLD_TYPE_ENUM = [THRESHOLD_TYPE_ONETIME, THRESHOLD_TYPE_RECUR]
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{THRESHOLD_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or THRESHOLD_TYPE_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class PiiPropertySetThresholdTypeValidator < ActiveModel::EachValidator
 
 class SimpleNameValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)

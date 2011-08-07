@@ -4,11 +4,13 @@ otherwise this can be just a page in public directory that uses ajax
 to communicate with meant.it using REST --->
 <%
   require 'constants'
+  require 'validators'
 #  var group_pii_val = params[Constants::PII_VALUE_INPUT]
   # Use labu-tan by default
   group_pii_val ||= ENV['GROUP_PII']
 #  group_pii_val_match_arr = group_pii_val.match(/\d#{Constants::ENTITY_DOMAIN_MARKER}(.*)/)
 #  short_name = group_pii_val_match_arr[1] if group_pii_val_match_arr[1] != null
+ pii = Pii.find_by_pii_value(CGI::unescape(group_pii_val))
 %>
 <html>
   <head>
@@ -22,7 +24,8 @@ to communicate with meant.it using REST --->
         jQuery.ajax({
             type: "GET",
 //            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=25%3d%3d%3dlabutan",
-            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=<%= group_pii_val %>",
+//            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=<%= group_pii_val %>",
+            url: "/piis/show_like_pii_value_uniq_sender_count_after_last_bill.json?message_type_input=like&pii_value_input=<%= group_pii_val %>",
 
             async: true, /* If set to non-async, browser shows page as "Loading.."*/
             cache: false,
@@ -39,6 +42,10 @@ to communicate with meant.it using REST --->
                     var thumbnail_url_data = val.pii.thumbnail_url_data;
                     var short_desc_data = val.pii.short_desc_data;
                     var threshold = val.pii.threshold;
+                    if (mir_count >= threshold)
+                    {
+                      jQuery('#closed').css('display','inline');
+                    }
                     x_axis_1_str = (1*threshold/3).toString();
                     x_axis_2_str = (2*threshold/3).toString();
                     jQuery('#x_axis_1').text(x_axis_1_str.substring(0,3));
@@ -84,11 +91,25 @@ to communicate with meant.it using REST --->
     </script>
   </head>
   <body>
+<%
+ if !pii.pii_property_set.nil? and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE
+%>
     <script>
       jQuery(document).ready(function(){
         waitForMsg(); /* Start the inital request */
       });
     </script>
+<%
+  else
+%>
+    <script>
+      jQuery(document).ready(function(){
+        jQuery('#closed').css('display','inline');
+      });
+    </script>
+<%
+  end
+%>
   <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
   <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
 <!--[if lt IE 8]>
@@ -107,6 +128,7 @@ to communicate with meant.it using REST --->
   <div class='span-10'>
     <img class='pixframe' height='100' width='90' src='images/labutan.jpg'/>
     <img height='120' width='120' src='images/like_labutan_qr.png'/>
+    <span id='closed' style='display:none;position:relative;top:-50px;left:-120px;color:red;font-size:35px'>Closed</span>
   </div>
   <div class='span-5'>
     <span class='large'>Qty:<span id='x_axis_0' class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;1</span></span></br>

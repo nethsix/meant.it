@@ -37,6 +37,11 @@
         <%= f.label "Formula:" %><br />
         <%= f.text_field :formula %>
       </div>
+ 
+      <div>
+        <%= f.label "Status:" %>
+        <%= select("pii_property_set", "status", LikerStatusTypeValidator::LIKER_STATUS_ENUM) %>
+      </div>
 
       <div class="field">
         <%= hidden_field_tag(Constants::PII_VALUE_INPUT, params[Constants::PII_VALUE_INPUT]) %>

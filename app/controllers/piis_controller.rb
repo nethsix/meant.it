@@ -2,7 +2,7 @@ require 'controller_helper'
 
 class PiisController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
-  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count ]
+  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill ]
 
   # GET /piis
   # GET /piis.xml
@@ -134,6 +134,23 @@ class PiisController < ApplicationController
     end
   end
 
+  def show_like_pii_value_uniq_sender_count_after_last_bill
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, params.inspect:#{params.inspect}")
+    pii_value = params[Constants::PII_VALUE_INPUT]
+    @pii = ControllerHelper.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, @pii[0].pii_property_set.last_bill_date:#{@pii[0].pii_property_set.last_bill_date}") if !@pii[0].nil? and !@pii[0].pii_property_set.nil?
+    add_virtual_methods_to_pii(@pii[0], pii_value)
+    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
+
+    respond_to do |format|
+#      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
+      format.xml  { render :xml => @pii }
+      format.json { render :json => pii_to_json }
+    end
+  end # end def find_like_pii_value_uniq_sender_count_after_last_bill
+
   def show_by_message_type_uniq_sender_count
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, params.inspect:#{params.inspect}")
@@ -156,6 +173,29 @@ class PiisController < ApplicationController
     # we use some metaprogramming to only include those values for this
     # pii.
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.inspect:#{pii_elem.inspect}")
+    add_virtual_methods_to_pii(pii_elem, pii_value)
+
+#        def as_json(options={})
+#          super(
+#            :methods => %w{:short_desc_data :long_desc_data :thumbnail_url_data }
+#          )
+#        end 
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.short_desc_data:#{pii_elem.short_desc_data}")
+    }
+    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_to_json:#{pii_to_json}")
+
+    respond_to do |format|
+#      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
+      format.xml  { render :xml => @pii }
+      format.json { render :json => pii_to_json }
+    end
+#      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
+#      format.xml  { render :xml => meantItRels }
+  end # end def show_by_message_type_uniq_sender_count
+
+  private
+    def add_virtual_methods_to_pii(pii_elem, pii_value)
       class << pii_elem
         def get_property_set_model
           pii_id = Pii.find_by_pii_value(pii_value)
@@ -197,24 +237,6 @@ class PiisController < ApplicationController
           return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
           return_value
         end
-
-#        def as_json(options={})
-#          super(
-#            :methods => %w{:short_desc_data :long_desc_data :thumbnail_url_data }
-#          )
-#        end 
-      end
-      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.short_desc_data:#{pii_elem.short_desc_data}")
-    }
-    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_to_json:#{pii_to_json}")
-
-    respond_to do |format|
-#      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
-      format.xml  { render :xml => @pii }
-      format.json { render :json => pii_to_json }
-    end
-#      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
-#      format.xml  { render :xml => meantItRels }
-  end # end def show_by_message_type_uniq_sender_count
+     end # end class << pii_elem
+    end # end def add_virtual_methods_to_pii
 end

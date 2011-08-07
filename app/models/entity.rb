@@ -8,6 +8,7 @@ class Entity < ActiveRecord::Base
 
   has_many :entityEndPointRels
   has_many :endPoints, :through => :entityEndPointRels
+  has_one :email_bill
 
 #  validates :propertyDocument_id, :presence => true, :uniqueness => true, :propertyDocument_id_foreign_key => true
 #  validates :property_document_id, :uniqueness => true, :property_document_id_foreign_key => true

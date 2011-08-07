@@ -6,6 +6,7 @@ MeantIt::Application.routes.draw do
   get "verify_captcha" => "sessions#verify_captcha", :as => "verify_captcha"
   get "manage" => "sessions#manage", :as => "manage"
   get "resend_confirmation" => "sessions#resend_confirmation", :as => "resend_confirmation"
+  get "send_liker_emails" => "sessions#send_liker_emails"
 
   devise_for :users, :controllers => { :confirmations => "meant_it_confirmations" }
 
@@ -68,6 +69,7 @@ MeantIt::Application.routes.draw do
       get 'show_by_pii_value'
       get 'show_by_pii_value_debug'
       get 'show_by_message_type_uniq_sender_count'
+      get 'show_like_pii_value_uniq_sender_count_after_last_bill'
     end
   end
 
