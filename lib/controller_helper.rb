@@ -574,6 +574,7 @@ module ControllerHelper
 
   # If email_bill_entry_id is nil then the likers after the last
   # billing will be returned
+  # NOTE: likers returned are meant_it_rels
   def self.get_likers_by_email_bill_entry_id(pii_value, email_bill_entry_id = nil, logtag = nil)
     likers = nil
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_likers_by_email_bill_entry_id:#{logtag}, pii_value:#{pii_value}, email_bill_entry_id:#{email_bill_entry_id}")

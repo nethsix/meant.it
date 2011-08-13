@@ -92,7 +92,7 @@ to communicate with meant.it using REST --->
   </head>
   <body>
 <%
- if !pii.pii_property_set.nil? and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE
+ if !pii.pii_property_set.nil? and ((pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE) or (pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR))
 %>
     <script>
       jQuery(document).ready(function(){

@@ -37,6 +37,11 @@
         <%= f.label "Formula:" %><br />
         <%= f.text_field :formula %>
       </div>
+
+      <div class="field">
+        <%= f.label "Type:" %>
+        <%= select("pii_property_set", "threshold_type", PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ENUM) %>
+      </div>
  
       <div>
         <%= f.label "Status:" %>
