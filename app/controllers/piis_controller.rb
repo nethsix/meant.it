@@ -139,9 +139,23 @@ class PiisController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, params.inspect:#{params.inspect}")
     pii_value = params[Constants::PII_VALUE_INPUT]
     @pii = ControllerHelper.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, @pii[0].pii_property_set.last_bill_date:#{@pii[0].pii_property_set.last_bill_date}") if !@pii[0].nil? and !@pii[0].pii_property_set.nil?
     add_virtual_methods_to_pii(@pii[0], pii_value)
-    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, @pii.inspect:#{@pii.inspect}")
+    if @pii.nil? or @pii.empty?
+      pii = Pii.find_by_pii_value(pii_value)
+      pps = pii.pii_property_set
+      made_mir_count = nil
+      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+        made_mir_count = pps.threshold_type
+      else
+        made_mir_count = 0
+      end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+      made_pii = [:pii => { :threshold => pps.threshold, :mir_count => made_mir_count }]
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
+      pii_to_json = made_pii.to_json
+    else
+      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+    end # end if pii_to_json.nil? or pii_to_json.empty?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
 
     respond_to do |format|
@@ -149,7 +163,7 @@ class PiisController < ApplicationController
       format.xml  { render :xml => @pii }
       format.json { render :json => pii_to_json }
     end
-  end # end def find_like_pii_value_uniq_sender_count_after_last_bill
+  end # end def show_like_pii_value_uniq_sender_count_after_last_bill
 
   def show_by_message_type_uniq_sender_count
     logtag = ControllerHelper.gen_logtag

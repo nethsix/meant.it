@@ -1,0 +1,82 @@
+<% require 'constants' %>
+<div class='container'>
+  <%= render :partial => "shared/top_menu" %>
+  <div class='span-24'>
+    <h3>Email Bill Management</h3>
+    <%
+      pii_value = params[Constants::PII_VALUE_INPUT]
+      pii = Pii.find_by_pii_value(pii_value)
+      pps = pii.pii_property_set
+      email_bill_entries = pps.email_bill_entries
+    %>
+    <span class="large"><b>Email Bill(s)</b></span>
+      <table summary="Email Bill(s)"  border="0" cellspacing="0" cellpadding="0">
+        <thead>
+          <tr>
+            <th class='span-2'>Bill No</th>
+            <th class='span-2'>Email Registered</th>
+            <th class='span-2'>Email Sent</th>
+            <th class='span-2'>Email Ratio</th>
+            <th class='span-2'>Cost</th>
+            <th class='span-2'>Conversion Ratio</th>
+            <th class='span-3'>Ready</th>
+            <th class='span-3'>Billed</th>
+            <th class='span-4'>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+<% if !email_bill_entries.nil? and !email_bill_entries.empty? %>
+  <% email_bill_entries.each do |email_bill_entry| %>
+    <% email_registered = email_bill_entry.meant_it_rels.size %>
+    <% # CODE/NOTE: This should be obtained from email sent/failed stats %>
+    <% if email_bill_entry.billed_date.nil? %>
+      <% email_sent = 'NA' %>
+      <% email_cost = email_registered * Constants::EMAIL_COST %>
+    <% else %>
+      <% email_sent = email_bill_entry.meant_it_rels.size %>
+      <% email_cost = email_sent * Constants::EMAIL_COST %>
+    <% end %>
+    <% if email_registered == 0 or email_sent == 'NA' %>
+      <% email_ratio = 0 %>
+    <% else %>
+      <% email_ratio = email_sent/email_registered %>
+    <% end %>
+          <tr>
+            <td>
+              <%= email_bill_entry.id %>
+            </td>
+            <td>
+              <%= email_registered %>
+            </td>
+            <td>
+              <%= email_sent %>
+            </td>
+            <td>
+              <%= 100*email_ratio %>%
+            </td>
+            <td>
+              $<%= email_cost %>
+            </td>
+            <td>
+              Soon!
+            </td>
+            <td>
+              <%= email_bill_entry.ready_date %>
+            </td>
+            <td>
+              <%= email_bill_entry.billed_date %>
+            </td>
+            <td>
+              <% if email_bill_entry.billed_date.nil? %>
+                <%= link_to "Contact", "/send_liker_emails?#{Constants::BILL_ENTRY_ID_VALUE_INPUT}=#{email_bill_entry.id}" %>
+              <% else %>
+                Billed
+              <% end # end if email_bill_entry.billed_date.nil? %>
+            </td>
+          </tr>
+  <% end %>
+<% end %>
+        </tbody>
+      </table>
+  </div>
+</div>

@@ -33,7 +33,13 @@ to communicate with meant.it using REST --->
 
             success: function(data)
             {
-//DEBUG                alert("data:"+data);
+//DEBUG                  alert("data:"+data);
+              if (data == null)
+              {
+                jQuery('#closed').css('display','inline');
+              }
+              else
+              {
                 jQuery.each(data, function(key, val)
                   {
 //DEBUG                    alert("key:"+key+", val:"+val);
@@ -57,7 +63,7 @@ to communicate with meant.it using REST --->
 //DEBUG                    alert("formula:"+formula);
 //DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
-                    var TOTAL_WIDTH = 700;
+                    var TOTAL_WIDTH = 560;
                     var hpos = mir_count * (TOTAL_WIDTH/threshold);
 //DEBUG                    alert("hpos:"+hpos);
                     if (hpos > TOTAL_WIDTH)
@@ -77,7 +83,8 @@ to communicate with meant.it using REST --->
                 setTimeout(
                     'waitForMsg()', /* Request next message */
                     POLL_INTERVAL /* ..after 1 seconds */
-                );
+              );
+              } /* end else if (data == null) */
             },
             error: function(XMLHttpRequest, textStatus, errorThrown){
                 alert("error", textStatus + " (" + errorThrown + ")");
@@ -157,13 +164,13 @@ to communicate with meant.it using REST --->
     <span class='tagframe fg' position:relative;top:-11' id='liketag'>0</span>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="100" src="/images/group_arrow.gif"/>
+    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="100" src="/images/group_arrow.gif"/>
+    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="100" src="/images/group_arrow.gif"/>
+    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-2 last'>
 

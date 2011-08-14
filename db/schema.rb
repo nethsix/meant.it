@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110806094138) do
+ActiveRecord::Schema.define(:version => 20110814025052) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -25,6 +25,8 @@ ActiveRecord::Schema.define(:version => 20110806094138) do
     t.integer  "pii_property_set_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.datetime "ready_date"
+    t.datetime "billed_date"
   end
 
   create_table "email_bills", :force => true do |t|
@@ -146,14 +148,15 @@ ActiveRecord::Schema.define(:version => 20110806094138) do
   add_index "meant_it_mood_tag_rels", ["meant_it_rel_id", "tag_id", "reasoner"], :name => "by_meant_it_rel_id_and_tag_id_and_reasoner", :unique => true
 
   create_table "meant_it_rels", :force => true do |t|
-    t.integer  "src_endpoint_id",  :null => false
-    t.integer  "dst_endpoint_id",  :null => false
-    t.string   "message_type",     :null => false
+    t.integer  "src_endpoint_id",     :null => false
+    t.integer  "dst_endpoint_id",     :null => false
+    t.string   "message_type",        :null => false
     t.text     "message"
     t.string   "status"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "inbound_email_id"
+    t.integer  "email_bill_entry_id"
   end
 
   add_index "meant_it_rels", ["inbound_email_id"], :name => "by_inbound_email_id", :unique => true
@@ -199,6 +202,7 @@ ActiveRecord::Schema.define(:version => 20110806094138) do
     t.string   "formula"
     t.string   "status"
     t.string   "threshold_type"
+    t.datetime "active_date"
   end
 
   create_table "piis", :force => true do |t|

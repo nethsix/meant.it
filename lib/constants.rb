@@ -1,7 +1,10 @@
 class Constants
+  EMAIL_COST = 0.1
+
   TITLE_STR = "title_str"
   EMAIL_VALUE_INPUT = "email"
   PII_VALUE_INPUT = "pii_value_input"
+  BILL_ENTRY_ID_VALUE_INPUT = "bill_entry_id_value_input"
   MESSAGE_TYPE_INPUT= "message_type_input"
   FIND_ANY_INPUT = "find_any_input"
   TAGS_INPUT = "tags_input"

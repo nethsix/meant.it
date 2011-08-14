@@ -121,13 +121,7 @@
                     end # end if !endpoint_elem.pii.pii_property_set.nil?
                   end # end if !endpoint_elem.pii.nil?
                 %>
-                <%
-                  if endpoint_elem.pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_READY
-                %>
-                  <%= link_to "Contact", "/send_liker_emails?#{Constants::PII_VALUE_INPUT}=#{CGI::escape(endpoint_elem.pii.pii_value)}" %>
-                <%
-                  end # end if endpoint_elem.pii.pii_property_set.ready
-                %>
+                <%= link_to "Bill", "/bill?#{Constants::PII_VALUE_INPUT}=#{CGI::escape(endpoint_elem.pii.pii_value)}" %>
               </td>
             </tr>
 <%
