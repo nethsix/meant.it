@@ -58,6 +58,23 @@ to communicate with meant.it using REST --->
                     jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
                     jQuery('#x_axis_3').text(threshold);
                     var formula = val.pii.formula;
+                    if (formula != null && formula.match(/\d+/))
+                    {
+                      jQuery('#cost_axis_3').text('$'+formula);
+                    } // end if (formula.match(/\d+/))
+                    var qr = val.pii.qr;
+                    if (qr == null || qr == '')
+                    {
+                      jQuery('#qr_img').css('display', 'none');
+                      jQuery('#meant_it_str').css('display', 'inline');
+                      jQuery('#meant_it_str').html("Send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
+                    }
+                    else
+                    {
+                      jQuery('#meant_it_str').css('display', 'none');
+                      jQuery('#qr_img').css('display', 'inline');
+                      jQuery('#qr_img').attr('src', qr);
+                    } // end if (qr == null || qr = '')
 //DEBUG                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("threshold:"+threshold);
 //DEBUG                    alert("formula:"+formula);
@@ -132,26 +149,28 @@ to communicate with meant.it using REST --->
     <h2>Get your Labu-tan clone!</h2>
     Clone in bulk to save.  Send order email using QR code.
   </div>
-  <div class='span-10'>
+  <div class='span-14 last'>
     <img class='pixframe' height='100' width='90' src='images/labutan.jpg'/>
-    <img height='120' width='120' src='images/like_labutan_qr.png'/>
+<!---    <img id='qr_img' height='120' width='120' src='images/like_labutan_qr.png'/> --->
+    <img id='qr_img' height='120' width='120' src=''/>
+    <span id='meant_it_str' width='120' style='position:relative;top:-55px'></span>
     <span id='closed' style='display:none;position:relative;top:-50px;left:-120px;color:red;font-size:35px'>Closed</span>
   </div>
   <div class='span-5'>
     <span class='large'>Qty:<span id='x_axis_0' class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;1</span></span></br>
-    <span class='large'>Cost:<span class='bluish'> $1B</span></span>
+    <span class='large'>Cost:<span id='cost_axis_0' class='bluish'> NA</span></span>
   </div>
   <div class='span-5'>
     <span id='x_axis_1' class='large bluish'>10</span></br>
-    <span class='large bluish'>$1M</span>
+    <span id='cost_axis_1' class='large bluish'>NA</span>
   </div>
   <div class='span-5'>
     <span id='x_axis_2' class='large bluish'>20</span></br>
-    <span class='large bluish'>$0.5M</span>
+    <span id='cost_axis_2' class='large bluish'>NA</span>
   </div>
   <div class='span-5 last'>
     <span id='x_axis_3' class='large bluish'>30</span></br>
-    <span class='large bluish'>$10</span>
+    <span id='cost_axis_3' class='large bluish'>Unset!</span>
   </div>
   <div class='span-20'>
     <hr class='hDivider'/>

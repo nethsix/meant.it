@@ -26,4 +26,8 @@ class HomeController < ApplicationController
   def like
     render "like", :layout => false
   end
+
+  def group_diy
+    render "group_diy", :layout => false
+  end
 end

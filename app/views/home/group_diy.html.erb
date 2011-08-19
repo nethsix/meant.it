@@ -1,0 +1,180 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
+    <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+    <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+    <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
+    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type='text/javascript'>
+      function genProdInfo()
+      {
+        var prefix = jQuery("#input_prefix").val();
+        var prod_id = jQuery("#input_prod_id").val();
+        if (prefix == '' || prefix == null || prod_id == '' || prod_id == null)
+        {
+          if (prefix == '' || prefix == null)
+          {
+            alert('Prefix must not be null');
+          }
+          else
+          {
+            alert('Product Id must not be null');
+          }
+        }
+        else
+        {
+          if (prefix.match(/\d+<%= Constants::ENTITY_DOMAIN_MARKER %>/) == null)
+          {
+            alert('Prefix seems invalid.  It should look like x<%= Constants::ENTITY_DOMAIN_MARKER %> where x is a number');
+          }
+          else
+          {
+            var uniq_prod_id_elem = jQuery("#uniq_prod_id");
+            var uniq_prod_id = prefix+prod_id;
+            uniq_prod_id_elem.text(uniq_prod_id);
+            var meant_it_str_elem = jQuery("#meant_it_str");
+            meant_it_str_elem.html("<b>:"+uniq_prod_id+"</b>");
+            var group_buy_page_elem = jQuery("#group_buy_page");
+            group_buy_page_elem.html("<a href='<%= request.host %>'></a>");
+            var qr_gen_url = "http://qrcode.good-survey.com/api/v2/generate?content=mailto%3Alike%40meant.it?subject=%3A" + escape(uniq_prod_id) + "&format=png&size=3";
+            var prod_qr_code_elem = jQuery("#prod_qr_code");
+            prod_qr_code_elem.attr('src', qr_gen_url);
+            prod_qr_code_elem.css('display', 'inline');
+          } // end if (prefix.match(/\d+ ...
+        } // end if (prefix == null or prod_id == null)
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <script>
+      jQuery(document).ready(function(){
+        jQuery('#gen_prod_info_form').submit(genProdInfo);
+      });
+    </script>
+    <div class='container'>
+      <div class='span-20'>
+        <h1>DIY Group-Buying Business in 7 Steps</h1>
+      </div>
+      <div class='span-4 last'>
+        &nbsp;
+      </div>
+      <div class='span-20'>
+      <table summary="DIY Group Business"  border="0" cellspacing="0" cellpadding="0">
+        <thead>
+          <tr>
+            <th class='span-10'>Step-By-Step</th>
+            <th class='span-10'>Visual Aid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <b>0. Goto http://meant.it</b><br/>
+              Keep this page available for easy reference.
+            </td>
+            <td>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>1. Create an ID</b><br/>
+              At the top menu, key in your userid and password.<br/>
+              <i>Use a valid email as userid if you wish to receive notification email when group-buying reaches the volume you set.</i>
+            </td>
+            <td>
+              <img src='/images/user_signup.png' alt='User sign-up' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>2. Prove human-ness</b><br/>
+              Type the letters as displayed with a space used to separate the 2 words.
+            </td>
+            <td>
+              <img src='/images/recaptcha.png' alt='Human proof' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>3. Obtain assigned prefix</b><br/>
+              At the top menu, click on 'Manage'. Look for <i>Unique Prefix</i>
+            </td>
+            <td>
+              <img src='images/assigned_prefix.png' alt='Assigned prefix' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>4. Generate product information</b><br/>
+              Key the prefix from <b>Step 3</b> and your arbitrarily chosen product id below and click 'Generate'.
+              <form id='gen_prod_info_form'>
+                  <b>Assigned prefix:</b><br/>
+                  <input id='input_prefix' type='text' /><br/>
+                  <b>Product Id:</b><br/>
+                  <input id='input_prod_id' type='text' /><br/>
+                  <input type='submit' value='Generate' />
+              </form>
+            </td>
+            <td>
+              Unique product id: <span id='uniq_prod_id'></span><br/>
+              Product QR code: <img style='display:none;' height='100' width='100' id='prod_qr_code' src='QR code to be generated'>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>5. Register product</b><br/>
+              Copy the bold string on the right, click on 'Home' at the top menu, and paste it under <i>Send Meant.it</i>. Change drop-down to like@meant.it and click 'Send'.
+            </td>
+            <td>
+              Copy this => <span class='large' id='meant_it_str'>......</span>
+              <img width='500' src='images/product_registration.png' alt='Product registration' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>6a. Setup #1</b><br/>
+              At the top menu, click 'Manage' and you should see your registered product id.  Click on 'Edit'.
+            </td>
+            <td>
+              <img src='images/setup_1.png' alt='Setup #1' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>6b. Setup #2</b><br/>
+              Key in a <i>Short description</i>, upload a product image, and QR code image (from <b>Step 4</b>). All are optional.
+            </td>
+            <td>
+              <img src='/images/setup_2.png' alt='Setup #2' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>6c. Setup #3</b><br/>
+              Set the <i>Threshold</i> when you want to be notified and whether you want this group-buying <i>Threshold type</i> is 'one-time' or it should 'recur' and click 'Save'.
+            </td>
+            <td>
+              <img src='/images/setup_3.png' alt='Setup #3' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>7. Group-buying page</b><br/>
+              Save the URL on the right, which is your group buying page, where users can group-buy and check status.  You can also enable buying from anywhere in the real world by pasting QR codes all over town.
+            </td>
+            <td>
+              <span class='large' id='group_buy_page'></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class='span-4 last'>
+        &nbsp;
+      </div>
+    </div>
+  </body>
+</html>
