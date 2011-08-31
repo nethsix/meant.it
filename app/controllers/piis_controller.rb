@@ -145,16 +145,16 @@ class PiisController < ApplicationController
       pii = Pii.find_by_pii_value(pii_value)
       pps = pii.pii_property_set
       made_mir_count = nil
-      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-        made_mir_count = pps.threshold_type
+      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pps.status == StatusTypeValidator::STATUS_INACTIVE
+        made_mir_count = pps.threshold
       else
         made_mir_count = 0
       end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-      made_pii = [:pii => { :threshold => pps.threshold, :mir_count => made_mir_count }]
+      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :mir_count => made_mir_count }]
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
       pii_to_json = made_pii.to_json
     else
-      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data])
     end # end if pii_to_json.nil? or pii_to_json.empty?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
 
@@ -196,7 +196,7 @@ class PiisController < ApplicationController
 #        end 
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.short_desc_data:#{pii_elem.short_desc_data}")
     }
-    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data])
+    pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data])
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_to_json:#{pii_to_json}")
 
     respond_to do |format|
@@ -249,6 +249,13 @@ class PiisController < ApplicationController
           @pii_property_set_model ||= get_property_set_model
           return_value = nil
           return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def thumbnail_qr_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
           return_value
         end
      end # end class << pii_elem

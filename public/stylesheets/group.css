@@ -9,6 +9,10 @@
 {
      z-index: 5;
 }
+.bg
+{
+     z-index: -10;
+}
 .tagframe
 {
 font-size: 30px;
@@ -47,3 +51,9 @@ box-sizing: border-box;
     position: relative;
     top: 20px;
 }
+
+a:hover {background:#ffffff; text-decoration:none;} /*BG color is a must for IE6*/
+a.vc_tooltip {text-decoration : none;}
+a.vc_tooltip img {border:none;}
+a.vc_tooltip span {display:none; padding:2px 3px; margin-left:8px;}
+a.vc_tooltip:hover span{display:inline; position:absolute; left:10px; top:10px; background:#ffffff; border:1px solid #cccccc; color:#3c3c3c;}

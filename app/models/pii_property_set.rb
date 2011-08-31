@@ -5,6 +5,19 @@ class PiiPropertySet < ActiveRecord::Base
 #20110813  define_attribute_methods  = [:status]
 
   has_attached_file :avatar, 
+    :default_url => "/images/unknown.jpg",
+    :path => ":hash.:extension", 
+#    :styles => { :medium => "300x300>", :thumb => "100x100>" }
+    :styles => { :medium => "300x300>", :thumb => "100x100>" },
+    :hash_secret => "deer gloomy",
+    :storage => :s3,
+    :bucket => 'ncal-meantit',
+    :s3_credentials => {
+      :access_key_id => ENV['S3_KEY'],
+      :secret_access_key => ENV['S3_SECRET']
+    }
+
+  has_attached_file :qr, 
     :path => ":hash.:extension", 
 #    :styles => { :medium => "300x300>", :thumb => "100x100>" }
     :styles => { :medium => "300x300>", :thumb => "100x100>" },

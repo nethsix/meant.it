@@ -5,12 +5,12 @@ to communicate with meant.it using REST --->
 <%
   require 'constants'
   require 'validators'
-#  var group_pii_val = params[Constants::PII_VALUE_INPUT]
+  group_pii_val = params[Constants::PII_VALUE_INPUT]
   # Use labu-tan by default
   group_pii_val ||= ENV['GROUP_PII']
 #  group_pii_val_match_arr = group_pii_val.match(/\d#{Constants::ENTITY_DOMAIN_MARKER}(.*)/)
 #  short_name = group_pii_val_match_arr[1] if group_pii_val_match_arr[1] != null
- pii = Pii.find_by_pii_value(CGI::unescape(group_pii_val))
+  pii = Pii.find_by_pii_value(CGI::unescape(group_pii_val))
 %>
 <html>
   <head>
@@ -43,9 +43,15 @@ to communicate with meant.it using REST --->
                 jQuery.each(data, function(key, val)
                   {
 //DEBUG                    alert("key:"+key+", val:"+val);
-//DEBUG                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
+                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
                     var mir_count = val.pii.mir_count;
                     var thumbnail_url_data = val.pii.thumbnail_url_data;
+                    if (thumbnail_url_data == null || thumbnail_url_data == '')
+                    {
+                      thumbnail_url_data = "/images/unknown.jpg";
+                    }
+                    jQuery('#prod_img').attr('src', thumbnail_url_data);
+                    jQuery('#desiredItem').attr('src', thumbnail_url_data);
                     var short_desc_data = val.pii.short_desc_data;
                     var threshold = val.pii.threshold;
                     if (mir_count >= threshold)
@@ -62,8 +68,11 @@ to communicate with meant.it using REST --->
                     {
                       jQuery('#cost_axis_3').text('$'+formula);
                     } // end if (formula.match(/\d+/))
-                    var qr = val.pii.qr;
-                    if (qr == null || qr == '')
+                    var qr = val.pii.thumbnail_qr_data;
+alert('qr:'+qr);
+                    // missing.png is the default url provided by paperclip
+                    // when no image is set
+                    if (qr == null || qr == '' || qr.match(/missing\.png/))
                     {
                       jQuery('#qr_img').css('display', 'none');
                       jQuery('#meant_it_str').css('display', 'inline');
@@ -75,10 +84,10 @@ to communicate with meant.it using REST --->
                       jQuery('#qr_img').css('display', 'inline');
                       jQuery('#qr_img').attr('src', qr);
                     } // end if (qr == null || qr = '')
-//DEBUG                    alert("mir_count:"+mir_count);
+                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("threshold:"+threshold);
 //DEBUG                    alert("formula:"+formula);
-//DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
+                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
                     var TOTAL_WIDTH = 560;
                     var hpos = mir_count * (TOTAL_WIDTH/threshold);
@@ -90,11 +99,12 @@ to communicate with meant.it using REST --->
 //                    document.getElementById('desiredItem').style.position="relative";
                     jQuery('#desiredItem').css('position','relative');
 //                    document.getElementById('desiredItem').style.left=+hpos;
+                    jQuery('#desiredItem').attr('src', thumbnail_url_data);
                     jQuery('#desiredItem').css('left', hpos);
                     jQuery('#liketag').css('position','relative');
                     jQuery('#liketag').css('left', hpos-3);
                     jQuery('#liketag').css('top', -11);
-                    jQuery('#liketag').text(mir_count.toString());
+                    jQuery('#liketag').html(mir_count.toString()+"<span>"+short_desc_data+"</span>");
                   }
                 );
                 setTimeout(
@@ -139,7 +149,7 @@ to communicate with meant.it using REST --->
 <!--[if lt IE 8]>
   <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
-  <link rel="stylesheet" type="text/css" href="stylesheets/group.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/group.css" />
 </head>
 
 <body>
@@ -150,7 +160,8 @@ to communicate with meant.it using REST --->
     Clone in bulk to save.  Send order email using QR code.
   </div>
   <div class='span-14 last'>
-    <img class='pixframe' height='100' width='90' src='images/labutan.jpg'/>
+<!---    <img class='pixframe' height='100' width='90' src='images/labutan.jpg'/> --->
+    <img id='prod_img' class='pixframe' height='100' width='90' src=''/>
 <!---    <img id='qr_img' height='120' width='120' src='images/like_labutan_qr.png'/> --->
     <img id='qr_img' height='120' width='120' src=''/>
     <span id='meant_it_str' width='120' style='position:relative;top:-55px'></span>
@@ -179,17 +190,19 @@ to communicate with meant.it using REST --->
     <br/>
   </div>
   <div class='span-4'>
-    <img id="desiredItem" class="pixframe fg" width="70" height="80" src="/images/labutan.jpg"/>
-    <span class='tagframe fg' position:relative;top:-11' id='liketag'>0</span>
+<!---    <img id="desiredItem" class="pixframe fg" width="70" height="80" src="/images/labutan.jpg"/> --->
+    <img id="desiredItem" class="pixframe fg" width="70" height="80" src=""/>
+<!---    <span position:relative;top:-11'><a id='liketag' class='tagframe vc_tooltip'>0</a></span> --->
+    <span><a id='liketag' class='fg tagframe vc_tooltip'>0</a></span>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
+    <img class='bg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
+    <img class='bg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-5 vertical-middle'>
-    <img class='bgimg' width="80" src="/images/group_arrow.gif"/>
+    <img class='bg' width="80" src="/images/group_arrow.gif"/>
   </div>
   <div class='span-2 last'>
 

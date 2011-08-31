@@ -62,6 +62,16 @@
       </div>
       <% end %>
 
+      <div class="field">
+        <%= f.label "QR code:" %><br />
+        <%= f.file_field :qr%>
+      </div>
+      <% if !@pii_property_set.nil? and !@pii_property_set.qr_file_name.nil? %>
+      <div class="field">
+        <%= image_tag @pii_property_set.qr.url(:thumb) %>
+      </div>
+      <% end %>
+
       <div class="actions">
         <%= f.submit "Save" %>
       </div>

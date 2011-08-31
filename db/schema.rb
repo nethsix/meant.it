@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110814025052) do
+ActiveRecord::Schema.define(:version => 20110819125445) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -203,6 +203,10 @@ ActiveRecord::Schema.define(:version => 20110814025052) do
     t.string   "status"
     t.string   "threshold_type"
     t.datetime "active_date"
+    t.string   "qr_file_name"
+    t.string   "qr_content_type"
+    t.integer  "qr_file_size"
+    t.datetime "qr_updated_at"
   end
 
   create_table "piis", :force => true do |t|

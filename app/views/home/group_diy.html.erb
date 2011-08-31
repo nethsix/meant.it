@@ -37,7 +37,8 @@
             var meant_it_str_elem = jQuery("#meant_it_str");
             meant_it_str_elem.html("<b>:"+uniq_prod_id+"</b>");
             var group_buy_page_elem = jQuery("#group_buy_page");
-            group_buy_page_elem.html("<a href='<%= request.host %>'></a>");
+            var group_buy_page_href = "http://<%= request.host %>/group.html?<%= Constants::PII_VALUE_INPUT %>="+escape(uniq_prod_id);
+            group_buy_page_elem.html("<a href='"+group_buy_page_href+"'>"+group_buy_page_href+"</a>");
             var qr_gen_url = "http://qrcode.good-survey.com/api/v2/generate?content=mailto%3Alike%40meant.it?subject=%3A" + escape(uniq_prod_id) + "&format=png&size=3";
             var prod_qr_code_elem = jQuery("#prod_qr_code");
             prod_qr_code_elem.attr('src', qr_gen_url);
@@ -56,7 +57,7 @@
     </script>
     <div class='container'>
       <div class='span-20'>
-        <h1>DIY Group-Buying Business in 7 Steps</h1>
+        <h1>DIY Group-Buying Business in 8 Steps</h1>
       </div>
       <div class='span-4 last'>
         &nbsp;
@@ -154,7 +155,7 @@
           <tr>
             <td>
               <b>6c. Setup #3</b><br/>
-              Set the <i>Threshold</i> when you want to be notified and whether you want this group-buying <i>Threshold type</i> is 'one-time' or it should 'recur' and click 'Save'.
+              Set the <i>Notify threshold</i> to the group-buy volume, <i>Formula</i> to the price, and whether you want <i>Type</i> to <i>one-time</i> or it should <i>recur</i>. Change <i>Status</i> to 'active' and click 'Save'.
             </td>
             <td>
               <img src='/images/setup_3.png' alt='Setup #3' />
@@ -167,6 +168,24 @@
             </td>
             <td>
               <span class='large' id='group_buy_page'></span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>8a. Reaching your customers #1</b><br/>
+              On the top menu, click 'Manage'.  Find the product and click on 'Bill'.
+            </td>
+            <td>
+              <img src='/images/reach.png' alt='Customer reach #1' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <b>8b. Reaching your customers #2</b><br/>
+              If a group-buy has reached the threshold, then you can click 'Contact' to automatically send email to customers.
+            </td>
+            <td>
+              <img src='/images/reach_2.png' alt='Customer reach #2' />
             </td>
           </tr>
         </tbody>
