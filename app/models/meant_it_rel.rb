@@ -64,17 +64,13 @@ class MeantItRel < ActiveRecord::Base
                   email_bill_entry = email_bill.email_bill_entries.create(:pii_property_set_id => pps.id)
                   email_bill_entry.ready_date = Time.now
                   mirs.each { |mir_elem|
-                    options = {}
-                    ControllerHelper.set_options(options, :conditions, :meant_it_rels, :src_endpoint_id, mir_elem.src_endpoint_id)
-                    ControllerHelper.set_options(options, :conditions, :meant_it_rels, :dst_endpoint_id, self.dst_endpoint.id)
-                    ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
-#AAA                    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at >= '#{start_bill_date}'") if !start_bill_date.nil?
-#AAA                    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at <= '#{end_bill_date}'") if !end_bill_date.nil?
+                    mir_where_1 = MeantItRel.where(:src_endpoint_id => mir_elem.src_endpoint_id).where(:dst_endpoint_id, self.dst_endpoint.id).where(:message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
                     option_str_all = ControllerHelper.get_date_option_str(start_bill_date, end_bill_date, true)
                     if !option_str_all.nil?
-                       ControllerHelper.set_options_str(options, :conditions, option_str_all)
+                      full_mirs = mir_where_1.where(option_str_all)
+                    else
+                      full_mirs = mir_where_1
                     end # end if !option_str_all.nil?
-                    full_mirs = MeantItRel.find(:all, options)
                     if full_mirs.empty?
                     end # end if full_mirs.empty?
                     full_mir = full_mirs[full_mirs.size-1]

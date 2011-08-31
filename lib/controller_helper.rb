@@ -476,9 +476,7 @@ module ControllerHelper
     pii_virtual = nil
     after_date = nil
     if !pii_value.nil? and !pii_value.empty?
-      options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide" }
-      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
-      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
+      desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
       # Get the last bill date
       pii = Pii.find_by_pii_value(pii_value)
 #20110813      if !pii.pii_property_set.nil? and !pii.pii_property_set.email_bill_entries.empty?
@@ -499,15 +497,15 @@ module ControllerHelper
         end # end if pps.threshold_type
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
         after_date = ControllerHelper.validate_date(after_date.to_s)
+        pii_virtual = nil
         if !after_date.nil?
-          ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at >= '#{after_date}' and meant_it_rels.email_bill_entry_id is NULL")
+          pii_virtual = desired_piis.where("meant_it_rels.created_at >= '#{after_date}' and meant_it_rels.email_bill_entry_id is NULL")
         else
-          ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.email_bill_entry_id is NULL")
+          pii_virtual = desired_piis.where("meant_it_rels.email_bill_entry_id is NULL")
         end # end if !after_date.nil?
       end # end if !pii.pii_property_set.nil? ...
 #DEBUG      ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '2011-08-05 11:12:20'") if after_date.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, options.inspect:#{options.inspect}")
-      pii_virtual = Pii.find(:all, options)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
       # We expect only one
       pii_virtual.each { |pii_elem|
         class << pii_elem
@@ -525,17 +523,17 @@ module ControllerHelper
     order = ControllerHelper.sql_validate_order(order, Constants::SQL_COUNT_ORDER_DESC)
 # NOT DISTINCT src_endpoint_id so WRONG!!!
 #    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(*) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => limit, :order => "mir_count #{order}" }
-    options = { :select => "piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count", :joins => ["JOIN end_points on piis.id = end_points.pii_id",  "JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id"], :group => "piis.pii_value, piis.status, piis.pii_hide", :limit => limit, :order => "mir_count #{order}" }
+    desired_piis = Pii.select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").group("piis.pii_value, piis.status, piis.pii_hide").limit(limit).order("mir_count #{order}")
     if !message_type.nil? and !message_type.empty?
       normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
       ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, normalized_msg_type_downcase)
+      desired_piis = desired_piis.where(:meant_it_rels => { :message_type => normalized_msg_type_downcase })
     end # end if !message_type.nil? and !message_type.empty?
     if !pii_value.nil? and !pii_value.empty?
-      ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value)
+      desired_piis = desired_piis.where(:piis => { :pii_value => pii_value})
     end # end if !pii_value.nil? and !pii_value.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_pii_by_message_type_uniq_sender_count:#{logtag}, options.inspect:#{options.inspect}")
-    piis = Pii.find(:all, options)
-    piis
+    desired_piis
   end # end def self.find_pii_by_message_type_uniq_sender_count
 
   def self.validate_date(datetime_str, datetime_output_format_str = '%Y-%m-%d %H:%M:%S', logtag = nil)

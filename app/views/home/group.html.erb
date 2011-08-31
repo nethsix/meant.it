@@ -43,7 +43,7 @@ to communicate with meant.it using REST --->
                 jQuery.each(data, function(key, val)
                   {
 //DEBUG                    alert("key:"+key+", val:"+val);
-                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
+//DEBUG                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
                     var mir_count = val.pii.mir_count;
                     var thumbnail_url_data = val.pii.thumbnail_url_data;
                     if (thumbnail_url_data == null || thumbnail_url_data == '')
@@ -69,7 +69,7 @@ to communicate with meant.it using REST --->
                       jQuery('#cost_axis_3').text('$'+formula);
                     } // end if (formula.match(/\d+/))
                     var qr = val.pii.thumbnail_qr_data;
-alert('qr:'+qr);
+//DEBUG alert('qr:'+qr);
                     // missing.png is the default url provided by paperclip
                     // when no image is set
                     if (qr == null || qr == '' || qr.match(/missing\.png/))
@@ -84,10 +84,10 @@ alert('qr:'+qr);
                       jQuery('#qr_img').css('display', 'inline');
                       jQuery('#qr_img').attr('src', qr);
                     } // end if (qr == null || qr = '')
-                    alert("mir_count:"+mir_count);
+//DEBUG                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("threshold:"+threshold);
 //DEBUG                    alert("formula:"+formula);
-                    alert("thumbnail_url_data:"+thumbnail_url_data);
+//DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
                     var TOTAL_WIDTH = 560;
                     var hpos = mir_count * (TOTAL_WIDTH/threshold);
