@@ -63,8 +63,9 @@ class MeantItRel < ActiveRecord::Base
                   # Link every bill entry to entity email bill and pii_property_set
                   email_bill_entry = email_bill.email_bill_entries.create(:pii_property_set_id => pps.id)
                   email_bill_entry.ready_date = Time.now
+                  pii_dst_endpoints = dst_endpoint_pii.endPoints.collect { |ep_elem| ep_elem.id }
                   mirs.each { |mir_elem|
-                    mir_where_1 = MeantItRel.where(:src_endpoint_id => mir_elem.src_endpoint_id).where(:dst_endpoint_id, self.dst_endpoint.id).where(:message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
+                    mir_where_1 = MeantItRel.where(:src_endpoint_id => mir_elem.src_endpoint_id).where(:dst_endpoint_id => pii_dst_endpoints).where(:message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE)
                     option_str_all = ControllerHelper.get_date_option_str(start_bill_date, end_bill_date, true)
                     if !option_str_all.nil?
                       full_mirs = mir_where_1.where(option_str_all)

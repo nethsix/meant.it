@@ -77,6 +77,7 @@ to communicate with meant.it using REST --->
                       jQuery('#qr_img').css('display', 'none');
                       jQuery('#meant_it_str').css('display', 'inline');
                       jQuery('#meant_it_str').html("Send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
+                      jQuery('#instruction').html("Send order email");
                     }
                     else
                     {
@@ -126,7 +127,7 @@ to communicate with meant.it using REST --->
   </head>
   <body>
 <%
- if !pii.pii_property_set.nil? and ((pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE) or (pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR))
+# if !pii.pii_property_set.nil? and ((pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE) or (pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR))
 %>
     <script>
       jQuery(document).ready(function(){
@@ -134,15 +135,15 @@ to communicate with meant.it using REST --->
       });
     </script>
 <%
-  else
+#  else
 %>
-    <script>
+<!---    <script>
       jQuery(document).ready(function(){
         jQuery('#closed').css('display','inline');
       });
-    </script>
+    </script> --->
 <%
-  end
+#  end
 %>
   <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
   <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
@@ -156,8 +157,8 @@ to communicate with meant.it using REST --->
 <div class='container'>
   <h1>Clone-A-Friend</h1>
   <div class='span-10'>
-    <h2>Get your Labu-tan clone!</h2>
-    Clone in bulk to save.  Send order email using QR code.
+    <h2>Bulk buy!</h2>
+    <span id='instruction'>Send order email using QR code.</span>
   </div>
   <div class='span-14 last'>
 <!---    <img class='pixframe' height='100' width='90' src='images/labutan.jpg'/> --->

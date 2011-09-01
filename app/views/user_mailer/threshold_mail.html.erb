@@ -1,3 +1,7 @@
+<% if @person.nil? %>
+Congratulations<br/>
+<% else %>
 Congratulations <%= @person.first_name %> <%= @person.last_name %><br/>
+<% end %>
 
 Threshold of <%= @pii.pii_property_set.threshold %> for pii:<%= @pii.pii_value %> (<%= @pii.pii_property_set.short_desc %>) reached!"

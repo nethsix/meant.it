@@ -39,7 +39,12 @@ class UserMailer < ActionMailer::Base
         end # end if !pii_entity_elem.property_document_id.nil?
       } # end pii_sender_endPoint.entities.each { |pii_entity_elem|
     end # end if !pii_sender_endPoint.entities.nil? and !pii_sender_endPoint.entities.empty?
-    mail(:to => email, :subject => "Threshold of #{threshold} for pii:#{pii_value} (#{short_desc}) reached!")
+    if email.nil? or email.empty?
+      logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:threshold_mail:#{logtag}, pii_value:#{pii_value} has no email") 
+      # Don't send notification email
+    else
+      mail(:to => email, :subject => "Threshold of #{threshold} for pii:#{pii_value} (#{short_desc}) reached!")
+    end # end if email.nil? or email.empty?
   end # end def threshold_mail
 
   def contract_mail(likee_pii_value, email, src_endpoint, logtag = nil)

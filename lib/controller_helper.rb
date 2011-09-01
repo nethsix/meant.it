@@ -443,34 +443,34 @@ module ControllerHelper
     sender_endPoint
   end # end def self.find_or_create_sender_endPoint_and_pii
 
-  def self.set_options(options, option_key_sym, table_name_sym, table_col_sym, value, logtag = nil)
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:set_options:#{logtag}, options[option_key_sym].class:#{options[option_key_sym].class}, options[option_key_sym].inspect:#{options[option_key_sym].inspect}")
-    if options[option_key_sym].nil?
-      options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
-    else
-      if options[option_key_sym][table_name_sym].nil?
-        options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
-      else
-        options[option_key_sym][table_name_sym][table_col_sym] = value
-      end # end if options[option_key_sym][table_name_sym].nil?
-    end # end if options[table_name].nil?
-  end # end def self.set_options
+#ABC  def self.set_options(options, option_key_sym, table_name_sym, table_col_sym, value, logtag = nil)
+#ABC    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:set_options:#{logtag}, options[option_key_sym].class:#{options[option_key_sym].class}, options[option_key_sym].inspect:#{options[option_key_sym].inspect}")
+#ABC    if options[option_key_sym].nil?
+#ABC      options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
+#ABC    else
+#ABC      if options[option_key_sym][table_name_sym].nil?
+#ABC        options[option_key_sym] = { table_name_sym => { table_col_sym => value } }
+#ABC      else
+#ABC        options[option_key_sym][table_name_sym][table_col_sym] = value
+#ABC      end # end if options[option_key_sym][table_name_sym].nil?
+#ABC    end # end if options[table_name].nil?
+#ABC  end # end def self.set_options
 
-  def self.set_options_str(options, option_key_sym, opt_str, logtag = nil)
-    if !opt_str.nil? and !opt_str.empty?
-      if options[option_key_sym].nil?
-        options[option_key_sym] = [opt_str]
-      else
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:set_options_str:#{logtag}, options[option_key_sym].class:#{options[option_key_sym].class}, options[option_key_sym].inspect:#{options[option_key_sym].inspect}")
-        if options[option_key_sym].is_a?(Hash)
-          opt_hash = options[option_key_sym]
-          options[option_key_sym] = [opt_str, opt_hash]
-        elsif options[option_key_sym].is_a?(Array)
-          options[option_key_sym].unshift(opt_str)
-        end # end if options[option_key_sym].is_a?(Hash)
-      end # end if options[option_key_sym].nil?
-    end # end if !opt_str.nil? ...
-  end # end def self.set_options_str
+#ABC  def self.set_options_str(options, option_key_sym, opt_str, logtag = nil)
+#ABC    if !opt_str.nil? and !opt_str.empty?
+#ABC      if options[option_key_sym].nil?
+#ABC        options[option_key_sym] = [opt_str]
+#ABC      else
+#ABC        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:set_options_str:#{logtag}, options[option_key_sym].class:#{options[option_key_sym].class}, options[option_key_sym].inspect:#{options[option_key_sym].inspect}")
+#ABC        if options[option_key_sym].is_a?(Hash)
+#ABC          opt_hash = options[option_key_sym]
+#ABC          options[option_key_sym] = [opt_str, opt_hash]
+#ABC        elsif options[option_key_sym].is_a?(Array)
+#ABC          options[option_key_sym].unshift(opt_str)
+#ABC        end # end if options[option_key_sym].is_a?(Hash)
+#ABC      end # end if options[option_key_sym].nil?
+#ABC    end # end if !opt_str.nil? ...
+#ABC  end # end def self.set_options_str
 
   def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil)
     pii_virtual = nil
@@ -526,13 +526,12 @@ module ControllerHelper
     desired_piis = Pii.select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").group("piis.pii_value, piis.status, piis.pii_hide").limit(limit).order("mir_count #{order}")
     if !message_type.nil? and !message_type.empty?
       normalized_msg_type_downcase = MessageTypeMapper.get_message_type(message_type.downcase)
-      ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, normalized_msg_type_downcase)
       desired_piis = desired_piis.where(:meant_it_rels => { :message_type => normalized_msg_type_downcase })
     end # end if !message_type.nil? and !message_type.empty?
     if !pii_value.nil? and !pii_value.empty?
       desired_piis = desired_piis.where(:piis => { :pii_value => pii_value})
     end # end if !pii_value.nil? and !pii_value.empty?
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_pii_by_message_type_uniq_sender_count:#{logtag}, options.inspect:#{options.inspect}")
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_pii_by_message_type_uniq_sender_count:#{logtag}, desired_piis.inspect:#{desired_piis.inspect}")
     desired_piis
   end # end def self.find_pii_by_message_type_uniq_sender_count
 
@@ -565,30 +564,13 @@ module ControllerHelper
       raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, end_date:#{end_date} is invalid."
     end # end if end_date.is_a?(String)
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, validated_start_date:#{validated_start_date}, validated_end_date:#{validated_end_date}")
-    options = { :select => "meant_it_rels.status, meant_it_rels.src_endpoint_id", :joins => ["JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id"], :group => "meant_it_rels.src_endpoint_id, meant_it_rels.status" }
-#20110807    options = { :joins => ["JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id"] }
-    ControllerHelper.set_options(options, :conditions, :meant_it_rels, :message_type, message_type) if !message_type.nil? and !message_type.empty?
-    ControllerHelper.set_options(options, :conditions, :piis, :pii_value, pii_value) if !pii_value.nil? and !pii_value.empty?
-#AAA    non_bill_str = "meant_it_rels.email_bill_entry_id is NULL" if non_bill
-#AAA    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, non_bill:#{non_bill}, non_bill_str:#{non_bill_str}")
-#AAA    validated_start_date_str = "meant_it_rels.created_at >= '#{validated_start_date}'" if !validated_start_date.nil?
-#AAA    validated_end_date_str = "meant_it_rels.created_at <= '#{validated_end_date}'" if !validated_end_date.nil?
-#AAA    option_str_arr = [validated_start_date_str, validated_end_date_str, non_bill_str]
-#AAA    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, option_str_arr.inspect:#{option_str_arr.inspect}")
-#AAA    option_str_all_arr = option_str_arr.find_all { |opt_elem| !opt_elem.nil? }
-#AAA    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, option_str_all_arr.inspect:#{option_str_all_arr.inspect}")
-#AAA    if !option_str_all_arr.empty?
-#AAA      option_str_all = option_str_all_arr.join(" and ")
-#AAA      ControllerHelper.set_options_str(options, :conditions, option_str_all)
-#AAA    end # end if option_str_all_arr.empty?
-     option_str_all = ControllerHelper.get_date_option_str(validated_start_date, validated_end_date, true, logtag)
-     if !option_str_all.nil?
-        ControllerHelper.set_options_str(options, :conditions, option_str_all)
-     end # end if !option_str_all.nil?
-#20110814    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '#{validated_start_date}'") if !validated_start_date.nil? and !validated_start_date.empty?
-#20110814    ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at <= '#{validated_end_date}'") if !validated_end_date.nil? and !validated_end_date.empty? 
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, options.inspect:#{options.inspect}")
-    mirs = MeantItRel.find(:all, options)
+    mirs = MeantItRel.select("meant_it_rels.status, meant_it_rels.src_endpoint_id").joins("JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id").group("meant_it_rels.src_endpoint_id, meant_it_rels.status")
+    mirs = mirs.where(:meant_it_rels => { :message_type => message_type }) if !message_type.nil? and !message_type.empty?
+    mirs = mirs.where(:piis => { :pii_value => pii_value }) if !pii_value.nil? and !pii_value.empty?
+    option_str_all = ControllerHelper.get_date_option_str(validated_start_date, validated_end_date, true, logtag)
+    if !option_str_all.nil?
+       mirs = mirs.where(option_str_all)
+    end # end if !option_str_all.nil?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, mirs.inspect:#{mirs.inspect}")
     mirs
   end # end def self.get_meant_it_rels_by_pii_value_message_type_within_dates
