@@ -61,6 +61,11 @@ to communicate with meant.it using REST --->
                       jQuery('#headline').text("Bulk buy '"+short_desc_data+"'!");
                     }
                     var threshold = val.pii.threshold;
+                    var threshold_type = val.pii.threshold_type;
+                    if (threshold_type != null)
+                    {
+                      jQuery('#threshold_type').text(threshold_type);
+                    }
                     if (mir_count >= threshold)
                     {
                       jQuery('#closed').css('display','inline');
@@ -99,6 +104,7 @@ to communicate with meant.it using REST --->
                     } // end if (qr == null || qr = '')
 //DEBUG                    alert("mir_count:"+mir_count);
 //DEBUG                    alert("threshold:"+threshold);
+//DEBUG                    alert("threshold_type:"+threshold_type);
 //DEBUG                    alert("formula:"+formula);
 //DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
 //DEBUG                    alert("short_desc_data:"+short_desc_data);
@@ -170,6 +176,7 @@ to communicate with meant.it using REST --->
   <h1>Welcome to Bulk Bee!</h1>
   <div class='span-10'>
     <h2 id='headline'>Bulk buy!</h2>
+    (NOTE: This is a '<span id="threshold_type">onetime</span>' offer.)<br/>
     <span id='instruction'>Send order email using QR code.</span>
   </div>
   <div class='span-14 last'>

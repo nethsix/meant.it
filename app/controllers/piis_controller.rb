@@ -150,11 +150,11 @@ class PiisController < ApplicationController
       else
         made_mir_count = 0
       end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb)}]
+      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type }]
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
       pii_to_json = made_pii.to_json
     else
-      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data])
+      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type])
     end # end if pii_to_json.nil? or pii_to_json.empty?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
 
@@ -256,6 +256,13 @@ class PiisController < ApplicationController
           @pii_property_set_model ||= get_property_set_model
           return_value = nil
           return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def threshold_type
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
           return_value
         end
      end # end class << pii_elem
