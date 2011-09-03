@@ -53,10 +53,21 @@ to communicate with meant.it using REST --->
                     jQuery('#prod_img').attr('src', thumbnail_url_data);
                     jQuery('#desiredItem').attr('src', thumbnail_url_data);
                     var short_desc_data = val.pii.short_desc_data;
+                    if (short_desc_data == null)
+                    {
+                      short_desc_data = 'Unknown';
+                    }
+                    {
+                      jQuery('#headline').text("Bulk buy '"+short_desc_data+"'!");
+                    }
                     var threshold = val.pii.threshold;
                     if (mir_count >= threshold)
                     {
                       jQuery('#closed').css('display','inline');
+                    }
+                    else
+                    {
+                      jQuery('#closed').css('display','none');
                     }
                     x_axis_1_str = (1*threshold/3).toString();
                     x_axis_2_str = (2*threshold/3).toString();
@@ -81,6 +92,7 @@ to communicate with meant.it using REST --->
                     }
                     else
                     {
+                      jQuery('#instruction').html("Send order email using QR code<br/><i>OR</i> send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
                       jQuery('#meant_it_str').css('display', 'none');
                       jQuery('#qr_img').css('display', 'inline');
                       jQuery('#qr_img').attr('src', qr);
@@ -155,9 +167,9 @@ to communicate with meant.it using REST --->
 
 <body>
 <div class='container'>
-  <h1>Clone-A-Friend</h1>
+  <h1>Welcome to Bulk Bee!</h1>
   <div class='span-10'>
-    <h2>Bulk buy!</h2>
+    <h2 id='headline'>Bulk buy!</h2>
     <span id='instruction'>Send order email using QR code.</span>
   </div>
   <div class='span-14 last'>
@@ -169,7 +181,7 @@ to communicate with meant.it using REST --->
     <span id='closed' style='display:none;position:relative;top:-50px;left:-120px;color:red;font-size:35px'>Closed</span>
   </div>
   <div class='span-5'>
-    <span class='large'>Qty:<span id='x_axis_0' class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;1</span></span></br>
+    <span class='large'>Qty:<span id='x_axis_0' class='bluish'>&nbsp;&nbsp;&nbsp;&nbsp;0</span></span></br>
     <span class='large'>Cost:<span id='cost_axis_0' class='bluish'> NA</span></span>
   </div>
   <div class='span-5'>

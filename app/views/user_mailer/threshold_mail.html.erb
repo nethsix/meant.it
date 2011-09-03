@@ -1,7 +1,17 @@
-<% if @person.nil? %>
-Congratulations<br/>
+<% 
+  name = nil
+  if !@person.nil?
+    if !@person.first_name.nil? and !@person.first_name.empty?
+      name = @person.first_name
+    elsif !@person.last_name.nil? and !@person.last_name.empty? 
+      name = @person.last_name
+    end # end elsif !@person.last_name.nil? and !@person.last_name.empty? 
+  end # end if !@person.nil?
+%>
+<% if name.nil? %>
+Congratulations!<br/>
 <% else %>
-Congratulations <%= @person.first_name %> <%= @person.last_name %><br/>
+Congratulations <%= name %>!<br/>
 <% end %>
 
-Threshold of <%= @pii.pii_property_set.threshold %> for pii:<%= @pii.pii_value %> (<%= @pii.pii_property_set.short_desc %>) reached!"
+Threshold of <%= @pii.pii_property_set.threshold %> for pii:<%= @pii.pii_value %> (<%= @pii.pii_property_set.short_desc %>) reached!
