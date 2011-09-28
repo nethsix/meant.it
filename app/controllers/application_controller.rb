@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
 
   def admin?
     is_admin = false
-    is_admin = true if current_entity.login_name = "nethsix@gmail.com"
+    is_admin = true if !current_entity.nil? and current_entity.login_name = "nethsix@gmail.com"
     is_admin
   end
 
