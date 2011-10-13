@@ -490,7 +490,12 @@ module ControllerHelper
           after_date = pii.pii_property_set.active_date
         elsif pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
           after_date_obj = pii.pii_property_set.last_bill("ready_date")
-          after_date = after_date_obj.ready_date if !after_date_obj.nil?
+          if !after_date_obj.nil?
+            after_date = after_date_obj.ready_date
+          else
+            # No billing etc., yet so use current date
+            after_date = pii.pii_property_set.active_date
+          end # end if !after_date_obj.nil?
         else
            Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
           raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
