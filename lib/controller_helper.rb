@@ -678,7 +678,12 @@ module ControllerHelper
            start_bill_date = pps.active_date
          elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
            start_bill = pps.last_bill("ready_date")
-           start_bill_date = start_bill.ready_date if !start_bill.nil?
+           if !start_bill.nil?
+             start_bill_date = start_bill.ready_date
+           else
+             # No billing etc., yet so use current date
+             start_bill_date = pii.pii_property_set.active_date
+           end # end if !after_date_obj.nil?
          else
             Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
            raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
