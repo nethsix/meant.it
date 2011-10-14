@@ -137,6 +137,8 @@ MeantIt::Application.routes.draw do
   match "/group.html" => "home#group"
   match "/group_diy.html" => "home#group_diy"
   match "/like.html" => "home#like"
+  match "/platform.html" => "home#platform"
+  match "/apis.html" => "home#apis"
 
   # See how all your routes lay out with "rake routes"
 

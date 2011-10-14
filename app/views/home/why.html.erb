@@ -1,5 +1,6 @@
 <div class="container">
   <div class="span-24">
+  <%= link_to "Home", url_for("/") %>
   <p>
     <h3>Why Meant.It?</h3>
   </p>
@@ -11,6 +12,10 @@
     <% } %>
     <li><%= Constants::MEANT_IT_GENERAL[0] %> - <i><%= Constants::MEANT_IT_GENERAL[1] %></i></li>
   </ul>
+    <p>
+      <h4>Meant.It Applications</h4>
+      Applications can be built on top of Meant.It platform.  They inherit Meant.It's simple email/QR-code-driven interface to facilitate anywhere/anytime user-application communication and can utilize Meant.it <a href='/apis.html'>APIs</a> to retrieve, filter, process stored messages and display them in useful formats. See <a href='/platform.html'>platform</a> for details.
+    </p>
   </div>
   <%= link_to "Home", url_for("/") %>
 </div>
