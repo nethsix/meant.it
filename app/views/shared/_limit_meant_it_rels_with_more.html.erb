@@ -57,8 +57,8 @@
   url = url_for("/meant_it_rels/show_by_endpoint_nick_pii?#{Constants::END_POINT_NICK_INPUT}=#{sender_nick}&#{Constants::PII_VALUE_INPUT}=#{receiver_pii_str}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}") if sender_pii_str.nil? and !receiver_pii_str.nil? and
                   sender_endpoint_id.nil? and receiver_endpoint_id.nil? and 
                   !sender_nick.nil? and receiver_nick.nil?
-  header_str = "Meant.It In" if !dst_endpoint_id.nil? and src_endpoint_id.nil?
-  header_str = "Meant.It Out" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
+  header_str = "Meant.It Received" if !dst_endpoint_id.nil? and src_endpoint_id.nil?
+  header_str = "Meant.It Sent" if dst_endpoint_id.nil? and !src_endpoint_id.nil?
   header_str_src = nil
   if !sender_pii_str.nil?
     header_str_src = "[pii:#{sender_pii_str}]"

@@ -22,31 +22,58 @@
   if !end_point_nick_col.nil? and !end_point_nick_col.pii.nil? and (end_point_nick_col.pii.pii_hide == "false")
     pii_shown = true
 %>
-     <%= link_to "[pii:#{end_point_nick_col.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
+     <%= link_to "#{end_point_nick_col.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
 <% end %>
 <% 
   if !end_point_nick_col.nil? and (show_nick_force or !pii_shown)
     nick_shown = true
     if !end_point_nick_col.nick.nil?
+      # Prepare links for nick
+      nick_link_to = "#{end_point_nick_col.nick}"
+      nick_url = "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}"
 %>
-    <%= link_to "nick:#{end_point_nick_col.nick}", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(end_point_nick_col.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
 <%
     else
+      # Prepare links for nick
+      nick_link_to = "nick_#{end_point_nick_col.id}"
+      nick_url = "/end_points/show_by_id/#{end_point_nick_col.id}"
 %>
-    <%= link_to "id:#{end_point_nick_col.id}", "/end_points/show_by_id/#{end_point_nick_col.id}" %>
 <% 
     end 
   end
 %>
 <% if !creator_endPoint.nil? and nick_shown
      if !creator_endPoint.nick.nil?
+       own_link_to = "(#{creator_endPoint.nick})"
+       own_url = "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}"
+     else
+       own_link_to = "(own_#{creator_endPoint.id})"
+       own_url = "/end_points/show_by_id/#{creator_endPoint.id}"
+     end # end if !creator_endPoint.nick.nil?
+     # AI:NICK#1
+     if end_point_nick_col.nick != creator_endPoint.nick
 %>
-     <%= link_to "(own:#{creator_endPoint.nick})", "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{end_point_nick_col.creator_endpoint_id}" %>
+       <%
+         if pii_shown
+       %>
+         is 
+       <%
+         end # end if pii_shown
+       %>
+       <%= link_to "#{own_link_to}", "#{own_url}" %>'s
+       <%= link_to "#{nick_link_to}", "#{nick_url}" %>
 <% 
      else
 %>
-     <%= link_to "own:#{creator_endPoint.id}", "/end_points/show_by_id/#{creator_endPoint.id}" %>
+       <%
+         if pii_shown
+       %>
+         is 
+       <%
+         end # end if pii_shown
+       %>
+       <%= link_to "#{nick_link_to}", "#{nick_url}" %>
 <% 
-     end
+     end # end if end_point_nick_col.nick != creator_endPoint.nick
   end
  %>

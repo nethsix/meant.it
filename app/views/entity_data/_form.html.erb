@@ -23,10 +23,8 @@
     <%= f.text_field :first_name %>
   </div>
   <div class="field">
-    <%= f.label "Date of birth (YYYY-MM-DD)" %><br />
-    <%= f.text_field :dob_yyyy, :size => 4 %> - 
-    <%= f.text_field :dob_mm, :size => 2 %> - 
-    <%= f.text_field :dob_dd, :size => 2 %>
+    <%= f.label "Nick" %><br />
+    <%= f.text_field :nick %>
   </div>
 </div>
 <div class="span-12 last">
@@ -38,6 +36,16 @@
     <%= f.label :email %><br />
     <%= f.text_field :email %>
   </div>
+</div>
+<div class="span-12">
+  <div class="field">
+    <%= f.label "Date of birth (YYYY-MM-DD)" %><br />
+    <%= f.text_field :dob_yyyy, :size => 4 %> - 
+    <%= f.text_field :dob_mm, :size => 2 %> - 
+    <%= f.text_field :dob_dd, :size => 2 %>
+  </div>
+</div>
+<div class="span-12 last">
 </div>
 <div class="span-12">
   <div class="field">

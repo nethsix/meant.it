@@ -56,17 +56,27 @@
 
     <strong>
     <% if endPoints.size > 1 %>
-      <%= endPoints.size %> persons
+      <% 
+         end_point_size_str = "#{endPoints.size} persons"
+         end_point_query_str = "ids%5b%5d="
+         endpoint_arr = endPoints.collect { |ep_elem| ep_elem.id }
+         end_point_query_str += endpoint_arr.join("&ids%5b%5d=")
+      %>
     <% else %>
-      <%= endPoints.size %> person
+      <% 
+         end_point_size_str = "#{endPoints.size} person"
+         end_point_query_str = "ids%5b%5d=#{endPoints[0].id}"
+      %>
     <% end %>
+    <% title_str = CGI::escape("<b>Nick/id(s)</b> that points to <b>Pii:</b>#{@pii.pii_value}") %>
+    <%= link_to "#{end_point_size_str}", url_for("/end_points/show_by_ids?#{end_point_query_str}&#{Constants::TITLE_STR}=#{title_str}") %>
     </strong>
     have created an id/nick for this <strong>Pii</strong>.
   </div>
   <div class='span-20'>
-    <ul><li>
-    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/li_ruler", :collection => endPoints, :locals => { :show_nick_force => true } %>
-    </li></ul>
+<!---    <ul><li>
+    <%= render :partial => "shared/end_point_nick_col", :spacer_template => "shared/li_ruler", :collection => endPoints, :locals => { :show_nick_force => true } %> 
+    </li></ul> --->
   </div>
   <div class='span-4 last'>
 &nbsp;
@@ -74,8 +84,8 @@
   <div class='span-24'>
 &nbsp;
 
-<table summary="Meant.It In Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It In</em></caption>
+<table summary="Meant.It Received Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Received</em></caption>
   <thead>
     <tr>
       <th class='span-12'>Meant.It Type</th>
@@ -129,8 +139,8 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
   <%= render :partial => "shared/limit_meant_it_rels_with_more", :locals => { :dst_endpoint_id => sender_endPoint_arr, :sender_pii_str => @pii.pii_value } %>
 </p>
 
-<table summary="Meant.It Out Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It Out</em></caption>
+<table summary="Meant.It Sent Table"  border="0" cellspacing="0" cellpadding="0">
+  <caption><em>Meant.It Sent</em></caption>
   <thead>
     <tr>
       <th class='span-12'>Meant.It Type</th>

@@ -125,7 +125,7 @@ class EndPointsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_id:#{logtag}, @endPoint:#{@endPoint.inspect}")
 
     respond_to do |format|
-      format.html { render "show_end_point_details", :layout => "find_any", :locals => { :find_any_input => params[:id] } }
+      format.html { render "show_end_point_details", :layout => "find_any", :locals => { :find_any_input => nil } }
       format.xml  { render :xml => @endPoint }
     end
   end # end def show_by_id

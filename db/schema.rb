@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110819125445) do
+ActiveRecord::Schema.define(:version => 20111016031155) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -93,6 +93,7 @@ ActiveRecord::Schema.define(:version => 20110819125445) do
     t.datetime "updated_at"
     t.integer  "credit_card_exp_yyyy"
     t.integer  "credit_card_exp_mm"
+    t.string   "nick"
   end
 
   create_table "entity_end_point_rels", :force => true do |t|

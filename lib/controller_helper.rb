@@ -1,5 +1,6 @@
 require 'validators'
 require 'date'
+require 'set'
 
 module ControllerHelper
   LOGTAG_MAX = 2**32
@@ -715,4 +716,68 @@ module ControllerHelper
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_date_option_str:#{logtag}, option_str_all:#{option_str_all}")
     option_str_all
   end # end def self.get_date_option_str
+
+  def self.is_similar?(word1, word2, acceptable_diff_set=['_', ' ', '-'].to_set, logtag=nil)
+    similar = false
+    if !word1.nil? and !word2.nil? and word1.size == word2.size
+      diff_found_set = Set.new
+      word1.size.times { |idx|
+        if word1[idx,1] != word2[idx,1]
+          diff_found_set.add(word1[idx,1])
+          diff_found_set.add(word2[idx,1])
+        end # end if word1[idx,1] != word2[idx,1]
+      } # end word1.size.times ...
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:is_similar?:#{logtag}, word1:#{word1}, word2:#{word2}, acceptable_diff_set.inspect:#{acceptable_diff_set.inspect}, diff_found_set.inspect:#{diff_found_set.inspect}")
+      if diff_found_set.subset? acceptable_diff_set
+        similar = true
+      end # end if diff_found_set.subset? acceptable_diff_set
+    end # end if !word1.nil? and !word2.nil? and word1.size == word2.size
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:is_similar?:#{logtag}, word1:#{word1}, word2:#{word2}, similar:#{similar}")
+    similar
+  end # end def self.is_similar?
+
+  #  AI:PII#1: if we show pii: 
+  #    - AI:PII#1a) show short_desc if it is similar to pii, we don't want ppl to fake
+  #      pii, e.g., :gloomy but short_desc = 'hello kitty'
+  #    - AI:PII#1b) if pii_value is NUM+ENTITY_DOMAIN_MARKER+pii 
+  #                 and NUM has nick, display NUM nick's short_desc 
+  #                 or NUM nick's pii
+  #    - AI:PII#1c) if pii_value is NUM+ENTITY_DOMAIN_MARKER+pii 
+  #                 and NUM has no nick, display 'entity NUM's short_desc'
+  #                 or 'entity NUM's pii'
+  #    - AI:PII#1d) else just show pii
+  def self.ai_for_pii(pii, logtag=nil)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, pii.inspect:#{pii.inspect}")
+    pii_orig_str = pii.pii_value
+    # AI:PII#1d
+    pii_display_str = "#{pii_orig_str}"
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1d (default) pii_display_str:#{pii_display_str}")
+    pii_pps_short_desc = pii.pii_property_set.short_desc if !pii.pii_property_set.nil?
+    if ControllerHelper.is_similar?(pii_orig_str, pii_pps_short_desc)
+      # AI:PII#1a Check if there is short description and it must 
+      # be similar otherwise we don't use short_desc
+      pii_display_str = pii_pps_short_desc
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1a (default) pii_display_str:#{pii_display_str}")
+    else
+      # Check if PII has ENTITY_DOMAIN_MARKER
+      pii_orig_str_match_arr = pii_orig_str.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}(.*)/)
+      if !pii_orig_str_match_arr.nil?
+        entity_id = pii_orig_str_match_arr[1]
+        object_pii = pii_orig_str_match_arr[2]
+        entity = Entity.find(entity_id)
+        entity_datum = EntityDatum.find_by_id(entity.property_document_id)
+        # Check if there nick for entity, if not then use entity id
+        if !entity_datum.nil? and !entity_datum.nick.nil?
+          # AI:PII#1b
+          pii_display_str = "#{entity_datum.nick}'s #{object_pii}"
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1b (default) pii_display_str:#{pii_display_str}")
+        else
+          # AI:PII#1c
+          pii_display_str = "entity_#{entity_id}'s #{object_pii}"
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1c (default) pii_display_str:#{pii_display_str}")
+        end # end if entity_datum.nil? and entity_datum.nick.nil?
+      end # end if !pii_orig_str_match_arr.nil?
+    end # end if ControllerHelper.is_similar?(pii_orig_str, pii_pps_short_desc)
+    pii_display_str
+  end # end def self.ai_for_pii
 end # end module ControllerHelper
