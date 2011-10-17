@@ -129,4 +129,11 @@
   <%= ControllerHelper.random_say %> <b>'<i><%= meant_it_rel.message %></i>'</b>
 <% end %>
 
-- <%= time_ago_in_words(meant_it_rel.created_at) %> ago
+<% 
+  time_ago_str = time_ago_in_words(meant_it_rel.created_at)
+  new_str = ''
+  if time_ago_str.match(/less than a minute/) or time_ago_str.match(/^[1-2] minute/)
+    new_str = "<span style='color:red;font-weight:bold;'>New!</span>"
+  end # end if time_ago_str.match(/less than a minute/)
+%>
+- <%= time_ago_str %> ago <%= raw(new_str) %>

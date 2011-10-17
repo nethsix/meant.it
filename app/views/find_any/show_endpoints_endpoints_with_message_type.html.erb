@@ -20,12 +20,12 @@
 
 <p>
 <strong>Meant.It:</strong>
-nick:<%= sender_endPoints[0].nick %>
+<%= sender_endPoints[0].nick %>
 <= <%= message_type %> =>
-nick:<%= receiver_endPoints[0].nick %>
+<%= receiver_endPoints[0].nick %>
 </p>
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It 'nick:<%= sender_endPoints[0].nick %> <%= message_type %> nick:<%= receiver_endPoints[0].nick %>'</em></caption>
+  <caption><em>Meant.It '<%= sender_endPoints[0].nick %> <%= message_type %> <%= receiver_endPoints[0].nick %>'</em></caption>
   <thead>
     <tr>
       <th class='span-10'>Sender Nick</th>
@@ -67,7 +67,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <% end %>
 
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It 'nick:<%= receiver_endPoints[0].nick %> <%= message_type %> nick:<%= sender_endPoints[0].nick %>'</em></caption>
+  <caption><em>Meant.It '<%= receiver_endPoints[0].nick %> <%= message_type %> <%= sender_endPoints[0].nick %>'</em></caption>
   <thead>
     <tr>
       <th class='span-10'>Sender Nick</th>

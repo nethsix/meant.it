@@ -5,7 +5,7 @@
   <p>
     <h3>Send Meant.It</h3>
   </p>
-    You can send Meant.It from <%= link_to "http://meant.it/", url_for("/") %> or from email.  The only differences are:
+    You can send Meant.It from <%= link_to "http://meant.it", url_for("/") %> or from email.  The only differences are:
     <ul>
      <li>Meant.It sent from the webpage has 'anonymous' as sender</li>
      <li>To email Meant.It, just send to thank@meant.it, sorry@meant.it, <%= link_to "etc.", url_for("message_types") %>
@@ -36,6 +36,10 @@
         <ul>
           <li>:hello kitty:</li>
           <li>:hello_kitty</li>
+        </ul>
+      </li>
+      <li>The first email encountered is recipient pii
+        <ul>
           <li>hello_kitty@sanrio.com</li>
         </ul>
       </li>
@@ -56,7 +60,7 @@
           <li>"no mouth"</li>
         </ul>
       </li>
-      <li><i>Message Type</i> is derived from the first tag that matches a Meant.It <%= link_to "message type", url_for("message_types") %>.</li>
+      <li><i>Message Type</i> is derived from the destination email address, e.g., <b>like</b>@meant.it (see <%= link_to "message type", url_for("message_types") %>).</li>
       <li><i>Nickname</i> (required if no pii), the first tag not enclosed by " or ' and is not a <i>message type</i> is used as nickname
       <ul>
         <li>my_kitty</li>

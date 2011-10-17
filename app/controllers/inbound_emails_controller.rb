@@ -534,7 +534,8 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         end # end if @receiver_pii.pii_value.scan(' ').empty?
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{receiver_pii_pii_value_str}"
         logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_pii.inspect:#{@receiver_pii.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
-        render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+#20111017        render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+        render "/home/index", :layout => "find_any", :locals => { :notice => nil }
       elsif !@sender_pii.nil? and @receiver_pii.nil? and !@receiver_endPoint.nil?
         sender_pii_pii_value_str = @sender_pii.pii_value
         if !@sender_pii.pii_value.scan(' ').empty?
@@ -542,7 +543,8 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         end # end if @sender_pii.pii_value.scan(' ').empty?
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{@receiver_endPoint.nick}"
         logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_endPoint.inspect#{@receiver_endPoint.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
-        render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => [@receiver_endPoint], :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+#20111017        render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => [@receiver_endPoint], :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
+        render "/home/index", :layout => "find_any", :locals => { :notice => nil }
       end # end if !@sender_pii.nil? ...
       return
     end # end if self.request.path.match(/send_inbound_emails/)

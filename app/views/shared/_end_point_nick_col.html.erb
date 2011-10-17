@@ -8,6 +8,8 @@
   # - don't show pii unless pii_hide is "false"
   # - if we have not shown pii, then show nick, if it's not nil, otherwise show record number
   # - if we show nick, then show own
+  #   AI:NICK#1: if nick == own then just show either
+  #   AI:NICK#2: show as 'own's nick' instead of nick:<nick> (own:<own>)
   pii_shown = false
   nick_shown = false
 %>
@@ -22,7 +24,7 @@
   if !end_point_nick_col.nil? and !end_point_nick_col.pii.nil? and (end_point_nick_col.pii.pii_hide == "false")
     pii_shown = true
 %>
-     <%= link_to "#{end_point_nick_col.pii.pii_value}", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
+     <%= link_to "[#{end_point_nick_col.pii.pii_value}]", "#{show_by_pii_value_piis_url}?#{Constants::PII_VALUE_INPUT}=#{URI::encode(end_point_nick_col.pii.pii_value)}" %>
 <% end %>
 <% 
   if !end_point_nick_col.nil? and (show_nick_force or !pii_shown)
@@ -56,7 +58,7 @@
        <%
          if pii_shown
        %>
-         is 
+         aka 
        <%
          end # end if pii_shown
        %>
@@ -68,7 +70,7 @@
        <%
          if pii_shown
        %>
-         is 
+         aka 
        <%
          end # end if pii_shown
        %>

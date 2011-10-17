@@ -21,11 +21,11 @@
 
 <p>
 <strong>Meant.It:</strong>
-[pii:<%= sender_pii.pii_value  %>] <=>
-[pii:<%= receiver_pii.pii_value %>]
+[<%= sender_pii.pii_value  %>] <=>
+[<%= receiver_pii.pii_value %>]
 </p>
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It '[pii:<%= sender_pii.pii_value %>] => [pii:<%= receiver_pii.pii_value %>]'</em></caption>
+  <caption><em>Meant.It '[<%= sender_pii.pii_value %>] => [<%= receiver_pii.pii_value %>]'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -70,7 +70,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <% end %>
 
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It 'pii:[<%= receiver_pii.pii_value %>] => pii:[<%= sender_pii.pii_value %>]'</em></caption>
+  <caption><em>Meant.It '[<%= receiver_pii.pii_value %>] => [<%= sender_pii.pii_value %>]'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>

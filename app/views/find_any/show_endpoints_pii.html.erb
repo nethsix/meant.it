@@ -22,11 +22,11 @@
 
 <p>
 <strong>Meant.It:</strong>
-[pii:<%= pii.pii_value  %>] <=>
-nick:<%= endPoints[0].nick %>
+[<%= pii.pii_value  %>] <=>
+<%= endPoints[0].nick %>
 </p>
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It '[pii:<%= pii.pii_value %>] => nick:<%= endPoints[0].nick %>'</em></caption>
+  <caption><em>Meant.It '[<%= pii.pii_value %>] => <%= endPoints[0].nick %>'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
@@ -71,7 +71,7 @@ Nothing yet... <b>Don't be disheartened.  They'll come!</b>
 <% end %>
 
 <table summary="Meant.It Table"  border="0" cellspacing="0" cellpadding="0">
-  <caption><em>Meant.It 'nick:<%= endPoints[0].nick %> => [pii:<%= pii.pii_value %>]'</em></caption>
+  <caption><em>Meant.It '<%= endPoints[0].nick %> => [<%= pii.pii_value %>]'</em></caption>
   <thead>
     <tr>
       <th class='span-8'>Sender Nick</th>
