@@ -84,7 +84,7 @@ class InboundEmailsControllerTest < ActionController::TestCase
   test "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email" do
    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email)
    common_code(email_elem)
-  end # end "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email"
+  end # end test "nick_n_xxx_y_yyy_n_tags_n_sender_idable_inbound_email"
 
   test "xxx_no_colon_inbound_email" do
    email_elem = inbound_emails(:xxx_no_colon_inbound_email)
@@ -737,6 +737,33 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal PiiTypeValidator::PII_TYPE_SSN, receiver_pii_hash[ControllerHelper::PII_TYPE]
     assert_equal PiiHideTypeValidator::PII_HIDE_TRUE, receiver_pii_hash[ControllerHelper::PII_HIDE]
   end # end test "pii with auto assign pii_type pii_hide" do
+
+  test "non-email pii nick" do
+    email_pii = "jslv tall t-shirt ;coolsnowboard t-shirt; :feedback@jslvcorp.com"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(email_pii)
+    pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    nick_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    assert_equal "feedback@jslvcorp.com", pii_str
+    assert_equal "jslv", nick_str
+    non_email_pii = "tall t-shirt ;coolsnowboard t-shirt; :jslv"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(non_email_pii)
+    pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    nick_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    assert_equal "jslv", pii_str
+    assert_equal "jslv", nick_str
+    non_email_pii_with_space = "skateboard shoes ;cool shoes; :es keswick:"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(non_email_pii_with_space)
+    pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    nick_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    assert_equal "es keswick", pii_str
+    assert_equal "es_keswick", nick_str
+    non_email_hide_pii = "jslvcorp tall t-shirt ;coolsnowboard t-shirt; :jslv$"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(non_email_hide_pii)
+    pii_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    nick_str = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+    assert_equal "jslv$", pii_str
+    assert_equal "jslvcorp", nick_str
+  end # end test "non-email pii nick"
 
   test "parse email string to get nick and email" do
     email_str = '"kuromi" <kuromi@sanrio.com>'

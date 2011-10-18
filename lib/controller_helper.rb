@@ -24,6 +24,20 @@ module ControllerHelper
     cleansed_order_str
   end # end def self.sql_validate_order(order_str)
 
+  def self.validate_email(email_str)
+    is_email = false
+    if !email_str.nil?
+      email_match = email_str.match(/.+@.+\..+/)
+      is_email = true if !email_match.nil?
+      is_email
+    end # end if !email_str.nil?
+  end # end def self.validate_email
+
+  def self.nickify_str(str)
+    nick = str.gsub(' ', '_')
+    nick
+  end # end def self.nickify_pii
+
   def self.validate_number(num_str, default_num)
     default_num ||= nil
     if !num_str.nil?
@@ -149,8 +163,33 @@ module ControllerHelper
     receiver_pii_str.strip! if !receiver_pii_str.nil?
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:parse_meant_it_input:#{logtag}, receiver_pii_str:#{receiver_pii_str}")
     result_hash[MEANT_IT_INPUT_RECEIVER_PII] = receiver_pii_str
-    receiver_nick_str = input_str_arr.shift
-    receiver_nick_str.strip! if !receiver_nick_str.nil?
+    receiver_pii_str_hash = self.get_pii_hash(receiver_pii_str)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:parse_meant_it_input:#{logtag}, receiver_pii_str_hash.inspect:#{receiver_pii_str_hash.inspect}")
+    # NOTE: the diff between receiver_pii_str and receiver_pii_value_str
+    # is, e.g., the $ at the end to indicate whether the pii should be
+    # hidden
+    receiver_pii_value_str = receiver_pii_str_hash[ControllerHelper::PII_VALUE_STR]
+    receiver_pii_hide = receiver_pii_str_hash[ControllerHelper::PII_HIDE]
+    if !receiver_pii_value_str.nil?
+      if self.validate_email(receiver_pii_value_str)
+        # If receiver_pii is email then the nick is the next keyword
+        # NOTE: email is has pii_hide true so we need a nick
+        receiver_nick_str = input_str_arr.shift
+        receiver_nick_str.strip! if !receiver_nick_str.nil?
+      elsif !self.validate_email(receiver_pii_value_str) and receiver_pii_hide == PiiHideTypeValidator::PII_HIDE_TRUE
+        # If receiver_pii is not email but the pii is marked as
+        # hide then we need a nick
+        receiver_nick_str = input_str_arr.shift
+        receiver_nick_str.strip! if !receiver_nick_str.nil?
+      else
+        # If receiver_pii is not email but the pii is not marked as
+        # hide then it is also the nick
+        receiver_nick_str = ControllerHelper.nickify_str(receiver_pii_value_str)
+      end # end if self.validate_email(receiver_pii_str)
+    else
+      receiver_nick_str = input_str_arr.shift
+      receiver_nick_str.strip! if !receiver_nick_str.nil?
+    end # end if !receiver_pii_value_str.nil?
     result_hash[MEANT_IT_INPUT_RECEIVER_NICK] = receiver_nick_str
     Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:parse_meant_it_input:#{logtag}, receiver_nick_str:#{receiver_nick_str}")
     tag_str_arr += input_str_arr
@@ -264,7 +303,7 @@ module ControllerHelper
       end # end if initial_pii_value_str.match ...
     end # end if !final_pii_value_str.nil?
     { PII_VALUE_STR => final_pii_value_str, PII_TYPE => pii_type, PII_HIDE => pii_hide }
-  end # end def self.get_pii_type
+  end # end def self.get_pii_hash
 
   def self.strip_quotes(input_str)
     stripped_input_str = nil
