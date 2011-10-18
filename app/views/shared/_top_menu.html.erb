@@ -11,14 +11,14 @@
     <% end %>
     <%= link_to "Log out", log_out_path %>
     Logged in as <b><%= current_entity.login_name %></b>
+  <% elsif no_login_form %>
+    <!--- Don't show anything --->
   <% elsif show_new_user.nil? %>
     <form style='display:inline' accept-charset='UTF-8' action='/sessions' class='session_new' id='session_new' method='post'>
       Login name:<input type='text' id='session_login_name' name='session[login_name]' size='15'/>
       Password:<input type='password' id='session_password' name='session[password]' size='15'/>
       <input id="session_submit" name="commit" type="submit" value="Sign In/Up" />
     </form>
-  <% elsif no_login_form %>
-    <!-- Don't show anything -->
   <% else %>
     About to create new user <b><%= show_new_user %></b>
     <form method='get' action='<%= verify_captcha_path %>'>
