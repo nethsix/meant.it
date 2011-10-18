@@ -1,4 +1,5 @@
 <% show_new_user ||= nil %>
+<% no_login_form ||= false %>
 <div class="span-20">
   <%= link_to "Home", url_for("/") %>
   <% if current_entity %>
@@ -16,6 +17,8 @@
       Password:<input type='password' id='session_password' name='session[password]' size='15'/>
       <input id="session_submit" name="commit" type="submit" value="Sign In/Up" />
     </form>
+  <% elsif no_login_form %>
+    <!-- Don't show anything -->
   <% else %>
     About to create new user <b><%= show_new_user %></b>
     <form method='get' action='<%= verify_captcha_path %>'>
