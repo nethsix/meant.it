@@ -3,6 +3,8 @@ require 'controller_helper'
 class MeantItConfirmationsController < Devise::ConfirmationsController
   prepend_view_path "app/views/devise"
 
+#20111023SOLN#2  before_filter :redirect_not_logged_in, :only => [:show]
+
   def show
     logtag = ControllerHelper.gen_logtag
     confirmation_token = params[:confirmation_token]
@@ -28,6 +30,9 @@ class MeantItConfirmationsController < Devise::ConfirmationsController
         session[Constants::SESSION_CONFIRM_EMAIL_ENDPOINT_ID]= endPoint.id
         logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:show:#{logtag}, setting session[Constants::SESSION_CONFIRM_EMAIL_ENDPOINT_ID], session.inspect:#{session.inspect}")
         redirect_to "/log_in"
+#20111023SOLN#2        logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:show:#{logtag}, this should not happen since before_filter ensures that there is login before we can reach this part of code, session.inspect:#{session.inspect}")
+#20111023SOLN#2        flash[:error] = "Can't confirm email association without login"
+#20111023SOLN#2        redirect_to url_for("/")
         return
       end # end if !current_entity.nil?
     end # end if resource.errors.empty?

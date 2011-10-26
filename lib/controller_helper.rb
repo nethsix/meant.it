@@ -224,7 +224,8 @@ module ControllerHelper
     if person.nil?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_person_by_email:#{logtag}, person find triggered exception, e.inspect:#{e.inspect}")
       # Use sql instead of couchdb
-      person = EntityDatum.find_by_email(:email => email)
+#20111026WTF      person = EntityDatum.find_by_email(:email => email)
+      person = EntityDatum.find_by_email(email)
     end # end if person.nil?
     person
   end # end def self.find_person_by_email(name, email, logtag=nil)
@@ -246,7 +247,8 @@ module ControllerHelper
       # Usually because couchdb is not there
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_person_by_email:#{logtag}, person find/create triggered exception, e.inspect:#{e.inspect}")
       # Use sql instead of couchdb
-      new_person = EntityDatum.find_or_create_by_email(:email => email)
+#20111026WTF      new_person = EntityDatum.find_or_create_by_email(:email => email)
+      new_person = EntityDatum.find_or_create_by_email(email)
    end # end find/create person
    new_person
   end # end def self.find_or_create_person_by_email
@@ -459,10 +461,31 @@ module ControllerHelper
     sender_endPoint
   end # end def self.get_sender_endPoint_from_endPoints
 
+  def self.find_sender_endPoint_and_pii(pii_value, pii_type, pii_hide=PiiHideTypeValidator::PII_HIDE_TRUE)
+    logtag = ControllerHelper.gen_logtag
+    sender_endPoint = nil
+    pii = Pii.find_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, pii_hide)
+    if pii.nil? or pii.errors.any?
+      if !pii.nil?
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_sender_endPoint_and_pii:#{logtag}, pii.errors.inspect:#{pii.errors.inspect}")
+      else
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_sender_endPoint_and_pii:#{logtag}, pii.nil? is true")
+      end # end if !pii.nil?
+    else
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_sender_endPoint_and_pii:#{logtag}, pii.inspect:#{pii.inspect}")
+    end # end if pii.nil? or pii.errors.any?
+    if !pii.nil?
+      sender_endPoint = ControllerHelper.get_sender_endPoint_from_endPoints(pii.endPoints)
+    end # end if pii.nil?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_sender_endPoint_and_pii:#{logtag}, sender_endPoint.inspect:#{sender_endPoint.inspect}")
+    sender_endPoint
+  end # end def self.find_sender_endPoint_and_pii
+
   def self.find_or_create_sender_endPoint_and_pii(pii_value, pii_type, pii_hide=PiiHideTypeValidator::PII_HIDE_TRUE)
     logtag = ControllerHelper.gen_logtag
 #    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
-    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(:pii_value => pii_value, :pii_type => pii_type, :pii_hide => pii_hide)
+#20111026WTF    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(:pii_value => pii_value, :pii_type => pii_type, :pii_hide => pii_hide)
+    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
     if pii.nil? or pii.errors.any?
       Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.errors.inspect:#{pii.errors.inspect}")
     else

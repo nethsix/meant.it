@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_entity
   helper_method :logged_in
+  helper_method :redirect_not_logged_in
   helper_method :admin?
   helper_method :no_profile?
     
@@ -45,6 +46,13 @@ class ApplicationController < ActionController::Base
       redirect_to url_for("/")
     end
   end
+
+#20111023SOLN#2  def redirect_not_logged_in(redirect_url)
+#20111023SOLN#2    unless current_entity
+#20111023SOLN#2      # CODE: base64 encode redirect_url
+#20111023SOLN#2      redirect_to "/log_in?#{Constants::REDIRECT_URL}=#{redirect_url}")
+#20111023SOLN#2    end # end unless current_entity
+#20111023SOLN#2  end # end def redirect_not_logged_in
 
 if Rails.env.production?
 #  ENV['GROUP_PII'] = '9%3d%3d%3dlabutan'

@@ -1,4 +1,5 @@
 <% require 'constants' %>
+<% logtag = ControllerHelper.gen_logtag %>
 <div class='container'>
   <%= render :partial => "shared/top_menu" %>
   <div class='span-24'>
@@ -16,15 +17,71 @@
         <ul>
           <li>
     <%
+        # 3 types of variable:
+        # - email_str.nil?
+        #  - true: Case A: cannot claim non-email pii
+#20111026b        # - email_pii.nil?
+        # - email_endPoint.nil?
+        #  - true: Case B: cannot claim email that have not sent received meant.it
+#20111026b        # - claimed_email_pii.nil?
+        # - claimed_email_entities.size
+        #  - if !email_pii.nil? and !email_str.nil?
+#20111026b        #    - claimed_email_pii.nil? is true: Case C: claim is OK
+        #    - claimed_email_entities.size == 0 : Case C: claim is OK
+#20111026b        #    - claimed_email_pii.nil? is false: Case D: already claimed
+        #    - claimed_email_entities.size > 0 : Case D: already claimed
         # Check if it's email
         email_hash = ControllerHelper.parse_email(@claim)
-        if !email_hash[ControllerHelper::EMAIL_STR].nil?
+        email_str = email_hash[ControllerHelper::EMAIL_STR]
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, email_str:#{email_str}")
+        # Check if email already claimed
+        email_endPoint = ControllerHelper.find_sender_endPoint_and_pii(email_str, PiiTypeValidator::PII_TYPE_EMAIL)
+#20111026b        email_pii = Pii.find_by_pii_value_and_pii_type(email_str, PiiTypeValidator::PII_TYPE_EMAIL)
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, email_endPoint.inspect:#{email_endPoint.inspect}")
+#20111026b        claimed_email_pii = email_pii.pii_property_set if !email_pii.nil?
+        claimed_email_entities = email_endPoint.entities if !email_endPoint.nil?
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, claimed_email_entities.inspect:#{claimed_email_entities.inspect}")
+#20111026        if !email_str.nil? and claimed_email_endPoint.nil?
+#20111026b        if !email_pii.nil? and !email_str.nil? and claimed_email_pii.nil?
+        if !email_endPoint.nil? and !email_str.nil? and claimed_email_entities.size == 0
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, Case C")
+          # Case C
+          # Set the confirmed_at for the User (email) to nil to allow claim
+          user_obj = User.find_by_email(email_str)
+          if !user_obj.nil?
+            user_obj.confirmed_at = nil
+            user_obj_save = user_obj.save
+          end # end if !user_obj.nil?
+          if user_obj.nil? or user_obj_save
     %>
-            <a href='/resend_confirmation?<%= Constants::EMAIL_VALUE_INPUT %>=<%= @claim %>'><%= @claim %></a>
-    <%      
-        else
+              <a href='/resend_confirmation?<%= Constants::EMAIL_VALUE_INPUT %>=<%= @claim %>'><%= @claim %></a>
+      <%      
+          else 
+      %>     
+              <%= @claim %> (<span style="color:red">Server error. </span>Please contact <img height='20' src='/images/nethseven_meant_it.png'/>.)
+    <%
+          end # end if user_obj_save
+        # it's email but already claimed
+#20111026b        elsif !email_pii.nil? and !email_str.nil? and !claimed_email_pii.nil?
+        elsif !email_endPoint.nil? and !email_str.nil? and claimed_email_entities.size > 0
+          # Case D
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, Case D")
+          %>
+            <%= @claim %> (<span style="color:red">Email already claimed.</span>Please contact <img height='20' src='/images/nethseven_meant_it.png'/> for dispute.)
+        <%     
+#20111026b        elsif email_pii.nil?
+        elsif email_endPoint.nil?
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, Case B")
+          # Case B
     %>
-            <%= @claim %> (<span style="color:red">Automated claims on non-email pii is not possible. </span>Please contact <img height='20' src='/images/nethseven_meant_it.png'/>)
+            <%= @claim %> (<span style="color:red">meant.it has not been sent from this email before. </span>Send a meant.it from that email prior claiming.)
+    <%
+        # if not email whether claimed or not
+        elsif email_hash[ControllerHelper::EMAIL_STR].nil?
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:manage.html.erb:#{logtag}, Case A")
+          # Case A
+    %>
+            <%= @claim %> (<span style="color:red">Automated claims on non-email pii is not possible. </span>Please contact <img height='20' src='/images/nethseven_meant_it.png'/>.)
     <%      
         end # end if !email_hash[ControllerHelper::EMAIL_STR].nil?
     %>
