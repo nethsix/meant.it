@@ -138,29 +138,30 @@ class PiisController < ApplicationController
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, params.inspect:#{params.inspect}")
     pii_value = params[Constants::PII_VALUE_INPUT]
-    @pii = ControllerHelper.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
-    add_virtual_methods_to_pii(@pii[0], pii_value)
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, @pii.inspect:#{@pii.inspect}")
-    if @pii.nil? or @pii.empty?
-      pii = Pii.find_by_pii_value(pii_value)
-      pps = pii.pii_property_set
-      made_mir_count = nil
-      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pps.status == StatusTypeValidator::STATUS_INACTIVE
-        made_mir_count = pps.threshold
-      else
-        made_mir_count = 0
-      end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type }]
-      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
-      pii_to_json = made_pii.to_json
-    else
-      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type])
-    end # end if pii_to_json.nil? or pii_to_json.empty?
+#20111103    @pii = ControllerHelper.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
+#20111103    add_virtual_methods_to_pii(@pii[0], pii_value)
+#20111103    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, @pii.inspect:#{@pii.inspect}")
+#20111103    if @pii.nil? or @pii.empty?
+#20111103      pii = Pii.find_by_pii_value(pii_value)
+#20111103      pps = pii.pii_property_set
+#20111103      made_mir_count = nil
+#20111103      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pps.status == StatusTypeValidator::STATUS_INACTIVE
+#20111103        made_mir_count = pps.threshold
+#20111103      else
+#20111103        made_mir_count = 0
+#20111103      end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+#20111103      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type }]
+#20111103      logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
+#20111103      pii_to_json = made_pii.to_json
+#20111103    else
+#20111103      pii_to_json = @pii.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type])
+#20111103    end # end if pii_to_json.nil? or pii_to_json.empty?
+    pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
 
     respond_to do |format|
 #      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
-      format.xml  { render :xml => @pii }
+#20111103      format.xml  { render :xml => @pii }
       format.json { render :json => pii_to_json }
     end
   end # end def show_like_pii_value_uniq_sender_count_after_last_bill
@@ -187,7 +188,7 @@ class PiisController < ApplicationController
     # we use some metaprogramming to only include those values for this
     # pii.
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type_uniq_sender_count:#{logtag}, pii_elem.inspect:#{pii_elem.inspect}")
-    add_virtual_methods_to_pii(pii_elem, pii_value)
+    ControllerHelper.add_virtual_methods_to_pii(pii_elem, pii_value)
 
 #        def as_json(options={})
 #          super(
@@ -208,63 +209,63 @@ class PiisController < ApplicationController
 #      format.xml  { render :xml => meantItRels }
   end # end def show_by_message_type_uniq_sender_count
 
-  private
-    def add_virtual_methods_to_pii(pii_elem, pii_value)
-      class << pii_elem
-        def get_property_set_model
-          pii_id = Pii.find_by_pii_value(pii_value)
-          pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
-          pii_property_set_model
-        end
-
-        def threshold
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def formula
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def short_desc_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def long_desc_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def thumbnail_url_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def thumbnail_qr_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
-          return_value
-        end
-
-        def threshold_type
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
-          return_value
-        end
-     end # end class << pii_elem
-    end # end def add_virtual_methods_to_pii
+#20111103  private
+#20111103    def add_virtual_methods_to_pii(pii_elem, pii_value)
+#20111103      class << pii_elem
+#20111103        def get_property_set_model
+#20111103          pii_id = Pii.find_by_pii_value(pii_value)
+#20111103          pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
+#20111103          pii_property_set_model
+#20111103        end
+#20111103
+#20111103        def threshold
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def formula
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def short_desc_data
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def long_desc_data
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def thumbnail_url_data
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def thumbnail_qr_data
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103
+#20111103        def threshold_type
+#20111103          @pii_property_set_model ||= get_property_set_model
+#20111103          return_value = nil
+#20111103          return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
+#20111103          return_value
+#20111103        end
+#20111103     end # end class << pii_elem
+#20111103    end # end def add_virtual_methods_to_pii
 end

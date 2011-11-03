@@ -214,10 +214,10 @@ module ControllerHelper
     person
   end # end def self.find_person_by_id
 
-  def self.find_person_by_email(name, email, logtag=nil)
+  def self.find_person_by_email(email, logtag=nil)
     person = nil
     begin
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_person_by_email:#{logtag}, name:#{name}, email:#{email}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_person_by_email:#{logtag}, email:#{email}")
       person = Person.find_by_email(email)
     rescue Exception => e
     end # end cannot find person from couchdb
@@ -228,7 +228,7 @@ module ControllerHelper
       person = EntityDatum.find_by_email(email)
     end # end if person.nil?
     person
-  end # end def self.find_person_by_email(name, email, logtag=nil)
+  end # end def self.find_person_by_email
 
   def self.find_or_create_person_by_email(name, email, logtag=nil)
     new_person = nil
@@ -535,6 +535,9 @@ module ControllerHelper
 #ABC    end # end if !opt_str.nil? ...
 #ABC  end # end def self.set_options_str
 
+  # +return+ +Pii+ array, after_date
+  # NOTE: after_date is when deal was started which is calculated
+  # by considering threshold_type (ONE_TIME, RECUR)
   def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil)
     pii_virtual = nil
     after_date = nil
@@ -574,6 +577,7 @@ module ControllerHelper
       end # end if !pii.pii_property_set.nil? ...
 #DEBUG      ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '2011-08-05 11:12:20'") if after_date.nil?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, setting pii_virtual with after_date.inspect:#{after_date.inspect}")
       # We expect only one
       pii_virtual.each { |pii_elem|
         class << pii_elem
@@ -583,8 +587,36 @@ module ControllerHelper
       } # end pii_virtual.each ...
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
     end # end if !pii_value.nil? and !pii_value.empty?
-    pii_virtual
+    [pii_virtual, after_date]
   end # end def self.find_like_pii_value_uniq_sender_count_after_last_bill
+
+  # This methods is used by group.html 'cos it takes additional steps
+  # to populate the pii when it's inactive, nil, etc.
+  # NOTE: This was migrated from piis_controller.rb's
+  # +show_like_pii_value_uniq_sender_count_after_last_bill+
+  # +return+ JSON
+  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil)
+    piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
+    self.add_virtual_methods_to_pii(piis[0], pii_value)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, piis.inspect:#{piis.inspect}")
+    if piis.nil? or piis.empty?
+      pii = Pii.find_by_pii_value(pii_value)
+      pps = pii.pii_property_set
+      made_mir_count = nil
+      if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pps.status == StatusTypeValidator::STATUS_INACTIVE
+        made_mir_count = pps.threshold
+      else
+        made_mir_count = 0
+      end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date }]
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
+      pii_to_json = made_pii.to_json
+    else
+      pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date])
+    end # end if piis.nil? or piis.empty?
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
+    pii_to_json
+  end # end def self.get_json_like_pii_value_uniq_sender_count_after_last_bill
 
   def self.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, limit = nil, order = nil, logtag = nil)
     limit = ControllerHelper.validate_number(limit, Constants::LIKEBOARD_REC_LIMIT)
@@ -853,4 +885,118 @@ module ControllerHelper
     end # end if !ep.pii.nil? and !ep.pii.pii_property_set.nil? and ...
     ep_display_str
   end # end def self.ai_for_endpoint
+
+  def self.order_endpoints
+  end # end def self.order_endpoints
+
+  def self.get_endpoint_price(ep, logtag=nil)
+   price = nil
+   if !ep.nil? and !ep.pii.nil?
+     price = self.get_pii_price(ep.pii, logtag)
+   end # end if !ep.nil? and !ep.pii.nil?
+   price
+  end # end def self.get_endpoint_price(pii, logtag=nil)
+
+  def self.get_pii_price(pii, logtag=nil)
+   price = nil
+   if !pii.nil?
+     if !pii.pii_property_set.nil?
+       formula = pii.pii_property_set.formula
+       if !formula.nil? and !formula.empty?
+         formula_match_arr = formula.match(/\d+/)
+         price = formula_match_arr[0] if !formula_match_arr.nil?
+       end # end if !formula.nil? and !formula.empty?
+     end # end if !pii.pii_property_set.nil?
+   end # end if !pii.nil?
+   price
+  end # end def self.get_pii_price
+  
+  # +EndPoint+ may be sellable if it has pii that we can check
+  # for sellability using +sellable_pii+
+  # +:ep:+:: +EndPoint+ to check
+  # +return+ boolean
+  def self.sellable_endpoint(ep, logtag=nil)
+    sellable = false
+    if !ep.nil? and !ep.pii.nil?
+      sellable = self.sellable_pii(ep.pii, logtag)
+    end # end if !ep.nil? and !ep.pii.nil?
+    sellable
+  end # end def self.sellable_endpoint
+
+  # Pii is sellable if it has +pii_property_set+
+  # with +threshold+, +formula+ set and +status+ active
+  # and +pii_value+ contains Constant::ENTITY_DOMAIN_MARKER
+  # +:pii:+:: +Pii+ to check
+  # +return+ boolean
+  def self.sellable_pii(pii, logtag=nil)
+    sellable = false
+    if !pii.nil?
+      pii_pps = pii.pii_property_set
+      if pii.pii_value.match(/#{Constants::ENTITY_DOMAIN_MARKER}/) and !pii_pps.nil?
+        if !pii_pps.threshold.nil? and !self.get_pii_price(pii).nil? and pii_pps.status == StatusTypeValidator::STATUS_ACTIVE
+          sellable = true
+        end # end if !pii_pps.threshold.nil? and ...
+      end # end if !pii_pps.nil?
+    end # end if !pii.nil?
+    sellable
+  end # end def self.sellable_pii
+
+    def self.add_virtual_methods_to_pii(pii_elem, pii_value)
+      class << pii_elem
+        def get_property_set_model
+          pii_id = Pii.find_by_pii_value(pii_value)
+          pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
+          pii_property_set_model
+        end
+
+        def threshold
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def formula
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def short_desc_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def long_desc_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def thumbnail_url_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def thumbnail_qr_data
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
+          return_value
+        end
+
+        def threshold_type
+          @pii_property_set_model ||= get_property_set_model
+          return_value = nil
+          return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
+          return_value
+        end
+     end # end class << pii_elem
+    end # end def self.add_virtual_methods_to_pii
 end # end module ControllerHelper

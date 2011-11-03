@@ -1,0 +1,127 @@
+<%
+  img_width = 50
+  img_height = 50
+  max_span = 24
+  # Ensure that max_span can be divided by items_per_row nicely
+  items_per_row = 2
+  item_span = max_span/items_per_row
+  shop_name = "Shop \##{@entity.id}"
+  person = ControllerHelper.find_person_by_id(@entity.property_document_id)
+  if !person.nil?
+    if !person.nick.nil? and !person.nick.empty?
+      shop_name += "(#{person.nick})"
+    elsif !person.first_name.nil? and !person.first_name.empty?
+      shop_name += " (#{person.first_name})"
+    end # end if !person.nick.nil? and !person.nick.empty?
+  end # end if !person.nil?
+%>
+<div class='container'>
+  <div class='span-<%= max_span %>'>
+    <strong><%= shop_name %></strong>
+
+  </div>
+  <table summary="Items"  border="0" cellspacing="0" cellpadding="0">
+    <caption><em>Order:</em>Date Price Best_Seller Near_Goal Group_Size</caption>
+    <tbody>
+<%
+  item_no_row = 0
+  item_ep_stack_arr = []
+  tr_closed = true
+  no_items = true
+  if !@entity.nil?
+    @entity.endPoints.each { |entity_ep|
+      entity_ep_pii = entity_ep.pii
+      # Check that it is an auto-associated item
+      if ControllerHelper.sellable_pii(entity_ep_pii)
+        no_items = false
+%>
+<%
+        if item_no_row == 0
+          tr_closed = false
+%>
+       <tr>
+<%
+        end # end if item_no_row == 0
+        item_ep_stack_arr.push(entity_ep)
+        item_no_row += 1
+        item_no_row = item_no_row % items_per_row
+        pix_url = nil
+        qr_url = nil
+        if !entity_ep_pii.pii_property_set.nil?
+          pix_url = entity_ep_pii.pii_property_set.avatar.url(:thumb)
+          qr_url = entity_ep_pii.pii_property_set.qr.url(:thumb)
+        end # end if !entity_ep_pii.pii_property_set.nil?
+%>
+         <td class='span-<%= item_span %>'>
+           <img height='<%= img_height %>' width='<%= img_width %>' src='<%= pix_url %>' />
+           <img height='<%= img_height %>' width='<%= img_width %>' src='<%= qr_url %>' />
+         </td>
+<%
+        if item_no_row == 0
+          tr_closed = true
+          # Close the row and add the description row
+%>
+      </tr>
+      <tr>
+<%
+          item_ep_stack_arr.each { |item_ep_elem|
+            pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
+            pii_virtuals = JSON.parse(pii_json)
+            # E.g., of pii_virtuals
+            # [{\"pii\"=>{\"threshold\"=>2, \"short_desc_data\"=>\"jersey\", \"pii_value\"=>\"28===jersey\", \"thumbnail_url_data\"=>\"/images/unknown.jpg\", \"mir_count\"=>0, \"formula\"=>\"15\", \"threshold_type\"=>\"recur\", \"thumbnail_qr_data\"=>\"http://s3.amazonaws.com/ncal-meantit/80dcdd8b00633e62c091d18c20fcab46fb4895e2.png?1314964833\"}}]
+            # We expect only one
+            pii_virtual = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+%>
+        <td class='span-<%= item_span %>'>
+           SKU: <%= item_ep_elem.pii.pii_value %><br/>
+           Desc: <%= ControllerHelper.ai_for_endpoint(item_ep_elem, "") %><br/>
+           Price: <%= ControllerHelper.get_endpoint_price(item_ep_elem) %><br/>
+           Type: <%= pii_virtual["threshold_type"] %><br/>
+           Date: <%= time_ago_in_words(pii_virtual["after_date"]) %> ago<br/>
+           Target: <%= pii_virtual["mir_count"] %>/<%= pii_virtual["threshold"] %>
+        </td>
+<%
+          } # end item_ep_stack_arr.each ...
+%>
+      </tr>
+<%
+          item_ep_stack_arr = []
+        end # end if item_no_row == 0
+      end # end if !entity_ep.pii.nil?
+    } # end @entity.endPointseach ...
+  end # end if @entity.nil?
+  if !tr_closed
+      # Close the row and add the description row
+%>
+      </tr>
+      <tr>
+<%
+        item_ep_stack_arr.each { |item_ep_elem|
+          pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
+          pii_virtuals = JSON.parse(pii_json)
+          # We expect only one
+          pii_virtual = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+%>
+        <td class='span-<%= item_span %>'>
+           SKU: <%= item_ep_elem.pii.pii_value %><br/>
+           Desc: <%= ControllerHelper.ai_for_endpoint(item_ep_elem, "") %><br/>
+           Price: <%= ControllerHelper.get_endpoint_price(item_ep_elem) %><br/>
+           Target: <%= item_ep_elem.pii.pii_property_set.threshold %>
+           Type: <%= pii_virtual["threshold_type"] %><br/>
+           Date: <%= time_ago_in_words(pii_virtual["after_date"]) %> ago<br/>
+           Target: <%= pii_virtual["mir_count"]%>/<%= pii_virtual["threshold"] %>
+        </td>
+      </tr>
+<%
+        } # end item_ep_stack_arr.each ...
+  end # end if !tr_closed
+%>
+    </tbody>
+  </table>
+<%
+  if @entity.nil? or no_items
+%>
+    No Items Yet!
+<%
+  end # end if @entity.nil? or no_items
+%>

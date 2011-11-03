@@ -1,5 +1,6 @@
 require 'validators'
 class PiiPropertySet < ActiveRecord::Base
+  DELIM = ";"
 #20110813  include ActiveModel::Dirty
 
 #20110813  define_attribute_methods  = [:status]
@@ -18,6 +19,7 @@ class PiiPropertySet < ActiveRecord::Base
     }
 
   has_attached_file :qr, 
+    :default_url => "/images/no_qr.jpg",
     :path => ":hash.:extension", 
 #    :styles => { :medium => "300x300>", :thumb => "100x100>" }
     :styles => { :medium => "300x300>", :thumb => "100x100>" },
