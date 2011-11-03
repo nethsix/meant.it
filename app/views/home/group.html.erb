@@ -80,9 +80,10 @@ to communicate with meant.it using REST --->
                     jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
                     jQuery('#x_axis_3').text(threshold);
                     var formula = val.pii.formula;
-                    if (formula != null && formula.match(/\d+/))
+                    var first_number = formula.match(/\d+/)
+                    if (formula != null && first_number != null)
                     {
-                      jQuery('#cost_axis_3').text('$'+formula);
+                      jQuery('#cost_axis_3').text('$'+first_number);
                     } // end if (formula.match(/\d+/))
                     var qr = val.pii.thumbnail_qr_data;
 //DEBUG alert('qr:'+qr);
