@@ -41,8 +41,8 @@
 %>
 <%
     else
+      nick_link_to = ControllerHelper.ai_for_endpoint(meant_it_rel.src_endpoint, "nick_")
       # Prepare links for nick
-      nick_link_to = "nick_#{meant_it_rel.src_endpoint.id}"
       nick_url = "/end_points/show_by_id/#{meant_it_rel.src_endpoint.id}"
 %>
 <% 
@@ -54,7 +54,7 @@
        own_link_to = "(#{src_creator_endPoint.nick})"
        own_url = "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(src_creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.src_endpoint.creator_endpoint_id}"
      else
-       own_link_to = "(own_#{src_creator_endPoint.id})"
+       own_link_to = ControllerHelper.ai_for_endpoint(src_creator_endPoint, "own_")
        own_url = "#{end_point_path(src_creator_endPoint.id)}"
      end # end if !src_creator_endPoint.nick.nil?
      # AI:NICK#1
@@ -95,8 +95,8 @@
 %>
 <%
     else
+      nick_link_to = ControllerHelper.ai_for_endpoint(meant_it_rel.dst_endpoint)
       # Prepare links for nick
-      nick_link_to = "nick_#{meant_it_rel.dst_endpoint.id}"
       nick_url = "/end_points/show_by_id/#{meant_it_rel.dst_endpoint.id}"
 %>
 <% 
@@ -108,7 +108,7 @@
        own_link_to = "(#{dst_creator_endPoint.nick})"
        own_url = "#{show_by_nick_and_creator_endpoint_id_end_points_url}?#{Constants::END_POINT_NICK_INPUT}=#{URI::encode(dst_creator_endPoint.nick)}&#{Constants::END_POINT_CREATOR_END_POINT_INPUT}=#{meant_it_rel.dst_endpoint.creator_endpoint_id}"
      else
-       own_link_to = "(own_#{dst_creator_endPoint.id}"
+       own_link_to = ControllerHelper.ai_for_endpoint(dst_creator_endPoint, "own_")
        own_url = "#{end_point_path(dst_creator_endPoint.id)}"
      end # end if !dst_creator_endPoint.nick.nil?
      # AI:NICK#1

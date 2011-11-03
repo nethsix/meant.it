@@ -809,17 +809,17 @@ module ControllerHelper
   #                 or 'entity NUM's pii'
   #    - AI:PII#1d) else just show pii
   def self.ai_for_pii(pii, logtag=nil)
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, pii.inspect:#{pii.inspect}")
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii:#{logtag}, pii.inspect:#{pii.inspect}")
     pii_orig_str = pii.pii_value
     # AI:PII#1d
     pii_display_str = "#{pii_orig_str}"
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1d (default) pii_display_str:#{pii_display_str}")
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii:#{logtag}, AI:PII#1d (default) pii_display_str:#{pii_display_str}")
     pii_pps_short_desc = pii.pii_property_set.short_desc if !pii.pii_property_set.nil?
     if ControllerHelper.is_similar?(pii_orig_str, pii_pps_short_desc)
       # AI:PII#1a Check if there is short description and it must 
       # be similar otherwise we don't use short_desc
       pii_display_str = pii_pps_short_desc
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1a (default) pii_display_str:#{pii_display_str}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii:#{logtag}, AI:PII#1a (default) pii_display_str:#{pii_display_str}")
     else
       # Check if PII has ENTITY_DOMAIN_MARKER
       pii_orig_str_match_arr = pii_orig_str.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}(.*)/)
@@ -832,14 +832,25 @@ module ControllerHelper
         if !entity_datum.nil? and !entity_datum.nick.nil?
           # AI:PII#1b
           pii_display_str = "#{entity_datum.nick}'s #{object_pii}"
-          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1b (default) pii_display_str:#{pii_display_str}")
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii:#{logtag}, AI:PII#1b (default) pii_display_str:#{pii_display_str}")
         else
           # AI:PII#1c
           pii_display_str = "entity_#{entity_id}'s #{object_pii}"
-          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii?:#{logtag}, AI:PII#1c (default) pii_display_str:#{pii_display_str}")
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_pii:#{logtag}, AI:PII#1c (default) pii_display_str:#{pii_display_str}")
         end # end if entity_datum.nil? and entity_datum.nick.nil?
       end # end if !pii_orig_str_match_arr.nil?
     end # end if ControllerHelper.is_similar?(pii_orig_str, pii_pps_short_desc)
     pii_display_str
   end # end def self.ai_for_pii
+
+  # Display nick_<endpoint_id> if it has no nick and no pii 
+  # with pii_property_set or the pii_property_set.short_desc is empty/nil
+  def self.ai_for_endpoint(ep, prefix, logtag=nil)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ai_for_endpoint:#{logtag}, ep.inspect:#{ep.inspect}")
+    ep_display_str = "#{prefix}#{ep.id}"
+    if !ep.pii.nil? and !ep.pii.pii_property_set.nil? and !ep.pii.pii_property_set.short_desc.nil? and !ep.pii.pii_property_set.short_desc.empty?
+      ep_display_str = "\"#{ep.pii.pii_property_set.short_desc}\""
+    end # end if !ep.pii.nil? and !ep.pii.pii_property_set.nil? and ...
+    ep_display_str
+  end # end def self.ai_for_endpoint
 end # end module ControllerHelper
