@@ -21,18 +21,38 @@
 
   </div>
   <table summary="Items"  border="0" cellspacing="0" cellpadding="0">
-    <caption><em>Order:</em>Date Price Best_Seller Near_Goal Group_Size</caption>
+    <caption><strong>Sort:</strong>
+    Date<a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_DATE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_ASC %>'>^</a><a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_DATE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_DESC %>'>v</a>
+    Price<a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_PRICE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_ASC %>'>^</a><a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_PRICE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_DESC %>'>v</a>
+    Near_Goal<a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_NEAR_GOAL %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_ASC %>'>^</a><a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_NEAR_GOAL %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_DESC %>'>v</a>
+    Group_Size<a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_GROUP_SIZE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_ASC %>'>^</a><a href='/shops/<%= @entity.id %>?<%= Constants::SORT_FIELD_INPUT %>=<%= ShopsController::SORT_FIELD_GROUP_SIZE %>&<%= Constants::SORT_ORDER_INPUT %>=<%= ShopsController::SORT_ORDER_DESC %>'>v</a>
+    </caption>
     <tbody>
 <%
   item_no_row = 0
-  item_ep_stack_arr = []
+#CCCC  item_ep_stack_arr = []
+  pii_virtual_stack_arr = []
   tr_closed = true
   no_items = true
   if !@entity.nil?
-    @entity.endPoints.each { |entity_ep|
-      entity_ep_pii = entity_ep.pii
-      # Check that it is an auto-associated item
-      if ControllerHelper.sellable_pii(entity_ep_pii)
+    # To sort endPoints we need to get all their virtual piis first
+    entity_endPoints = @entity.endPoints
+    # Remove non-sellable items
+    entity_sellable_endPoints = entity_endPoints.select { |ep| ControllerHelper.sellable_pii(ep.pii) }
+    entity_sellable_pii_virtuals = entity_sellable_endPoints.collect { |ep| 
+      pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(ep.pii.pii_value)
+      pii_virtuals = JSON.parse(pii_json)
+      # We expect only one
+      pii_virtual_hash = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+      pii_virtual = OpenStruct.new(pii_virtual_hash) if !pii_virtual_hash.nil?
+      pii_virtual
+    } # end entity_sellable_pii_virtuals = ...
+    sorted_sellable_pii_virtuals = ControllerHelper.sort_pii_virtuals(entity_sellable_pii_virtuals, @sort_field, @sort_order)
+    sorted_sellable_pii_virtuals.each { |entity_pii_virtual|
+#CCCC    entity_endPoints.each { |entity_ep|
+#CCCC      entity_ep_pii = entity_ep.pii
+#CCCC      # Check that it is an auto-associated item
+#CCCC      if ControllerHelper.sellable_pii(entity_ep_pii)
         no_items = false
 %>
 <%
@@ -42,19 +62,20 @@
        <tr>
 <%
         end # end if item_no_row == 0
-        item_ep_stack_arr.push(entity_ep)
+#CCCC        item_ep_stack_arr.push(entity_ep)
+        pii_virtual_stack_arr.push(entity_pii_virtual)
         item_no_row += 1
         item_no_row = item_no_row % items_per_row
-        pix_url = nil
-        qr_url = nil
-        if !entity_ep_pii.pii_property_set.nil?
-          pix_url = entity_ep_pii.pii_property_set.avatar.url(:thumb)
-          qr_url = entity_ep_pii.pii_property_set.qr.url(:thumb)
-        end # end if !entity_ep_pii.pii_property_set.nil?
+#CCCC        pix_url = nil
+#CCCC        qr_url = nil
+#CCCC        if !entity_ep_pii.pii_property_set.nil?
+#CCCC          pix_url = entity_ep_pii.pii_property_set.avatar.url(:thumb)
+#CCCC          qr_url = entity_ep_pii.pii_property_set.qr.url(:thumb)
+#CCCC        end # end if !entity_ep_pii.pii_property_set.nil?
 %>
          <td class='span-<%= item_span %>'>
-           <img height='<%= img_height %>' width='<%= img_width %>' src='<%= pix_url %>' />
-           <img height='<%= img_height %>' width='<%= img_width %>' src='<%= qr_url %>' />
+           <a href='<%= ControllerHelper.get_named_parm_from_formula(entity_pii_virtual.formula, PiiPropertySet::NAME_PARM_URL, "") %>'><img height='<%= img_height %>' width='<%= img_width %>' src='<%= entity_pii_virtual.thumbnail_url_data %>' /></a>
+           <img height='<%= img_height %>' width='<%= img_width %>' src='<%= entity_pii_virtual.thumbnail_qr_data %>' />
          </td>
 <%
         if item_no_row == 0
@@ -64,31 +85,34 @@
       </tr>
       <tr>
 <%
-          item_ep_stack_arr.each { |item_ep_elem|
-            pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
-            pii_virtuals = JSON.parse(pii_json)
-            # E.g., of pii_virtuals
-            # [{\"pii\"=>{\"threshold\"=>2, \"short_desc_data\"=>\"jersey\", \"pii_value\"=>\"28===jersey\", \"thumbnail_url_data\"=>\"/images/unknown.jpg\", \"mir_count\"=>0, \"formula\"=>\"15\", \"threshold_type\"=>\"recur\", \"thumbnail_qr_data\"=>\"http://s3.amazonaws.com/ncal-meantit/80dcdd8b00633e62c091d18c20fcab46fb4895e2.png?1314964833\"}}]
-            # We expect only one
-            pii_virtual = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+           pii_virtual_stack_arr.each { |pii_virtual|
+#CCCC          item_ep_stack_arr.each { |item_ep_elem|
+#CCCC            pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
+#CCCC            pii_virtuals = JSON.parse(pii_json)
+#CCCC            # E.g., of pii_virtuals
+#CCCC            # [{\"pii\"=>{\"threshold\"=>2, \"short_desc_data\"=>\"jersey\", \"pii_value\"=>\"28===jersey\", \"thumbnail_url_data\"=>\"/images/unknown.jpg\", \"mir_count\"=>0, \"formula\"=>\"15\", \"threshold_type\"=>\"recur\", \"thumbnail_qr_data\"=>\"http://s3.amazonaws.com/ncal-meantit/80dcdd8b00633e62c091d18c20fcab46fb4895e2.png?1314964833\"}}]
+#CCCC            # We expect only one
+#CCCC            pii_virtual_hash = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+#CCCC            pii_virtual = OpenStruct.new(pii_virtual_hash) if !pii_virtual_hash.nil?
 %>
         <td class='span-<%= item_span %>'>
-           SKU: <%= item_ep_elem.pii.pii_value %><br/>
-           Desc: <%= ControllerHelper.ai_for_endpoint(item_ep_elem, "") %><br/>
-           Price: <%= ControllerHelper.get_endpoint_price(item_ep_elem) %><br/>
-           Type: <%= pii_virtual["threshold_type"] %><br/>
-           Date: <%= time_ago_in_words(pii_virtual["after_date"]) %> ago<br/>
-           Target: <%= pii_virtual["mir_count"] %>/<%= pii_virtual["threshold"] %>
+           SKU: <%= pii_virtual.pii_value %><br/>
+           Desc: <%= pii_virtual.short_desc_data %><br/>
+           Price: <%= ControllerHelper.get_price_from_formula(pii_virtual.formula) %><br/>
+           Type: <%= pii_virtual.threshold_type %><br/>
+           Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
+           Target: <%= pii_virtual.mir_count %>/<%= pii_virtual.threshold %>
         </td>
 <%
-          } # end item_ep_stack_arr.each ...
+          } # end pii_virtual_stack_arr.each ...
 %>
       </tr>
 <%
-          item_ep_stack_arr = []
+#CCCC          item_ep_stack_arr = []
+          pii_virtual_stack_arr = []
         end # end if item_no_row == 0
-      end # end if !entity_ep.pii.nil?
-    } # end @entity.endPointseach ...
+#CCCC      end # end if !entity_ep.pii.nil?
+    } # end entity_endPoints.each ...
   end # end if @entity.nil?
   if !tr_closed
       # Close the row and add the description row
@@ -96,24 +120,27 @@
       </tr>
       <tr>
 <%
-        item_ep_stack_arr.each { |item_ep_elem|
-          pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
-          pii_virtuals = JSON.parse(pii_json)
-          # We expect only one
-          pii_virtual = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+        pii_virtual_stack_arr.each { |pii_virtual|
+#CCCC        item_ep_stack_arr.each { |item_ep_elem|
+#CCCC          pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(item_ep_elem.pii.pii_value)
+#CCCC          pii_virtuals = JSON.parse(pii_json)
+#CCCC          # We expect only one
+#CCCC            pii_virtual_hash = pii_virtuals[0]["pii"] if pii_virtuals.size > 0
+#CCCC            pii_virtual = OpenStruct.new(pii_virtual_hash) if !pii_virtual_hash.nil?
 %>
         <td class='span-<%= item_span %>'>
-           SKU: <%= item_ep_elem.pii.pii_value %><br/>
-           Desc: <%= ControllerHelper.ai_for_endpoint(item_ep_elem, "") %><br/>
-           Price: <%= ControllerHelper.get_endpoint_price(item_ep_elem) %><br/>
-           Target: <%= item_ep_elem.pii.pii_property_set.threshold %>
-           Type: <%= pii_virtual["threshold_type"] %><br/>
-           Date: <%= time_ago_in_words(pii_virtual["after_date"]) %> ago<br/>
-           Target: <%= pii_virtual["mir_count"]%>/<%= pii_virtual["threshold"] %>
+           SKU: <%= pii_virtual.pii_value %><br/>
+           Desc: <%= pii_virtual.short_desc_data  %><br/>
+           Price: <%= ControllerHelper.get_price_from_formula(pii_virtual.formula) %><br/>
+           Target: <%= pii_virtual.threshold %>
+           Type: <%= pii_virtual.threshold_type %><br/>
+           Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
+           Target: <%= pii_virtual.mir_count %>/<%= pii_virtual.threshold %>
         </td>
       </tr>
 <%
-        } # end item_ep_stack_arr.each ...
+#CCCC        } # end item_ep_stack_arr.each ...
+        } # end pii_virtual_stack_arr.each ...
   end # end if !tr_closed
 %>
     </tbody>

@@ -1,5 +1,13 @@
 require 'validators'
 class PiiPropertySet < ActiveRecord::Base
+  # IMPT: formula field contains mix of positional and named parms
+  # Thus far we use the first digit positional parm as price.
+  # All parms are delimited by DELIM.
+  # We can use the method +get_named_parm_from_formula+ in +ControllerHelper+
+  # The following are name parms we are using
+  # Refers to the full url of the item
+  NAME_PARM_URL = 'url'
+
   DELIM = ";"
 #20110813  include ActiveModel::Dirty
 

@@ -18,6 +18,8 @@ class Constants
   COUNT_ORDER_INPUT = "count_order"
   SQL_COUNT_ORDER_ASC = "asc"
   SQL_COUNT_ORDER_DESC = "desc"
+  SORT_FIELD_INPUT = "sort_field"
+  SORT_ORDER_INPUT = "sort_order"
 
   PAGINATE_BATCH_SIZE = 5
   MIN_PASSWORD_LEN = 6

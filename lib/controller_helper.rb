@@ -902,14 +902,44 @@ module ControllerHelper
    if !pii.nil?
      if !pii.pii_property_set.nil?
        formula = pii.pii_property_set.formula
-       if !formula.nil? and !formula.empty?
-         formula_match_arr = formula.match(/\d+/)
-         price = formula_match_arr[0] if !formula_match_arr.nil?
-       end # end if !formula.nil? and !formula.empty?
+       price = self.get_price_from_formula(formula)
      end # end if !pii.pii_property_set.nil?
    end # end if !pii.nil?
    price
   end # end def self.get_pii_price
+
+  def self.get_price_from_formula(formula)
+    price = nil
+    if !formula.nil? and !formula.empty?
+      formula_match_arr = formula.match(/\d+/)
+      price = formula_match_arr[0] if !formula_match_arr.nil?
+    end # end if !formula.nil? and !formula.empty?
+    price
+  end # end def self.get_price_from_formula
+
+  # Looks for +parm_name+ from formula string to get the value
+  def self.get_named_parm_from_formula(formula, parm_name, default_val=nil, logtag=nil)
+    val = default_val
+    if !formula.nil? and !formula.empty?
+      # We tried to use CGI.parse but there are issues since some
+      # parm values are also cgi-like parms, e.g., 
+      # parm1=http://shop.ccs.com/product/aaa?a=1&b=2&parm2=hello
+      # Is confusing since within parm1 itself there are & and =
+      formula_match_arr = formula.split(PiiPropertySet::DELIM)
+      # Return first parm that matches parm_name
+      formula_match_arr.each { |match_elem|
+        parm_arr = match_elem.split('=')
+        # Proper named parms have 2 elems, one on each side of '='
+        if parm_arr.size == 2
+          if parm_arr[0] == parm_name
+            val = parm_arr[1]
+            break
+          end # end if parm_arr[0] == parm_name
+        end # end if parm_arr.size == 2
+      } # end formula_match_arr.each ...
+    end # end if !formula.nil? and !formula.empty?
+    val
+  end # end def self.get_url_from_formula
   
   # +EndPoint+ may be sellable if it has pii that we can check
   # for sellability using +sellable_pii+
@@ -941,62 +971,95 @@ module ControllerHelper
     sellable
   end # end def self.sellable_pii
 
-    def self.add_virtual_methods_to_pii(pii_elem, pii_value)
-      class << pii_elem
-        def get_property_set_model
-          pii_id = Pii.find_by_pii_value(pii_value)
-          pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
-          pii_property_set_model
-        end
+  def self.add_virtual_methods_to_pii(pii_elem, pii_value)
+    class << pii_elem
+      def get_property_set_model
+        pii_id = Pii.find_by_pii_value(pii_value)
+        pii_property_set_model = PiiPropertySet.find_by_pii_id(pii_id)
+        pii_property_set_model
+      end
 
-        def threshold
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
-          return_value
-        end
+      def threshold
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.threshold if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def formula
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
-          return_value
-        end
+      def formula
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def short_desc_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
-          return_value
-        end
+      def short_desc_data
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.short_desc if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def long_desc_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
-          return_value
-        end
+      def long_desc_data
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.long_desc if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def thumbnail_url_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
-          return_value
-        end
+      def thumbnail_url_data
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.avatar.url(:thumb) if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def thumbnail_qr_data
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
-          return_value
-        end
+      def thumbnail_qr_data
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.qr.url(:thumb) if !@pii_property_set_model.nil?
+        return_value
+      end
 
-        def threshold_type
-          @pii_property_set_model ||= get_property_set_model
-          return_value = nil
-          return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
-          return_value
-        end
-     end # end class << pii_elem
-    end # end def self.add_virtual_methods_to_pii
+      def threshold_type
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.threshold_type if !@pii_property_set_model.nil?
+        return_value
+      end
+    end # end class << pii_elem
+  end # end def self.add_virtual_methods_to_pii
+
+  def self.sort_pii_virtuals(pii_virtuals, sort_field=nil, sort_order=nil, logtag=nil)
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sort_pii_virtuals:#{logtag}, pii_virtuals.inspect:#{pii_virtuals.inspect}")
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sort_pii_virtuals:#{logtag}, sort_order:#{sort_order}, sort_field:#{sort_field}")
+    if !ShopsController::SORT_ORDER_ENUM.include?(sort_order)
+      sort_order = ShopsController::SORT_ORDER_DESC
+    end # end if !ShopsController::SORT_ORDER_ENUM.include?(sort_order)
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sort_pii_virtuals:#{logtag}, corrected sort_order:#{sort_order}")
+    if ShopsController::SORT_FIELD_ENUM.include?(sort_field)
+      if sort_field == ShopsController::SORT_FIELD_DATE and sort_order == ShopsController::SORT_ORDER_ASC
+        Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sort_pii_virtuals:#{logtag}, sort based on date and asc")
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| a.after_date <=> b.after_date }
+      elsif sort_field == ShopsController::SORT_FIELD_DATE and sort_order == ShopsController::SORT_ORDER_DESC
+        Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sort_pii_virtuals:#{logtag}, sort based on date and desc")
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| b.after_date <=> a.after_date }
+      elsif sort_field == ShopsController::SORT_FIELD_PRICE and sort_order == ShopsController::SORT_ORDER_ASC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| ControllerHelper.get_price_from_formula(a.formula).to_i <=> ControllerHelper.get_price_from_formula(b.formula).to_i }
+      elsif sort_field == ShopsController::SORT_FIELD_PRICE and sort_order == ShopsController::SORT_ORDER_DESC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| ControllerHelper.get_price_from_formula(b.formula).to_i <=> ControllerHelper.get_price_from_formula(a.formula).to_i }
+      elsif sort_field == ShopsController::SORT_FIELD_GROUP_SIZE and sort_order == ShopsController::SORT_ORDER_ASC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| a.threshold.to_i <=> b.threshold.to_i }
+      elsif sort_field == ShopsController::SORT_FIELD_GROUP_SIZE and sort_order == ShopsController::SORT_ORDER_DESC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| b.threshold.to_i <=> a.threshold.to_i }
+      elsif sort_field == ShopsController::SORT_FIELD_NEAR_GOAL and sort_order == ShopsController::SORT_ORDER_ASC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| a.mir_count.to_f/a.threshold.to_f <=> b.mir_count.to_f/b.threshold.to_f }
+      elsif sort_field == ShopsController::SORT_FIELD_NEAR_GOAL and sort_order == ShopsController::SORT_ORDER_DESC
+        sorted_pii_virtuals = pii_virtuals.sort { |a,b| b.mir_count.to_f/b.threshold.to_f <=> a.mir_count.to_f/a.threshold.to_f }
+      end # end if ...
+    else
+      sorted_pii_virtuals = pii_virtuals
+    end # end if ShopsController::SORT_FIELD_ENUM.include?(pii_virtuals)
+    sorted_pii_virtuals
+  end # end def self.sort_pii_virtuals
 end # end module ControllerHelper
