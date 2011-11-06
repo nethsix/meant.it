@@ -1,5 +1,6 @@
 class Constants
   EMAIL_COST = 0.1
+  DEFAULT_CURRENCY = "USD"
 
   TITLE_STR = "title_str"
   EMAIL_VALUE_INPUT = "email"

@@ -608,11 +608,11 @@ module ControllerHelper
       else
         made_mir_count = 0
       end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date }]
+      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date, :price => self.get_price_from_formula(pps.formula), :currency => self.get_currency_from_formula(pps.formula) }]
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
       pii_to_json = made_pii.to_json
     else
-      pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date])
+      pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date, :price, :currency ])
     end # end if piis.nil? or piis.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
     pii_to_json
@@ -640,7 +640,7 @@ module ControllerHelper
     date_obj.strftime(datetime_output_format_str)
   end # end def self.validate_date
 
-  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, non_bill = true, logtag = nil)
+  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, status=StatusTypeValidator::STATUS_ACTIVE, non_bill=true, logtag=nil)
     mirs = nil
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, pii_value:#{pii_value}, message_type:#{message_type}, start_date:#{start_date}, end_date:#{end_date}")
     if start_date.nil? or start_date.empty?
@@ -665,6 +665,7 @@ module ControllerHelper
     end # end if end_date.is_a?(String)
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, validated_start_date:#{validated_start_date}, validated_end_date:#{validated_end_date}")
     mirs = MeantItRel.select("meant_it_rels.status, meant_it_rels.src_endpoint_id").joins("JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id").group("meant_it_rels.src_endpoint_id, meant_it_rels.status")
+    mirs = mirs.where(:status => status)
     mirs = mirs.where(:meant_it_rels => { :message_type => message_type }) if !message_type.nil? and !message_type.empty?
     mirs = mirs.where(:piis => { :pii_value => pii_value }) if !pii_value.nil? and !pii_value.empty?
     option_str_all = ControllerHelper.get_date_option_str(validated_start_date, validated_end_date, true, logtag)
@@ -761,7 +762,7 @@ module ControllerHelper
     contract_no
   end # end def self.gen_contract_no(pii_value, mir)
 
-  def self.get_latest_likers_by_pii_value(pii_value, logtag = nil)
+  def self.get_latest_likers_by_pii_value(pii_value, status=StatusTypeValidator::STATUS_ACTIVE, logtag = nil)
     likers = nil
     start_bill_date = nil
     end_bill_date = nil
@@ -783,7 +784,7 @@ module ControllerHelper
             Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
            raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
          end # end if pps.threshold_type
-         likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, true, logtag)
+         likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, StatusTypeValidator::STATUS_ACTIVE, true, logtag)
       else 
         Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set")
         raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set"
@@ -917,6 +918,15 @@ module ControllerHelper
     price
   end # end def self.get_price_from_formula
 
+  def self.get_currency_from_formula(formula)
+    currency = Constants::DEFAULT_CURRENCY
+    if !formula.nil? and !formula.empty?
+      formula_match_arr = formula.match(/^[A-Za-z]+/)
+      currency = formula_match_arr[0] if !formula_match_arr.nil?
+    end # end if !formula.nil? and !formula.empty?
+    currency
+  end # end def self.get_currency_from_formula
+
   # Looks for +parm_name+ from formula string to get the value
   def self.get_named_parm_from_formula(formula, parm_name, default_val=nil, logtag=nil)
     val = default_val
@@ -992,6 +1002,22 @@ module ControllerHelper
         return_value = @pii_property_set_model.formula if !@pii_property_set_model.nil?
         return_value
       end
+
+      def price
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        formula = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+        return_value = ControllerHelper.get_price_from_formula(formula)
+        return_value
+      end # end def price
+
+      def currency
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        formula = @pii_property_set_model.formula if !@pii_property_set_model.nil?
+        return_value = ControllerHelper.get_currency_from_formula(formula)
+        return_value
+      end # end def currency
 
       def short_desc_data
         @pii_property_set_model ||= get_property_set_model

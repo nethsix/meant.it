@@ -1,6 +1,7 @@
 MeantIt::Application.routes.draw do
 
   get "/shops/:id" => "shops#show"
+  get "/payments/:pay_id" => "payments#show"
 
 #  get "sessions/new"
   get "log_in" => "sessions#new", :as => "log_in"  

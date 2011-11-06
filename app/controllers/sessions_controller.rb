@@ -103,7 +103,7 @@ class SessionsController < ApplicationController
           # Get entity
           entity = bill_entry.email_bill.entity
           if current_entity != entity
-            logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold, Not authorized to send contract emails")
+            logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}, Not authorized to send contract emails")
             flash[:error] = "Not authorized to send contract emails"
           else
             # Set billing time first since we use to check

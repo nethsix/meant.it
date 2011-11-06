@@ -6,7 +6,7 @@ to communicate with meant.it using REST --->
   require 'constants'
   require 'validators'
   group_pii_val = params[Constants::PII_VALUE_INPUT]
-  # Use labu-tan by default
+  # Use labu-tan by default, i.e., 25===labutan
   group_pii_val ||= ENV['GROUP_PII']
 #  group_pii_val_match_arr = group_pii_val.match(/\d#{Constants::ENTITY_DOMAIN_MARKER}(.*)/)
 #  short_name = group_pii_val_match_arr[1] if group_pii_val_match_arr[1] != null
@@ -80,11 +80,12 @@ to communicate with meant.it using REST --->
                     jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
                     jQuery('#x_axis_3').text(threshold);
                     var formula = val.pii.formula;
-                    var first_number = formula.match(/\d+/)
-                    if (formula != null && first_number != null)
+                    var currency = val.pii.currency;
+                    var price = val.pii.price;
+                    if (price != null)
                     {
-                      jQuery('#cost_axis_3').text('$'+first_number);
-                    } // end if (formula.match(/\d+/))
+                      jQuery('#cost_axis_3').text(currency+price);
+                    } // end if (price != null)
                     var qr = val.pii.thumbnail_qr_data;
 //DEBUG alert('qr:'+qr);
                     // missing.png is the default url provided by paperclip

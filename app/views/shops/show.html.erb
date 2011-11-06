@@ -97,8 +97,7 @@
 %>
         <td class='span-<%= item_span %>'>
            SKU: <%= pii_virtual.pii_value %><br/>
-           Desc: <%= pii_virtual.short_desc_data %><br/>
-           Price: <%= ControllerHelper.get_price_from_formula(pii_virtual.formula) %><br/>
+           Item: <%= pii_virtual.short_desc_data %>, <%= pii_virtual.currency %><%= pii_virtual.price %><br/>
            Type: <%= pii_virtual.threshold_type %><br/>
            Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
            Target: <%= pii_virtual.mir_count %>/<%= pii_virtual.threshold %>
@@ -130,8 +129,7 @@
 %>
         <td class='span-<%= item_span %>'>
            SKU: <%= pii_virtual.pii_value %><br/>
-           Desc: <%= pii_virtual.short_desc_data  %><br/>
-           Price: <%= ControllerHelper.get_price_from_formula(pii_virtual.formula) %><br/>
+           Item: <%= pii_virtual.short_desc_data  %>, <%= pii_virtual.currency %><%= pii_virtual.price %><br/>
            Target: <%= pii_virtual.threshold %>
            Type: <%= pii_virtual.threshold_type %><br/>
            Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
