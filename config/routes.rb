@@ -145,6 +145,7 @@ MeantIt::Application.routes.draw do
   match "/apis.html" => "home#apis"
   match "/policy.html" => "home#policy"
   match "/campaigns/:name" => "home#campaigns"
+  match "/campaigns/:predir/:name" => "home#campaigns"
 
   # See how all your routes lay out with "rake routes"
 

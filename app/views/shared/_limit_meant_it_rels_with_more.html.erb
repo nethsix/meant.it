@@ -79,7 +79,9 @@
 %>
 <b>Latest <%= Constants::WEB_MAX_MEANTIT_IN %></b> <%= header_str %> <br/>
 <%
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:#{logtag}, query_hash.inspect:#{query_hash.inspect}")
   lastXdstMeantItRels= MeantItRel.where(query_hash).order("created_at DESC").limit(Constants::WEB_MAX_MEANTIT_IN+1)
+  Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:#{logtag}, lastXdstMeantItRels.inspect:#{lastXdstMeantItRels.inspect}")
 %>
   <% if !lastXdstMeantItRels.nil? and !lastXdstMeantItRels.empty? %>
     <ul><li>

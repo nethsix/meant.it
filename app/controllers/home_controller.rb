@@ -35,6 +35,11 @@ class HomeController < ApplicationController
 # Use this eventually when we have APIs for everything, i.e., call the
 # API from the page using JSON
 #CODE20111116    render "public/campaigns/#{params[:name]}", :layout => false
-    render "/home/campaigns/#{params[:name]}/#{params[:name]}", :layout => false
+p "!!!!!!params[:name]:#{params[:name]}!!!!!"
+    if !params[:predir].nil?
+      render "/home/campaigns/#{params[:predir]}/#{params[:name]}", :layout => false
+    else
+      render "/home/campaigns/#{params[:name]}/#{params[:name]}", :layout => false
+    end # end if params[:name].match(/^general/)
   end # end def campaigns
 end

@@ -373,6 +373,7 @@ class MeantItRelsController < ApplicationController
     respond_to do |format|
       format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
       format.xml  { render :xml => meantItRels }
+      format.json { render :json => meantItRels.to_json }
     end
   end # end def show_in_by_pii
 

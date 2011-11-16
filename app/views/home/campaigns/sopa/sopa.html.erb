@@ -8,13 +8,18 @@
 <![endif]-->
   <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
   <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<%
+  # Configurable variables
+  message_type = "protest"
+  pii_value = "sopa"
+%>
   <script>
     var TIMEOUT = 50000;
     function getJson()
     {
       jQuery.ajax({
           type: "GET",
-          url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=protest&pii_value_input=sopa",
+          url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=<%= message_type %>&pii_value_input=<%= pii_value %>",
           async: true, /* If set to non-async, browser shows page as "Loading.."*/
           cache: false,
           timeout:TIMEOUT, /* Timeout in ms */
@@ -78,7 +83,7 @@
               Send email using QR code
             </td>
             <td>
-              <img width='80' height='80' src='/images/sopa.png' />
+              <img width='80' height='80' src='/images/<%= pii_value %>.png' />
             </td>
           </tr>
           <tr>
@@ -91,10 +96,10 @@
           </tr>
           <tr>
             <td>
-              Send email to <strong>protest@meant.it</strong> with subject<br/>
+              Send email to <strong><%= message_type %>@meant.it</strong> with subject<br/>
             </td>
             <td class="verbatim-font">
-              <strong>:sopa ;</strong><em>your customized message</em><strong>;</strong> <em>zipcode</em> <em>state</em>
+              <strong>:<%= pii_value %> ;</strong><em>your customized message</em><strong>;</strong> <em>zipcode</em> <em>state</em>
             </td>
           </tr>
           <tr>
@@ -117,10 +122,10 @@
             </td>
           </tr>
 <%
-  pii = Pii.find_by_pii_value("sopa")
+  pii = Pii.find_by_pii_value(pii_value)
   endPoints = pii.endPoints
   ep_ids = endPoints.collect { |ep_elem| ep_elem.id }
-  meantItRels_arr = MeantItRel.where("message_type = 'protest' and dst_endpoint_id in (#{ep_ids.join(',')})").order("created_at desc")
+  meantItRels_arr = MeantItRel.where("message_type = '#{message_type}' and dst_endpoint_id in (#{ep_ids.join(',')})").order("created_at desc")
   # Limit the display
 #  meantItRels_limit_arr = meantItRels_arr.limit(Constants::WEB_MAIN_MAX_MEANTIT)
   test_num = 1
@@ -137,7 +142,7 @@
 %>
                 </li>
                 <li>
-                  <a href=''>More...</a>
+                  <a href='/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>'>More...</a>
                 </li>
               </ul>
 <%
@@ -163,3 +168,4 @@
     </div>
   </div>
 </body>
+</html>
