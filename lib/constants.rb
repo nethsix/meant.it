@@ -1,6 +1,15 @@
 class Constants
   EMAIL_COST = 0.1
   DEFAULT_CURRENCY = "USD"
+  CURRENCY_REGEX1 = "[A-Za-z]{3}"
+  CURREG1 = CURRENCY_REGEX1
+  CURRENCY_REGEX2 = "\\d+\\.*\\d*"
+  CURREG2 = CURRENCY_REGEX2
+
+  # Contract/Payment parms
+  SHA1_LEN = 48
+  CONTRACT_NO_LEN = 8 # in chars
+  CONTRACT_DELIM = '-'
 
   TITLE_STR = "title_str"
   EMAIL_VALUE_INPUT = "email"

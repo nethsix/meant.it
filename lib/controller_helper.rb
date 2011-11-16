@@ -224,8 +224,8 @@ module ControllerHelper
     if person.nil?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_person_by_email:#{logtag}, person find triggered exception, e.inspect:#{e.inspect}")
       # Use sql instead of couchdb
-#20111026WTF      person = EntityDatum.find_by_email(:email => email)
-      person = EntityDatum.find_by_email(email)
+      person = EntityDatum.find_by_email(:email => email)
+#20111111      person = EntityDatum.find_by_email(email)
     end # end if person.nil?
     person
   end # end def self.find_person_by_email
@@ -247,8 +247,8 @@ module ControllerHelper
       # Usually because couchdb is not there
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_person_by_email:#{logtag}, person find/create triggered exception, e.inspect:#{e.inspect}")
       # Use sql instead of couchdb
-#20111026WTF      new_person = EntityDatum.find_or_create_by_email(:email => email)
-      new_person = EntityDatum.find_or_create_by_email(email)
+      new_person = EntityDatum.find_or_create_by_email(:email => email)
+#20111111      new_person = EntityDatum.find_or_create_by_email(email)
    end # end find/create person
    new_person
   end # end def self.find_or_create_person_by_email
@@ -484,12 +484,16 @@ module ControllerHelper
   def self.find_or_create_sender_endPoint_and_pii(pii_value, pii_type, pii_hide=PiiHideTypeValidator::PII_HIDE_TRUE)
     logtag = ControllerHelper.gen_logtag
 #    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
-#20111026WTF    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(:pii_value => pii_value, :pii_type => pii_type, :pii_hide => pii_hide)
-    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
+    pii_cond = "found"
+    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(:pii_value => pii_value, :pii_type => pii_type, :pii_hide => pii_hide) do |pii_obj|
+      pii_cond = "created"
+    end # end Pii.find_or_create_by_pii_value ...
+#2011111WTF    pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(pii_value, pii_type, PiiHideTypeValidator::PII_HIDE_TRUE)
     if pii.nil? or pii.errors.any?
       Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.errors.inspect:#{pii.errors.inspect}")
     else
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, pii.inspect:#{pii.inspect}")
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, #{pii_cond} pii, pii_value:#{pii.pii_value}")
     end # end if pii.nil? or pii.errors.any?
     if !pii.nil?
       sender_endPoint = ControllerHelper.get_sender_endPoint_from_endPoints(pii.endPoints)
@@ -500,6 +504,9 @@ module ControllerHelper
         unless sender_endPoint.save
           Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, sender_endPoint.errors.inspect:#{sender_endPoint.errors.inspect}")
         end # end unless sender_endPoint.save
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, created sender_endPoint, sender_endPoint.inspect:#{sender_endPoint.inspect}")
+      else
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, found sender_endPoint, sender_endPoint.inspect:#{sender_endPoint.inspect}")
       end # end # end if sender_endPoint.nil?
     end # end if pii.nil?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_or_create_sender_endPoint_and_pii:#{logtag}, sender_endPoint.inspect:#{sender_endPoint.inspect}")
@@ -544,28 +551,29 @@ module ControllerHelper
     if !pii_value.nil? and !pii_value.empty?
       desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
       # Get the last bill date
-      pii = Pii.find_by_pii_value(pii_value)
+      after_date = self.get_bill_dates_by_pii_value(pii_value)
+#YYYY      pii = Pii.find_by_pii_value(pii_value)
 #20110813      if !pii.pii_property_set.nil? and !pii.pii_property_set.email_bill_entries.empty?
-      if !pii.pii_property_set.nil?
+#YYYY      if !pii.pii_property_set.nil?
 #20110806a        email_bill_entries = pii.pii_property_set.email_bill_entries.sort { |elem1, elem2|
 #20110806a          elem2.created_at <=> elem1.created_at
 #20110806a        } # end email_bill_entries.sort
 #20110806a        after_date = email_bill_entries[0].created_at
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii.pii_property_set.inspect:#{pii.pii_property_set.inspect}")
-        if pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-          after_date = pii.pii_property_set.active_date
-        elsif pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
-          after_date_obj = pii.pii_property_set.last_bill("ready_date")
-          if !after_date_obj.nil?
-            after_date = after_date_obj.ready_date
-          else
-            # No billing etc., yet so use current date
-            after_date = pii.pii_property_set.active_date
-          end # end if !after_date_obj.nil?
-        else
-           Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
-          raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
-        end # end if pps.threshold_type
+#YYYY        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii.pii_property_set.inspect:#{pii.pii_property_set.inspect}")
+#YYYY        if pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+#YYYY          after_date = pii.pii_property_set.active_date
+#YYYY        elsif pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
+#YYYY          after_date_obj = pii.pii_property_set.last_bill("ready_date")
+#YYYY          if !after_date_obj.nil?
+#YYYY            after_date = after_date_obj.ready_date
+#YYYY          else
+#YYYY            # No billing etc., yet so use current date
+#YYYY            after_date = pii.pii_property_set.active_date
+#YYYY          end # end if !after_date_obj.nil?
+#YYYY        else
+#YYYY           Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
+#YYYY          raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
+#YYYY        end # end if pps.threshold_type
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
         after_date = ControllerHelper.validate_date(after_date.to_s)
         pii_virtual = nil
@@ -574,7 +582,7 @@ module ControllerHelper
         else
           pii_virtual = desired_piis.where("meant_it_rels.email_bill_entry_id is NULL")
         end # end if !after_date.nil?
-      end # end if !pii.pii_property_set.nil? ...
+#YYYY      end # end if !pii.pii_property_set.nil? ...
 #DEBUG      ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '2011-08-05 11:12:20'") if after_date.nil?
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, setting pii_virtual with after_date.inspect:#{after_date.inspect}")
@@ -640,7 +648,8 @@ module ControllerHelper
     date_obj.strftime(datetime_output_format_str)
   end # end def self.validate_date
 
-  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, status=StatusTypeValidator::STATUS_ACTIVE, non_bill=true, logtag=nil)
+#20111106  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, status=StatusTypeValidator::STATUS_ACTIVE, non_bill=true, logtag=nil)
+  def self.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, message_type, start_date, end_date, status=StatusTypeValidator::STATUS_ACTIVE, uniq=true, non_bill=true, logtag=nil)
     mirs = nil
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, pii_value:#{pii_value}, message_type:#{message_type}, start_date:#{start_date}, end_date:#{end_date}")
     if start_date.nil? or start_date.empty?
@@ -664,7 +673,11 @@ module ControllerHelper
       raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, end_date:#{end_date} is invalid."
     end # end if end_date.is_a?(String)
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_meant_it_rels_by_pii_value_message_type_within_dates:#{logtag}, validated_start_date:#{validated_start_date}, validated_end_date:#{validated_end_date}")
-    mirs = MeantItRel.select("meant_it_rels.status, meant_it_rels.src_endpoint_id").joins("JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id").group("meant_it_rels.src_endpoint_id, meant_it_rels.status")
+    if uniq
+      mirs = MeantItRel.select("meant_it_rels.status, meant_it_rels.src_endpoint_id").joins("JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id").group("meant_it_rels.src_endpoint_id, meant_it_rels.status")
+    else
+      mirs = MeantItRel.select("meant_it_rels.status, meant_it_rels.src_endpoint_id").joins("JOIN end_points on meant_it_rels.dst_endpoint_id = end_points.id", "JOIN piis on end_points.pii_id = piis.id")
+    end # end if uniq
     mirs = mirs.where(:status => status)
     mirs = mirs.where(:meant_it_rels => { :message_type => message_type }) if !message_type.nil? and !message_type.empty?
     mirs = mirs.where(:piis => { :pii_value => pii_value }) if !pii_value.nil? and !pii_value.empty?
@@ -745,7 +758,16 @@ module ControllerHelper
     likers
   end # end def self.get_likers_by_bill_id
 
-  def self.gen_contract_no(pii_value, liker_endpoint, logtag = nil)
+  # Contract (payment) is tied to and meant_it_rel.id
+  # NOTE: we do not want to corrupt
+  # mir by adding a field for contract no./payment id, etc since
+  # it already has association with email_bill_entry.id
+  # From mir, we can get email_bill_entry.
+  # We can also get dest_pii, src_ep, entity of pii 
+  # thus entity'salt to verify contract no.
+#20111106  def self.gen_contract_no(pii_value, liker_endpoint, logtag = nil)
+  def self.gen_contract_no(pii_value, mir_elem, logtag = nil)
+    liker_endpoint = mir_elem.src_endpoint
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:gen_contract_no:#{logtag}, pii_value:#{pii_value}, liker_endpoint.inspect:#{liker_endpoint.inspect}")
     liker_endpoint_id = liker_endpoint.id
     entity_no_match_arr = pii_value.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}/)
@@ -757,44 +779,111 @@ module ControllerHelper
     end # end if entity.nil?
     salt = entity.password_salt
     combo_str = pii_value.to_s+liker_endpoint_id.to_s
-    contract_no = BCrypt::Engine.hash_secret(combo_str, salt)  
+#20111106    contract_no = BCrypt::Engine.hash_secret(combo_str, salt)
+    contract_no = mir_elem.id + Constants::CONTRACT_DELIM + Digest::SHA1.hexdigest(combo_str+salt)[SHA1_LEN-(CONTRACT_NO_LEN*2)..SHA1_LEN]
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:gen_contract_no:#{logtag}, pii_value:#{pii_value}, liker_endpoint_id:#{liker_endpoint_id}, contract_no:#{contract_no}")
     contract_no
   end # end def self.gen_contract_no(pii_value, mir)
 
-  def self.get_latest_likers_by_pii_value(pii_value, status=StatusTypeValidator::STATUS_ACTIVE, logtag = nil)
-    likers = nil
-    start_bill_date = nil
-    end_bill_date = nil
+  def self.verify_contract_no(contract_no)
+    contract_no_match_arr = contract_no.match(/^(\d+)-/)
+    fail_str = nil
+    if !contract_no_match_arr.nil?
+      fail_str = "Invalid contract_no:#{contract_no}, missing '-'"
+    else
+      mir_id = contract_no_match_arr[1]
+      mir_elem = MeantItRel.find(mir_id)
+      if mir_elem.nil?
+       fail_str = "meant_it_rel:#{mir_id} does not exist"
+      else
+        # Get email_bill_entry
+        ebe = mir_elem.email_bill_entry
+        likee_pii_value = ebe.pii_property_set.pii.pii_value
+        # Calculate contract number
+        calc_contract_no = self.gen_contract_no(likee_pii_value, mir_elem)
+        if calc_contract_no != contract_no
+          fail_str = "invalid contract_no:#{contract_no}, failed checksum"
+        end # end if calc_contract_no != contract_no
+      end # end if mir_elem.nil?
+    end # end if !contract_no_match_arr.nil?
+    if !fail_str.nil?
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:verify_contract_no:#{logtag}, #{fail_str}")
+      raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:verify_contract_no:#{logtag}, #{fail_str}"
+    end # end if !fail_str.nil?
+    return true
+  end # end def self.verify_contract_no(contract_no)
+
+  def self.get_bill_dates_by_pii_value(pii_value, logtag=nil)
     pii = Pii.find_by_pii_value(pii_value)
+    start_bill_date = self.get_bill_dates_by_pii(pii)
+    start_bill_date
+  end # end def self.get_bill_dates_by_pii_value
+
+  def self.get_bill_dates_by_pii(pii, logtag=nil)
+    start_bill_date = nil
     if !pii.nil?
       pps = pii.pii_property_set
       if !pps.nil?
-         if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-           start_bill_date = pps.active_date
-         elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
-           start_bill = pps.last_bill("ready_date")
-           if !start_bill.nil?
-             start_bill_date = start_bill.ready_date
-           else
-             # No billing etc., yet so use current date
-             start_bill_date = pii.pii_property_set.active_date
-           end # end if !after_date_obj.nil?
-         else
-            Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
-           raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
-         end # end if pps.threshold_type
-         likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, StatusTypeValidator::STATUS_ACTIVE, true, logtag)
+        if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+          start_bill_date = pps.active_date
+        elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
+          start_bill = pps.last_bill("ready_date")
+          if !start_bill.nil?
+            start_bill_date = start_bill.ready_date
+          else
+            # No billing etc., yet so use current date
+            start_bill_date = pii.pii_property_set.active_date
+          end # end if !after_date_obj.nil?
+        else
+           Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
+          raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
+        end # end if pps.threshold_type
       else 
-        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set")
-        raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set"
+        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pii_value:#{pii_value} has no pii_property_set")
+        raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pii_value:#{pii_value} has no pii_property_set"
       end # end if !pps.nil?
     else
-      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, no such Pii for pii_value:#{pii_value}")
-      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, no such Pii for pii_value:#{pii_value}"
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, no such Pii for pii_value:#{pii_value}")
+      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, no such Pii for pii_value:#{pii_value}"
     end # end if !pii.nil? and !pii.empty?
+    start_bill_date
+  end # end def self.get_bill_dates_by_pii
+
+  def self.get_latest_likers_by_pii_value(pii_value, status=StatusTypeValidator::STATUS_ACTIVE, uniq=true, logtag=nil)
+    likers = nil
+    start_bill_date = nil
+    end_bill_date = nil
+#XXXX    pii = Pii.find_by_pii_value(pii_value)
+#XXXX    if !pii.nil?
+#XXXX      pps = pii.pii_property_set
+#XXXX      if !pps.nil?
+#XXXX        if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+#XXXX           start_bill_date = pps.active_date
+#XXXX         elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
+#XXXX           start_bill = pps.last_bill("ready_date")
+#XXXX           if !start_bill.nil?
+#XXXX             start_bill_date = start_bill.ready_date
+#XXXX           else
+#XXXX             # No billing etc., yet so use current date
+#XXXX             start_bill_date = pii.pii_property_set.active_date
+#XXXX           end # end if !after_date_obj.nil?
+#XXXX         else
+#XXXX            Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
+#XXXX           raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
+#XXXX         end # end if pps.threshold_type
+#XXXX         likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, StatusTypeValidator::STATUS_ACTIVE, uniq, true, logtag)
+#XXXX      else 
+#XXXX        Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set")
+#XXXX        raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, pii_value:#{pii_value} has no pii_property_set"
+#XXXX      end # end if !pps.nil?
+#XXXX    else
+#XXXX      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, no such Pii for pii_value:#{pii_value}")
+#XXXX      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_latest_likers_by_pii_value:#{logtag}, no such Pii for pii_value:#{pii_value}"
+#XXXX    end # end if !pii.nil? and !pii.empty?
+    start_bill_date = self.get_bill_dates_by_pii_value(pii_value)
+    likers = ControllerHelper.get_meant_it_rels_by_pii_value_message_type_within_dates(pii_value, MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE, start_bill_date.to_s, end_bill_date.to_s, StatusTypeValidator::STATUS_ACTIVE, uniq, true, logtag)
     return likers, start_bill_date, end_bill_date
-  end # end def self.get_latest_likers_bypii_value(pii_value)
+  end # end def self.get_latest_likers_by_pii_value
 
   def self.get_date_option_str(start_date, end_date, non_bill = true, logtag = nil)
     option_str_all = nil
@@ -958,6 +1047,7 @@ module ControllerHelper
   def self.sellable_endpoint(ep, logtag=nil)
     sellable = false
     if !ep.nil? and !ep.pii.nil?
+      Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sellable_endpoint:#{logtag}, ep.pii.inspect:#{ep.pii.inspect}")
       sellable = self.sellable_pii(ep.pii, logtag)
     end # end if !ep.nil? and !ep.pii.nil?
     sellable
@@ -972,12 +1062,17 @@ module ControllerHelper
     sellable = false
     if !pii.nil?
       pii_pps = pii.pii_property_set
+      Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sellable_pii:#{logtag}, pii_pps.inspect:#{pii_pps.inspect}")
       if pii.pii_value.match(/#{Constants::ENTITY_DOMAIN_MARKER}/) and !pii_pps.nil?
-        if !pii_pps.threshold.nil? and !self.get_pii_price(pii).nil? and pii_pps.status == StatusTypeValidator::STATUS_ACTIVE
+        # NOTE: we do not care about pii_price 'cos pii maybe to meet a
+        # value, i.e., price is nil but there is a threshold
+#20111112        if !pii_pps.threshold.nil? and !self.get_pii_price(pii).nil? and pii_pps.status == StatusTypeValidator::STATUS_ACTIVE
+        if !pii_pps.threshold.nil? and !pii_pps.threshold_type.nil? and pii_pps.status == StatusTypeValidator::STATUS_ACTIVE and !pii_pps.value_type.nil?
           sellable = true
         end # end if !pii_pps.threshold.nil? and ...
       end # end if !pii_pps.nil?
     end # end if !pii.nil?
+    Rails.logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sellable_pii:#{logtag}, sellable:#{sellable}")
     sellable
   end # end def self.sellable_pii
 
@@ -1088,4 +1183,168 @@ module ControllerHelper
     end # end if ShopsController::SORT_FIELD_ENUM.include?(pii_virtuals)
     sorted_pii_virtuals
   end # end def self.sort_pii_virtuals
+
+  
+  def self.get_entity_no_from_pii(pii, logtag=nil)
+    entity_no = nil
+    if !pii.nil?
+      self.get_entity_no_from_pii_value(pii.pii_value)
+    end # end if !pii.nil?
+    entity_no
+  end # end def self.get_entity_no_from_pii
+
+  def self.get_entity_no_from_pii_value(pii_value, logtag=nil)
+    entity_no = nil
+    if !pii_value.nil?
+      entity_no_match_arr = pii_value.match(/(\d+)#{Constants::ENTITY_DOMAIN_MARKER}/)
+      entity_no = entity_no_match_arr[1] if !entity_no_match_arr.nil?
+    end # end if !pii_value.nil?
+    entity_no
+  end # end def self.get_entity_no_from_pii_value
+
+  # Given a string extract all the currency within
+  # Return +Array+ with currency with 3-digit code, nil if +str+ provided is nil
+  def self.get_currency_arr_from_str(str, logtag=nil)
+    currency_arr = nil
+    if !str.nil?
+      # Extract words with preceded by '$' or 3 letter codes
+      currency_arr = str.scan(/#{Constants::CURREG1}#{Constants::CURREG2}/)
+    end # end if !str.nil?
+    currency_arr
+  end # end def self.get_currency_arr_from_str
+
+  def self.convert_currency(from_currency_val, to_currency, logtag=nil)
+    from_currency = self.get_currency_code(from_currency_val)
+    # Get the conversion rate table from somewhere
+    Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:convert_currency:#{logtag}, no @rate_table_hash yet!")
+    raise Exception, "no @rate_table_hash yet!"
+    rate = @rate_table_hash[from_currency][to_currency]
+    # For now we don't do conversion, we throw error
+    new_currency = from_currency_vale*rate
+    new_currency = to_currency + new_currency
+    new_currency
+  end # end def self.convert_currency
+
+  # Given a currency, e.g., SGD300.00, returns the 3-digit
+  # currency code
+  # Return +String+
+  def self.get_currency_code(currency, logtag=nil)
+    currency_code = nil
+    if currency.class == String
+      currency_code_match = currency.match(/^#{Constants::CURREG1}/)
+      currency_code = currency_code_match.to_s if !currency_code_match.nil?
+    elsif currency.class == Integer or currency.class == Fixnum
+      # It's ok just let currency_code be nil
+    else
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code:#{logtag}, not a valid currency or number, currency:#{currency}, currency.class:#{currency.class} must be String, Fixnum or Integer")
+      raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code:#{logtag}, not a valid currency or number, currency:#{currency}, currency.class:#{currency.class} must be String, Fixnum or Integer"
+    end # end if currency.class == String
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code:#{logtag}, currency:#{currency}, currency_code:#{currency_code}")
+    currency_code
+  end # end def self.get_currency_code
+
+  # Given a currency, e.g., SGD300.00, returns the 3-digit
+  # currency code and value, i.e., SGD, and 300.00
+  # Return +[String, Float]+
+  def self.get_currency_code_and_val(currency, logtag=nil)
+    curr_code = nil
+    curr_val = nil
+    if currency.class == Fixnum or currency.class == Integer or currency.class == Float
+      curr_val = currency.to_f
+    elsif currency.class == String
+      currency_str = currency.strip
+      currency_match_arr = currency_str.match(/^(#{Constants::CURREG1})(#{Constants::CURREG2})/)
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, currency_match_arr.inspect:#{currency_match_arr.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, currency_match_arr.nil?:#{currency_match_arr.nil?}")
+      if currency_match_arr.nil?
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, FUCKOFF!!!")
+        currency_match_arr = currency.match(/^(#{Constants::CURREG2})/)
+        if !currency_match_arr.nil?
+          curr_val = currency_match_arr[1]
+        else
+          Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, not a valid currency or number, currency:#{currency}")
+          raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, not a valid currency or number, currency:#{currency}"
+        end # end if !currency_match_arr.nil?
+      else
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, FUCKOFFF222!!!")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, HERE, curr_code:#{curr_code}, curr_val:#{curr_val}")
+        curr_code = currency_match_arr[1].to_s
+        curr_val = currency_match_arr[2].to_f
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, HERE, curr_code:#{curr_code}, curr_val:#{curr_val}")
+      end # end if currency_match_arr.nil?
+    else
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, not a valid currency or number, currency:#{currency}, currency.class:#{currency.class} must be String, Fixnum, Integer")
+    end # end if currency.class == Fixnum or currency.class == Integer
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_currency_code_and_val:#{logtag}, currency:#{currency}, curr_code:#{curr_code}, curr_val:#{curr_val}")
+    [curr_code, curr_val]
+  end # end def self.get_currency_code_and_val
+
+  # +:arr:+:: arr containing all the currency values preceded by 3-digit code
+  # +:base_curr:+:: the final result of all currency operations. Defaults to Constants::DEFAULT_CURRENCY
+  # +:result_init:+:: the starting value.  Defaults to 0.  If not 3-digit code then use the 3-digit code in arr. Otherwise its 3-digit code becomes the +base_currr+
+  # +:convert:+:: if false then +Exception+ is raised when operations is performed on different currencies.
+  # Return the result in currency with 3-digit code, or nil if +arr+ is nil
+  def self.currency_op(arr, base_curr=nil, result_init=0, convert=false, logtag=nil)
+    Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, arr.inspect:#{arr.inspect}, base_curr:#{base_curr}, result_init:#{result_init}, convert:#{convert}")
+    result_str = nil
+    if !arr.nil? and !arr.empty?
+      if base_curr.nil?
+        base_curr = self.get_currency_code(result_init)
+        base_curr ||= self.get_currency_code(arr[0], logtag)
+      end # end if base_curr.nil?
+      result_curr_code, result = self.get_currency_code_and_val(result_init)
+      # Check that currency is the same before performing operation
+      arr.each { |elem|
+        elem_curr = self.get_currency_code(elem)
+        if !convert and elem_curr != base_curr
+          Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, convert:#{convert} but elem:#{elem}, elem_curr:#{elem_curr} is not same as base_curr:#{base_curr}")
+          raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:currency_op:#{logtag}, convert:#{convert} but elem:#{elem}, elem_curr:#{elem_curr} is not same as base_curr:#{base_curr}"
+        elsif elem_curr != base_curr
+          new_elem = self.convert_currency(elem, base_curr, logtag)
+        else
+          new_elem = elem
+        end # end if !convert and self.get_currency_code(elem) != base_curr
+        # Clean new_elem
+        new_elem = self.get_currency_code_and_val(new_elem)[1]
+        result = yield(result, new_elem)
+      } # end arr.each ...
+      result_str = base_curr + sprintf('%.2f', result)
+    end # end if !arr.nil?
+    result_str 
+  end # end def self.currency_op
+
+  # +:str:+:: contains the string will all currency we want to add
+  # Return the result in currency with 3-digit code
+  def self.sum_currency_in_str(str, default_value=nil, convert=false, logtag=nil)
+    Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:sum_currency_in_str:#{logtag}, str:#{str}, default_value:#{default_value}, convert:#{convert}")
+    currency_arr = self.get_currency_arr_from_str(str)
+    sum_value = self.currency_op(currency_arr, nil, 0, convert) { |res, elem| res.to_f + elem.to_f } 
+    sum_value ||= default_value
+    sum_value
+  end # end def self.sum_currency_in_str
+
+  # +:main_str:+:: contains the string will all currency we want to add
+  # +:subtract_str:+:: contains the string will all currency we want to subtract from +main_str+
+  # Return the result in currency with 3-digit code
+  def self.subtract_currency_in_str(main_str, subtract_str, default_value=nil, convert=false, logtag=nil)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:subtract_currency_in_str:#{logtag}, main_str:#{main_str}, subtract_str:#{subtract_str}")
+    main_str_value = self.sum_currency_in_str(main_str, 0)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:subtract_currency_in_str:#{logtag}, main_str_value:#{main_str_value}")
+    currency_arr = self.get_currency_arr_from_str(subtract_str)
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:subtract_currency_in_str:#{logtag}, currency_arr.inspect:#{currency_arr.inspect}")
+    value = self.currency_op(currency_arr, nil, main_str_value, convert) { |res, elem| res.to_f - elem.to_f } 
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:subtract_currency_in_str:#{logtag}, value:#{value}")
+    value ||= default_value
+    value
+  end # end def self.subtract_currency_in_str
+
+  # Get the inbound_email text from inbound_email active record, i.e., 
+  # get from subject, if not then get from body_text
+  def self.get_text_from_inbound_email(inbound_email)
+    orig_msg = inbound_email.subject
+    if orig_msg.nil? or orig_msg.empty?
+      orig_msg = inbound_email.body_text
+    end # end if orig_msg.nil? or orig_msg.empty?
+    orig_msg
+  end # end def self.get_text_from_inbound_email
 end # end module ControllerHelper

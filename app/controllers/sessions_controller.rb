@@ -126,7 +126,8 @@ class SessionsController < ApplicationController
                   if !liker_email.nil? and !liker_email.empty?
                     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}, send email contract to liker_email:#{liker_email}")
 #DEBUG                    UserMailer.contract_mail(pii_value, liker_email, ep_elem).deliver if liker_email.match(/aimless/)
-                    UserMailer.contract_mail(pii_value, liker_email, ep_elem).deliver
+#20111106                    UserMailer.contract_mail(pii_value, liker_email, ep_elem).deliver
+                    UserMailer.contract_mail(pii_value, mir_elem).deliver
                     email_count += 1
                   else
                     logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}, ep_elem's does not have pii.pii_value, liker_person.inspect:#{liker_person.inspect}")

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111016031155) do
+ActiveRecord::Schema.define(:version => 20111113063740) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -27,6 +27,10 @@ ActiveRecord::Schema.define(:version => 20111016031155) do
     t.datetime "updated_at"
     t.datetime "ready_date"
     t.datetime "billed_date"
+    t.float    "qty"
+    t.string   "currency"
+    t.float    "price_final"
+    t.float    "threshold_final"
   end
 
   create_table "email_bills", :force => true do |t|
@@ -208,6 +212,8 @@ ActiveRecord::Schema.define(:version => 20111016031155) do
     t.string   "qr_content_type"
     t.integer  "qr_file_size"
     t.datetime "qr_updated_at"
+    t.string   "value_type",          :null => false
+    t.string   "currency"
   end
 
   create_table "piis", :force => true do |t|

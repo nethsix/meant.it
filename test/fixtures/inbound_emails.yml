@@ -101,7 +101,56 @@ anonymous_inbound_email_from_web_page:
 auto_entity_domain:
   headers: <%= headers.to_s %>
   envelope: <%= envelope.to_s %>
-  body_text: ':1===playboy'
+  body_text: ':1===playcat'
   to: like@meant.it
   from: kuromi_papa@sanrio.com
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===sanrio_store SGD800'
+  to: like@meant.it
+  from: 'mama 11 <mama11@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===sanrio_store SGD200'
+  to: like@meant.it
+  from: 'mama 12 <mama12@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===sanrio_store SGD1.50'
+  to: like@meant.it
+  from: 'mama 13 <mama13@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===hello_kitty'
+  to: like@meant.it
+  from: 'mama 11 <mama11@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email_buy:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===hello_kitty'
+  to: like@meant.it
+  from: 'mama 12 <mama12@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email_buy2:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':1===hello_kitty'
+  to: like@meant.it
+  from: 'mama 13 <mama13@gmail.com>'
+  attachment_count: 0
+nick_n_xxx_y_non_sellable_yyy_n_tags_y_currency_sender_idable_inbound_email:
+  headers: <%= headers.to_s %>
+  envelope: <%= envelope.to_s %>
+  body_text: ':hello_doggy SGD800'
+  to: protests@meant.it
+  from: 'mama 11 <mama11@gmail.com>'
   attachment_count: 0

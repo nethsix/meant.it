@@ -8,14 +8,34 @@
       <thead>
         <tr>
           <th>
-            Retrieve Unique Sender for Message Type
+            Retrieve Unique Sender for Message Type, Pii With Limit, Order control
           </th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>
-            http://meant.it/piis/show_by_message_type_uniq_sender_count.json?message_type_input=<b><i>&lt;meant.it type&gt;</i></b>
+            Base Url: 
+            <ul>
+              <li>
+                http://meant.it/piis/show_by_message_type_uniq_sender_count.json<br/>
+              </li>
+            </ul>
+            Url Params:
+            <ul>
+              <li>
+                message_type_input=<b><i>&lt;meant.it type&gt;</i></b>
+              </li>
+              <li>
+                pii_value_input=<b><i>&lt;pii value&gt;</i></b>
+              </li>
+              <li>
+                count_order=<b><i>&lt;chronological order of records&gt;</i></b>
+              </li>
+              <li>
+                rec_limit=<b><i>&lt;number of records&gt;</i></b>
+              </li>
+            </ul>
           </td>
         </tr>
         <tr>
@@ -25,10 +45,22 @@
         </tr>
       </tbody>
     </table>
-    Retrieves all unique senders who sent to like@meant.it
     <ul>
       <li>
-        http://meant.it/piis/show_by_message_type_uniq_sender_count.json?message_type_input=<b><i>like</i></b>
+        Retrieves all unique senders who sent to <b>like</b>@meant.it
+        <ul>
+          <li>
+            http://meant.it/piis/show_by_message_type_uniq_sender_count.json?message_type_input=<b><i>like</i></b>
+          </li>
+        </ul>
+      </li>
+      <li>
+        Retrieves the <b>latest 5</b> entries related to <b>'hello_kitty'</b>
+        <ul>
+          <li>
+            http://meant.it/piis/show_by_message_type_uniq_sender_count.json?pii_value_input=<b><i>hello_kitty</i></b>&count_order=<b><i>desc</i></b>&rec_limit=<b><i>5</i></b>
+          </li>
+        </ul>
       </li>
     </ul>
     <table border="0" cellspacing="0" cellpadding="0">

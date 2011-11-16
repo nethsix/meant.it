@@ -30,4 +30,11 @@ class HomeController < ApplicationController
   def group_diy
     render "group_diy", :layout => false
   end
+
+  def campaigns
+# Use this eventually when we have APIs for everything, i.e., call the
+# API from the page using JSON
+#CODE20111116    render "public/campaigns/#{params[:name]}", :layout => false
+    render "/home/campaigns/#{params[:name]}/#{params[:name]}", :layout => false
+  end # end def campaigns
 end

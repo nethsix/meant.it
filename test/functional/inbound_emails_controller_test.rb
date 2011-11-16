@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'validators'
 
 class InboundEmailsControllerTest < ActionController::TestCase
   setup do
@@ -842,6 +843,946 @@ p "#AAAAAAA after body_text:#{body_text}"
     email_elem = inbound_emails(:auto_entity_domain)
     common_code(email_elem, nil)
   end # end test "auto entity domain"
+
+  test "sellable_pii" do
+    # Test email_bill_entry created if sellable
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create the pii_property_set and fill in
+    hk_pii.pii_property_set = PiiPropertySet.create
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "pii with default pii_property_set is also not sellable since some attributes are nil")
+    # Now fill in the necessary properties to make pii sellable
+    hk_pii.pii_property_set.threshold = 15
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with pii_property that has required fields filled in is sellable")
+    # Non active pii are not sellable
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_INACTIVE
+    hk_pii.pii_property_set.save
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "pii with pii_property status set to inactive is not sellable")
+    # Pii whose value is not marked by ENTITY_DOMAIN_MARKER are not sellable
+    email_elem = inbound_emails(:nick_n_xxx_y_non_sellable_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    post :create, :inbound_email => email_elem.attributes
+    hd_pii = Pii.find_by_pii_value("hello_doggy")
+    hd_pii.pii_property_set = PiiPropertySet.create
+    hd_pii.pii_property_set.threshold = 15
+    hd_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    assert_equal(false, ControllerHelper.sellable_pii(hd_pii), "pii with pii_value without ENTITY_DOMAIN_MARKER:#{Constants::ENTITY_DOMAIN_MARKER} is not sellable")
+  end # end test "sellable_pii" do
+
+  test "email_bill_entry value_type_value_uniq but no currency specified" do
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.threshold = 15
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 0], # Same tag, i.e., xxx of xxx@meant.it
+      ['EndPointTagRel.count', 0],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    # Check the value of email_bill_entry.qty
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    assert_equal(0.to_f, hk_pii_email_bill_entries[0].qty)
+    # If a same email is resubmitted
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 0], # Same tag, i.e., xxx of xxx@meant.it
+      ['EndPointTagRel.count', 0],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    assert_equal(0.to_f, hk_pii_email_bill_entries[0].qty)
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_no_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 0], # Same tag, i.e., xxx of xxx@meant.it
+      ['EndPointTagRel.count', 0],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    assert_equal(0.to_f, hk_pii_email_bill_entries[0].qty)
+  end # end test "email_bill_entry value_type_value_uniq but no currency specified" do
+
+  test "email_bill_entry value_type_value_uniq" do
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = "SGD"
+    hk_pii.pii_property_set.threshold = 1500
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    sum_currency = ControllerHelper.sum_currency_in_str(input_str)
+    sum_curr_code, sum_val = ControllerHelper.get_currency_code_and_val(sum_currency)
+    assert_equal(sum_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(sum_curr_code, hk_pii_email_bill_entries[0].currency)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    new_curr_f = new_curr_curr_val.to_f + 1.0
+    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Still one entry since the sender is same 
+    # and value_type is VALUE_TYPE_VALUE_UNIQ
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    # The newer value will be used
+    assert_equal(new_curr_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag because of new currency
+      ['EndPointTagRel.count', 1],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Increase in mirs in email_bill_entry because sender is different
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text} #{new_curr_str}")
+    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
+    assert_equal(new_curr_2_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(new_curr_2_curr_code, hk_pii_email_bill_entries[0].currency)
+  end # end test "email_bill_entry value_type_value_uniq" do
+
+  test "email_bill_entry value_type_count_uniq" do
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = nil
+    hk_pii.pii_property_set.threshold = 1500
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    assert_equal(1.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    new_curr_f = new_curr_curr_val.to_f + 1.0
+    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Still one entry since the sender is same 
+    # and value_type is VALUE_TYPE_VALUE_UNIQ
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    # Count is still one since sender is the same
+    assert_equal(1.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag because of new currency
+      ['EndPointTagRel.count', 1],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Increase in mirs in email_bill_entry because sender is different
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text} #{new_curr_str}")
+    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
+    # The new count is two because the new inbound_email is from different sender
+    assert_equal(2.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+  end # end test "email_bill_entry value_type_count_uniq" do
+
+  test "email_bill_entry value_type_value" do
+    sum_thus_far_curr_val = 0
+    sum_thus_far_curr_code = nil
+    sum_thus_far_str = nil
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = "SGD"
+    hk_pii.pii_property_set.threshold = 1500
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
+    sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
+    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(sum_thus_far_curr_code, hk_pii_email_bill_entries[0].currency)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    new_curr_f = new_curr_curr_val.to_f + 1.0
+    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Add one entry even tho' the sender is same 
+    # since value_type is VALUE_TYPE_VALUE
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    # The sum of first email and second email value will be used
+    sum_thus_far_curr_val += new_curr_f
+    assert_equal(sum_thus_far_curr_val, hk_pii_email_bill_entries[0].qty)
+    # Increase in the number of mirs
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    # The currency code of first email and second email value are the same
+    assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
+    assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag because of new currency
+      ['EndPointTagRel.count', 1],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Increase in mirs in email_bill_entry because sender is different
+    assert_equal(3, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text}")
+    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
+    sum_thus_far_curr_val += new_curr_2_curr_val
+    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(new_curr_2_curr_code, hk_pii_email_bill_entries[0].currency)
+  end # end test "email_bill_entry value_type_value" do
+
+  test "email_bill_entry value_type_count" do
+    sum_thus_far_curr_val = 0
+    sum_thus_far_curr_code = nil
+    sum_thus_far_str = nil
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = nil
+    hk_pii.pii_property_set.threshold = 1500
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_COUNT
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
+    sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
+    assert_equal(1.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    new_curr_f = new_curr_curr_val.to_f + 1.0
+    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Add one entry even tho' the sender is same 
+    # since value_type is VALUE_TYPE_VALUE
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    # The sum is not important, only the count on meant_it_rels
+    sum_thus_far_curr_val += new_curr_f
+    assert_equal(2.to_f, hk_pii_email_bill_entries[0].qty)
+    # Increase in the number of mirs
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    # The currency code of first email and second email value are the same
+    assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag because of new currency
+      ['EndPointTagRel.count', 1],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Increase in mirs in email_bill_entry because sender is different
+    assert_equal(3, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text}")
+    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
+    sum_thus_far_curr_val += new_curr_2_curr_val
+    assert_equal(3.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_nil(hk_pii_email_bill_entries[0].currency)
+  end # end test "email_bill_entry value_type_count" do
+
+  # The currency in pii_property_set.threshold does not match
+  # with the one in meant_it_rel, i.e., inbound_email
+  test "email_bill_entry value_type_value_uniq mismatch with threshold currency" do
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.threshold = 15
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+    hk_pii.pii_property_set.save
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    exception = assert_raise(Exception) { 
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+   } # end assert_raise
+   assert_not_nil(exception.message)
+   assert_not_nil(exception.message.match(/does not match/))
+  end # end test "email_bill_entry value_type_value_uniq mismatch with threshold currency" do
+
+  test "get currency from str" do
+    # Each inner array holds the msg and the expected currency arr
+    msg_ok_arr = [
+                  [ "hello 200 SGD230.00 kitty", ["SGD230.00"] ],
+                  [ "hello 200 kitty SGD230.00", ["SGD230.00"] ],
+                  [ "200 hello SGD230.00 kitty", ["SGD230.00"] ],
+                  [ "SGD230.00 hello MYR100 kitty", ["SGD230.00", "MYR100"] ],
+                  [ "SGD230.00 MYR100 hello kitty", ["SGD230.00", "MYR100"] ],
+                  [ "SGD230.00 hello kitty MYR100", ["SGD230.00", "MYR100"] ],
+                  [ "hello SGD230.00 kitty MYR100", ["SGD230.00", "MYR100"] ],
+                  [ "hello SGD230.00 MYR100 kitty" , ["SGD230.00", "MYR100"] ],
+                  [ "hello kitty SGD230.00 MYR100", ["SGD230.00", "MYR100"] ]
+                 ]
+    msg_ok_arr.each { |msg_arr_elem|
+      currency_arr = ControllerHelper.get_currency_arr_from_str(msg_arr_elem[0])
+      assert_equal(msg_arr_elem[1], currency_arr, "msg:#{msg_arr_elem[0]}")
+    } # end msg_ok_arr.each ...
+  end # end test "get currency from str" do
+
+  test "sum currency in str" do
+    # Errors when we don't convert
+    msg_err_arr = [
+                   "SGD300 hello MYR200"
+                  ]
+    msg_err_arr.each { |msg_elem|
+      assert_raise(Exception, "msg:#{msg_elem}") {
+        ControllerHelper.sum_currency_in_str(msg_elem)
+      } # end assert_raise(Exception) do
+    } # end msg_err_arr.each ...
+    # No errros if we convert
+    # CODE: Currently Exceptions are raised during conversion
+    # because we have not implemented conversion table.
+    msg_err_arr.each { |msg_elem|
+      assert_raise(Exception, "msg:#{msg_elem}") {
+        ControllerHelper.sum_currency_in_str(msg_elem, true)
+      } # end assert_raise(Exception) do
+    } # end msg_err_arr.each ...
+    msg_ok_arr = [
+                   ["SGD300 SGD200.35 hello", "SGD500.35"],
+                   ["SGD300 hello SGD200.35", "SGD500.35"],
+                   ["SGD300 hello SGD200.35 kitty SGD1.15", "SGD501.50"],
+                   ["SGD300 hello kitty SGD200.35 SGD1.15", "SGD501.50"]
+                  ]
+    msg_ok_arr.each { |msg_ok_arr_elem|
+      sum = ControllerHelper.sum_currency_in_str(msg_ok_arr_elem[0])
+      assert_equal(msg_ok_arr_elem[1], sum, "msg:#{msg_ok_arr_elem[0]}")
+    } # end msg_ok_arr.each ...
+  end # end test "sum currency in str" do
+
+  test "subtract currency in str" do
+    # Errors when we don't convert
+    msg_err_arr = [
+                   ["SGD300 hello SGD200", "MYR5.55"]
+                  ]
+    msg_err_arr.each { |msg_arr_elem|
+      assert_raise(Exception, "msg:#{msg_arr_elem.inspect}") {
+        ControllerHelper.subtract_currency_in_str(msg_arr_elem[0], msg_arr_elem[1])
+      } # end assert_raise(Exception) do
+    } # end msg_err_arr.each ...
+    # No errros if we convert
+    # CODE: Currently Exceptions are raised during conversion
+    # because we have not implemented conversion table.
+    msg_err_arr.each { |msg_arr_elem|
+      assert_raise(Exception, "msg:#{msg_arr_elem.inspect}") {
+        ControllerHelper.subtract_currency_in_str(msg_arr_elem[0], msg_arr_elem[1], true)
+      } # end assert_raise(Exception) do
+    } # end msg_err_arr.each ...
+    msg_ok_arr = [
+                   ["SGD300 SGD200.35 hello", "SGD0.35", "SGD500.00"],
+                   ["SGD300 hello SGD200.35", "SGD0.35", "SGD500.00"],
+                   ["SGD300 hello SGD200.35 kitty SGD1.15", "SGD0.50", "SGD501.00"],
+                   ["SGD300 hello kitty SGD200.35 SGD1.15", "hello SGD0.50 kitty SGD1.00", "SGD500.00"]
+                  ]
+    msg_ok_arr.each { |msg_ok_arr_elem|
+      result = ControllerHelper.subtract_currency_in_str(msg_ok_arr_elem[0], msg_ok_arr_elem[1])
+      assert_equal(msg_ok_arr_elem[2], result, "msg:#{msg_ok_arr_elem.inspect}")
+    } # end msg_ok_arr.each ...
+  end # end test "subtract currency in str" do
+
+  test "threshold reached" do
+    # This is ripped from email_bill_entry value_type_value
+    sum_thus_far_curr_val = 0
+    sum_thus_far_curr_code = nil
+    sum_thus_far_str = nil
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = "SGD"
+    # NOTE: We set this later when we find out what is the value of
+    # email entry so that we can adjust it be exceeded after the 2nd buy
+    # The next email will value is adjusted to (sum_thus_far_curr_val + 1)
+    # so setting threshold at this will ensure it is reached
+    threshold = ControllerHelper.sum_currency_in_str(input_str)
+    hk_pii.pii_property_set.threshold = threshold.to_f*2.to_f+1.to_f
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    # Create a new mir by sending another mail
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
+    sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
+    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(sum_thus_far_curr_code, hk_pii_email_bill_entries[0].currency)
+    # Check threshold
+p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
+p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
+    assert(sum_thus_far_curr_val < hk_pii_email_bill_entries[0].pii_property_set.threshold)
+    assert_nil(hk_pii_email_bill_entries[0].ready_date)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    new_curr_f = new_curr_curr_val.to_f + 1.0
+    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Add one entry even tho' the sender is same 
+    # since value_type is VALUE_TYPE_VALUE
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    # The sum of first email and second email value will be used
+    sum_thus_far_curr_val += new_curr_f
+    assert_equal(sum_thus_far_curr_val, hk_pii_email_bill_entries[0].qty)
+    # Increase in the number of mirs
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    # The currency code of first email and second email value are the same
+    assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
+    assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
+    # Check threshold
+    assert(sum_thus_far_curr_code == hk_pii_email_bill_entries[0].pii_property_set.threshold)
+    assert_nil(hk_pii_email_bill_entries[0].ready_date)
+    # Check price_final, threshold_final
+    # CODE201111 for VALUE_TYPE_VALUE, price_final is nil
+
+
+
+    # If a different email is resubmitted
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 2], # for new sender and the nick for destination
+      ['Pii.count', 1], # for new sender
+      ['Tag.count', 1], # New tag because of new currency
+      ['EndPointTagRel.count', 1],
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    # Increase in mirs in email_bill_entry because sender is different
+    assert_equal(3, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
+    src_ep_arr = []
+    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
+      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
+    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
+    assert_equal(true, src_ep_arr.include?(src_ep_1))
+    assert_equal(true, src_ep_arr.include?(src_ep_2))
+    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text}")
+    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
+    sum_thus_far_curr_val += new_curr_2_curr_val
+    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(new_curr_2_curr_code, hk_pii_email_bill_entries[0].currency)
+    # email_bill_entry.ready_date
+CODE20111115
+    # Bill now returns nil for ONE_TIME
+    # Bill now returns nil for RECUR
+  end # end test "threshold reached" do
 
   test "aaa" do
     # Test abuse of inbound_emails_200

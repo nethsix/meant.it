@@ -95,7 +95,7 @@
 %>
 <%
     else
-      nick_link_to = ControllerHelper.ai_for_endpoint(meant_it_rel.dst_endpoint)
+      nick_link_to = ControllerHelper.ai_for_endpoint(meant_it_rel.dst_endpoint, "nick_")
       # Prepare links for nick
       nick_url = "/end_points/show_by_id/#{meant_it_rel.dst_endpoint.id}"
 %>

@@ -44,6 +44,7 @@ class PiiPropertySet < ActiveRecord::Base
   validates :uniq_id, :uniqueness => true, :allow_nil => true
   validates :threshold_type, :presence => true, :pii_property_set_threshold_type => true
   validates :status, :presence => true, :status_type => true
+  validates :value_type, :presence => true, :value_type => true
 
   after_initialize :default_values
   before_save :before_save_stuff
@@ -98,5 +99,6 @@ p "self.status:#{self.status}"
       self.status ||= StatusTypeValidator::STATUS_INACTIVE
       self.threshold_type ||= PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
       self.active_date ||= Time.now
+      self.value_type ||= ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ
     end
 end

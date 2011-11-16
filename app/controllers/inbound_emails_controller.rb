@@ -124,9 +124,11 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
     # Create sender EndPoint
     sender_pii_hash = ControllerHelper.get_pii_hash(sender_str)
     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, sender_pii_hash:#{sender_pii_hash.inspect}")
+    pii_cond = "found"
     @sender_pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(sender_pii_hash[ControllerHelper::PII_VALUE_STR], sender_pii_hash[ControllerHelper::PII_TYPE], sender_pii_hash[ControllerHelper::PII_HIDE]) do |pii_obj|
-      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created sender_pii")
+      pii_cond = "created"
     end # end Pii.find_or_create_by_pii ...
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{pii_cond} sender_pii, pii_value:#{@sender_pii.pii_value}")
     unless @sender_pii.errors.empty?
        @error_obj_arr << @sender_pii
       error_display("Error creating sender_pii '#{sender_str}':#{@sender_pii.errors}", @sender_pii.errors, :error, logtag)
@@ -155,6 +157,7 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         error_display("Error creating @sender_endPoint '#{@sender_endPoint.inspect}:#{@sender_endPoint.errors}", @sender_endPoint.errors, :error, logtag)
         return
       end # end unless @sender_endPoint.save
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created sender_endPoint, @sender_endPoint.inspect:#{@sender_endPoint.inspect}")
       @sender_pii.reload
 #20110725add_auth      @sender_pii.endPoints << @sender_endPoint
 #20110725add_auth      unless @sender_pii.save
@@ -163,6 +166,8 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
 #20110725add_auth        return
 #20110725add_auth      end # end unless @sender_pii.save
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, acquired sender_endPoint with id:#{@sender_endPoint.id}")
+    else
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, found sender_endPoint, @sender_endPoint.inspect:#{@sender_endPoint.inspect}")
     end # end if @sender_endPoint.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, @sender_endPoint.entities:#{@sender_endPoint.entities}")
 #20110713    if @sender_endPoint.entities.empty?
@@ -249,23 +254,31 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
        )
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, case 2, 3")
       # Create receiver pii if it does not possess one
+      pii_cond = "found"
       @receiver_pii = Pii.find_or_create_by_pii_value_and_pii_type_and_pii_hide(receiver_pii_hash[ControllerHelper::PII_VALUE_STR], receiver_pii_hash[ControllerHelper::PII_TYPE], receiver_pii_hash[ControllerHelper::PII_HIDE]) do |pii_obj|
-        logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created receiver_pii")
+        pii_cond = "created"
       end # end Pii.find_or_create_by_pii ...
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{pii_cond} receiver_pii, pii_value:#{@receiver_pii.pii_value} - case 2, 3")
       # If @receiver_pii has an entity prefix 
       # automatically tie it to the prefix
       if (receiver_pii_match_arr = ControllerHelper.auto_entity_domain?(@receiver_pii.pii_value))
         receiver_entity = Entity.find(receiver_pii_match_arr[ControllerHelper::AUTO_ENTITY_DOMAIN_ENTITY_ID]) if !receiver_pii_match_arr.nil?
+        logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, receiver_entity.inspect:#{receiver_entity.inspect}")
         if !receiver_entity.nil?
           entityEndPointRel_exist = receiver_entity.endPoints.collect { |ep_elem| ep_elem.pii.pii_value if !ep_elem.pii.nil? }.include?(@receiver_pii.pii_value)
+          logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, entityEndPointRel_exist.inspect:#{entityEndPointRel_exist.inspect}")
           if !entityEndPointRel_exist
             # Since entity can only tie to endpoints, we use the sender endpoint
+            # NOTE: a receiver has many endpoints, each with own nick so we
+            # tie to only the receiver endpoint which is its sending endpoint
+            ep_cond = "found"
             receiver_sender_endPoint = ControllerHelper.find_or_create_sender_endPoint_and_pii(@receiver_pii.pii_value, @receiver_pii.pii_type, @receiver_pii.pii_hide)
             entityEndPointRel1 = receiver_entity.entityEndPointRels.create(:verification_type => VerificationTypeValidator::VERIFICATION_TYPE_AUTO_ENTITY_DOMAIN)
             entityEndPointRel1.endpoint_id = receiver_sender_endPoint.id
             unless entityEndPointRel1.save
               logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, entityEndPointRel1.errors.inspect:#{entityEndPointRel1.errors.inspect}")
             end # end unless entityEndPointRel1.save
+            logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created entityEndPointRel, entityEndPointRel1.inspect:#{entityEndPointRel1.inspect}")
             receiver_sender_endPoint.reload
           end # end if !entityEndPointRel_exist
         end # end if !receiver_entity.nil?
@@ -286,9 +299,11 @@ puts "InboundEmail, create:#{params[:inbound_email].inspect}"
         ((receiver_pii_str.nil? or receiver_pii_str.empty?) and (!receiver_nick_str.nil? and !receiver_nick_str.empty?))
        )
       logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, case 2, 4")
+      ep_cond = "found"
       @receiver_endPoint = EndPoint.find_or_create_by_nick_and_creator_endpoint_id(:nick => receiver_nick_str, :creator_endpoint_id => @sender_endPoint.id, :start_time => Time.now) do |ep_obj|
-        logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created receiver_endPoint - case 2, 4")
+        ep_cond = "created"
       end # end @receiver_endPoint ...
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{ep_cond} receiver_endPoint - case 2, 4")
     end # end Cases 2 and 4 ...
 
     # For Case 2. receiver_pii_str: yes, receiver_nick_str: yes 
@@ -476,15 +491,18 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, yet_2b_associated_tag_str_arr:#{yet_2b_associated_tag_str_arr}")
       yet_2b_associated_tag_str_arr.each { |tag_str_elem|
         norm_tag_str_elem = tag_str_elem.downcase
+        tag_cond = "found"
         @new_tag = Tag.find_or_create_by_name(norm_tag_str_elem) do |tag_obj|
-          logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created tag:#{norm_tag_str_elem}")
+          tag_cond = "created"
         end # end Tag.find_or_create_by ...
+        logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{tag_cond} tag:#{norm_tag_str_elem}")
         unless @new_tag.errors.empty?
           @error_obj_arr << @new_tag
           error_display("Error creating new_tag '#{norm_tag_str_elem}':#{@new_tag.errors}", @new_tag.errors, :error, logtag)
           return
         end # end unless @new_tag.errors.empty?
         @receiver_endPoint.tags << @new_tag
+        logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created EndPointTagRel.tag")
       } # end tag_str_arr.each ...
     end # end if !@receiver_endPoint.nil?
     # Create meant_it rel
@@ -495,21 +513,25 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         error_display("Error creating meantItRel 'sender_endPoint.id:#{@sender_endPoint.id}, message_type:#{@meantItRel.message_type}, @receiver_endPoint.id#{@receiver_endPoint.id}':#{@meantItRel.errors}", @meantItRel.errors, :error, logtag)
         return
       end # end unless @meantItRel.errors.empty?
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created meantItRel, @meantItRel.inspect:{@meantItRel.inspect}")
       if @meantItRel.errors.empty?
         if message_type_str == MeantItMessageTypeValidator::MEANT_IT_MESSAGE_OTHER
           # Call mood reasoner
           # CODE!!!!! Implement this in ControllerHelper
         else
           logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: creating mood using message_type_str:#{message_type_str}")
+          mood_tag_cond = "found"
           @new_mood_tag = Tag.find_or_create_by_name_and_desc(message_type_str, MeantItMoodTagRel::MOOD_TAG_TYPE) do |tag_obj|
-           logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created mood_tag:#{message_type_str}")
+           mood_tag_cond = "created"
           end # end Tag.find_or_create_by ...
+          logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, #{mood_tag_cond} mood_tag:#{message_type_str}")
           unless @new_mood_tag.errors.empty?
             @error_obj_arr << @new_mood_tag
             error_display("Error creating new_mood_tag '#{message_type_str}':#{@new_mood_tag.errors}", @new_mood_tag.errors, :error, logtag)
             return
           end # end unless @new_mood_tag.errors.empty?
           @meantItRel.tags << @new_mood_tag
+          logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, created MeantItMoodTagRel.tag")
         end # end if message_type_str == MeantItMessageTypeValidator:: ...
       end # end if @meantItRel.errors.empty?
     end # end if !@sender_endPoint.nil? and !@receiver_endPoint.nil? and !@inbound_email.nil?
@@ -592,6 +614,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           # automated sender.  Only automated sender uses inbound_emails_200
           # Record this error
           @inbound_email_logs = InboundEmailLog.create(:params_txt => params.inspect.to_s, :error_msgs => message, :error_objs => @inbound_email.errors.inspect.to_s)
+          logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:error_display:#{logtag}: created InboundEmailLog, @inbound_email_logs.inspect:#{@inbound_email_logs.inspect}")
         else
           # We don't worry cause user will see error message
         end # end if self.request.path.match(/#{Constants::SENDGRID_PARSE_URL}/)

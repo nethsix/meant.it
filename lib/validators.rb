@@ -1,3 +1,15 @@
+class ValueTypeValidator < ActiveModel::EachValidator
+  VALUE_TYPE_COUNT = "count"
+  VALUE_TYPE_COUNT_UNIQ = "count_uniq"
+  VALUE_TYPE_VALUE = "value"
+  VALUE_TYPE_VALUE_UNIQ = "value_uniq"
+  VALUE_TYPE_ENUM = [ VALUE_TYPE_COUNT, VALUE_TYPE_COUNT_UNIQ, VALUE_TYPE_VALUE, VALUE_TYPE_VALUE_UNIQ ]
+
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{VALUE_TYPE_ENUM.join('\', \'').strip}'" if value.nil? or VALUE_TYPE_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class ValueTypeValidator < ActiveModel::EachValidator
+
 class LikerStatusTypeValidator < ActiveModel::EachValidator
   LIKER_STATUS_ACTIVE = "active"
   LIKER_STATUS_INACTIVE = "inactive"

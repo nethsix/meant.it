@@ -10,7 +10,8 @@ MeantIt::Application.routes.draw do
   get "manage" => "sessions#manage", :as => "manage"
   get "resend_confirmation" => "sessions#resend_confirmation", :as => "resend_confirmation"
   get "send_liker_emails" => "sessions#send_liker_emails"
-  get "bill" => "sessions#bill", :as => "bill"
+#20111108  get "bill" => "sessions#bill", :as => "bill"
+  get "bill" => "sessions#bill_2", :as => "bill_2"
 
   devise_for :users, :controllers => { :confirmations => "meant_it_confirmations" }
 
@@ -142,6 +143,8 @@ MeantIt::Application.routes.draw do
   match "/like.html" => "home#like"
   match "/platform.html" => "home#platform"
   match "/apis.html" => "home#apis"
+  match "/policy.html" => "home#policy"
+  match "/campaigns/:name" => "home#campaigns"
 
   # See how all your routes lay out with "rake routes"
 

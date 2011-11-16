@@ -47,9 +47,13 @@ class UserMailer < ActionMailer::Base
     end # end if email.nil? or email.empty?
   end # end def threshold_mail
 
-  def contract_mail(likee_pii_value, email, src_endpoint, logtag = nil)
+#20111106  def contract_mail(likee_pii_value, email, src_endpoint, logtag = nil)
+  def contract_mail(likee_pii_value, mir_elem, logtag = nil)
+    src_endpoint = mir_elem.src_endpoint
+    email = src_endpoint.pii.pii_value
     @pii = src_endpoint.pii
-    @contract_no = ControllerHelper.gen_contract_no(likee_pii_value, src_endpoint)
+#20111106    @contract_no = ControllerHelper.gen_contract_no(likee_pii_value, src_endpoint)
+    @contract_no = ControllerHelper.gen_contract_no(likee_pii_value, mir_elem)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:contract_mail:#{logtag}, @pii.inspect:#{@pii.inspect}")
     short_desc = nil
     threshold = nil

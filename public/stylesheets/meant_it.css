@@ -25,6 +25,37 @@ select {
   font-size: 30px;
 }
 
+.small {
+  font-size: 12px;
+}
+
+.medium {
+  font-size: 15px;
+}
+
+.large {
+  font-size: 20px;
+}
+
 .superlarge {
   font-size: 30px;
 }
+
+.superduperlarge {
+  font-size: 50px;
+}
+
+.verbatim-font {
+  font-family: "Courier New";monospace
+}
+
+.background-ddd
+{
+  background-color: #ddd
+}
+
+table.no-zebra tbody tr:nth-child(even) td,
+table.no-zebra tbody tr.even td {
+  background: transparent;
+}
+
