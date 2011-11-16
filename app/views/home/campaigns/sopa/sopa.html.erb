@@ -128,7 +128,7 @@
   meantItRels_arr = MeantItRel.where("message_type = '#{message_type}' and dst_endpoint_id in (#{ep_ids.join(',')})").order("created_at desc")
   # Limit the display
 #  meantItRels_limit_arr = meantItRels_arr.limit(Constants::WEB_MAIN_MAX_MEANTIT)
-  test_num = 1
+  test_num = Constants::WEB_MAIN_MAX_MEANTIT
   meantItRels_limit_arr = meantItRels_arr.limit(test_num)
 %>
           <tr>

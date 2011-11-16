@@ -125,8 +125,16 @@
   end
 %>
 
-<% if !meant_it_rel.message.nil? and !meant_it_rel.message.empty? %>
-  <%= ControllerHelper.random_say %> <b>'<i><%= meant_it_rel.message %></i>'</b>
+<% 
+  if !meant_it_rel.message.nil? and !meant_it_rel.message.empty?
+    if meant_it_rel.message.size > Constants::MESSAGE_DISPLAY_LEN
+      truncated_message = "#{meant_it_rel.message[0, Constants::MESSAGE_DISPLAY_LEN]}..."
+    else
+      truncated_message = meant_it_rel.message
+    end # end if meant_it_rel.message.size > #{Constants::MESSAGE_DISPLAY_LEN}
+%>
+
+  <%= ControllerHelper.random_say %> <b>'<i><%= truncated_message %></i>'</b>
 <% end %>
 
 <% 
