@@ -30,6 +30,7 @@ class Constants
   SQL_COUNT_ORDER_DESC = "desc"
   SORT_FIELD_INPUT = "sort_field"
   SORT_ORDER_INPUT = "sort_order"
+  LAYOUT_INPUT = "layout"
 
   PAGINATE_BATCH_SIZE = 5
   MIN_PASSWORD_LEN = 6

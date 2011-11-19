@@ -11,7 +11,8 @@ module ModelHelper
       total_size = 0
       start_idx = start_id_inclusive
       result_container = nil
-      end_id = self.all.size
+#WHAT!?!?      end_id = self.all.size
+      end_id = self.last.id
       end_id -= 1 if self::FIRST_INDEX == 0
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate_by_id:#{logtag}, start_idx:#{start_idx}, end_id:#{end_id}")
       while total_size < page_size and start_idx <= end_id
@@ -32,10 +33,13 @@ module ModelHelper
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate_by_id:#{logtag}, start_idx:#{start_idx}, total_size:#{total_size}")
       end # end while ...
       result_container.sort! { |a,b| b.id <=> a.id }
-      return result_container
+      # Truncate result size to page_size
+      return result_container[0,page_size]
+#      return result_container
     end # end def paginate_by_id
 
     def reverse_paginate_by_id(where_str, last_id_inclusive, page_size = Constants::WEB_PAGE_RESULT_SIZE, batch_size = Constants::PAGINATE_BATCH_SIZE, logtag = nil)
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:reverse_paginate_by_id:#{logtag}, where_str:#{where_str}, page_size:#{page_size}, batch_size:#{batch_size}")
       total_size = 0
       last_idx = last_id_inclusive
       result_container = nil
@@ -57,7 +61,9 @@ module ModelHelper
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:reverse_paginate_by_id:#{logtag}, last_idx:#{last_idx}, total_size:#{total_size}")
       end # end while ...
       result_container.sort! { |a,b| b.id <=> a.id }
-      return result_container
+      # Truncate result size to page_size
+      return result_container[0,page_size]
+#      return result_container
     end # end reverse_paginate_by_id
 
     def up_more(where_str, last_id, batch_size = Constants::PAGINATE_BATCH_SIZE, logtag = nil)

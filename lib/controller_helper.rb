@@ -1347,4 +1347,19 @@ module ControllerHelper
     end # end if orig_msg.nil? or orig_msg.empty?
     orig_msg
   end # end def self.get_text_from_inbound_email
+
+  # If we provide xxx.com/index.html?a=&b=5
+  # then params[:a] is "" not nil
+  # This is a problem, especially if we try to replace default value
+  # using our_a = params[:a] followed by our_a ||= DEFAULT_A
+  # +:use_default_for_nil:+:: if nil then use default value
+  # +:use_default_for_empty:+:: if nil then use default value
+  def self.get_param(params, key, default_value=nil, use_default_for_nil=true, use_default_for_empty=true)
+    val = params[key]
+    if use_default_for_empty
+      val = nil if val.empty?
+    end # end if use_default_for_empty
+    val ||= default_value
+    val
+  end # end def self.get_param
 end # end module ControllerHelper

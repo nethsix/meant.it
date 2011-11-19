@@ -15,6 +15,8 @@
 %>
   <script>
     var TIMEOUT = 50000;
+    var POLL_INTERVAL = 10000;
+    var BACKOFF = 3;
     function getJson()
     {
       jQuery.ajax({
@@ -133,7 +135,8 @@
   meantItRels_arr = MeantItRel.where("message_type = '#{message_type}' and dst_endpoint_id in (#{ep_ids.join(',')})").order("created_at desc")
   # Limit the display
 #  meantItRels_limit_arr = meantItRels_arr.limit(Constants::WEB_MAIN_MAX_MEANTIT)
-  test_num = Constants::WEB_MAIN_MAX_MEANTIT
+#  test_num = Constants::WEB_MAIN_MAX_MEANTIT
+  test_num = 1
   meantItRels_limit_arr = meantItRels_arr.limit(test_num)
 %>
           <tr>
@@ -145,11 +148,11 @@
 #  if meantItRels_arr.size > Constants::WEB_MAIN_MAX_MEANTIT
   if meantItRels_arr.size > test_num
 %>
-<!----                </li>
+                </li>
                 <li>
                   <a href='/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>'>More...</a>
                 </li>
-              </ul> ---->
+              </ul>
 <%
   else
 %>

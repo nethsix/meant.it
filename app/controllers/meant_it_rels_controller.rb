@@ -1,6 +1,9 @@
 require 'constants'
 
 class MeantItRelsController < ApplicationController
+  MEANT_IT_RELS = "mirs"
+  UP_URL_PARMS = "up_url_parms"
+  DOWN_URL_PARMS = "down_url_parms"
   before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type, :show_by_message_type_uniq_sender_count ]
 
   # GET /meant_it_rels
@@ -354,6 +357,8 @@ class MeantItRelsController < ApplicationController
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, params.inspect:#{params.inspect}")
     pii_str = params[Constants::PII_VALUE_INPUT]
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    page_size = ControllerHelper.get_param(params, Constants::MEANT_IT_REL_PAGE_SIZE, Constants::WEB_PAGE_RESULT_SIZE)
+    page_size = page_size.to_i
     find_any_input_str = "#{message_type} #{pii_str}"
     meantItRels = nil
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, pii_str:#{pii_str}, message_type:#{message_type}")
@@ -361,19 +366,48 @@ class MeantItRelsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, pii.inspect:#{pii.inspect}")
     endPoints = pii.endPoints if !pii.nil?
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
+    endPoints_str = endPoints.collect { |ep_elem| ep_elem.id }.join(",")
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, endPoints_str:#{endPoints_str}")
     if message_type.nil? or message_type.empty?
-      meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints).order("created_at DESC")
+      mir_hash = paginate(params, "dst_endpoint_id in (#{endPoints_str})", __method__.to_s, logtag)
+      meantItRels = mir_hash[MEANT_IT_RELS]
       title_str = "(any =&gt; <b>pii:</b>#{pii_str})"
+      urlparms = "#{Constants::PII_VALUE_INPUT}=#{pii_str}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
     else
-      meantItRels = MeantItRel.where(:dst_endpoint_id => endPoints, :message_type => message_type).order("created_at DESC")
+      mir_hash = paginate(params, "dst_endpoint_id in (#{endPoints_str}) and message_type = '#{message_type}'", __method__.to_s, logtag)
+      meantItRels = mir_hash[MEANT_IT_RELS]
       title_str = "(any <i>#{message_type}</i> <b>pii:</b>#{pii_str})"
+      urlparms = "#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}&#{Constants::PII_VALUE_INPUT}=#{pii_str}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
     end # end if message_type.nil? ...
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
+    base_url = "/meant_it_rels/#{__method__.to_s}?#{urlparms}"
+    up_url_parms = mir_hash[UP_URL_PARMS]
+    down_url_parms = mir_hash[DOWN_URL_PARMS]
+#20111119    up_url = "#{base_url}&#{urlparms}"
+#20111119    down_url = "#{base_url}&#{urlparms}"
+#20111119    up_url = "#{up_url}&#{up_url_parms}" if !up_url_parms.nil?
+    up_url = "#{base_url}&#{up_url_parms}" if !up_url_parms.nil?
+#20111119    down_url = "#{down_url}&#{down_url_parms}" if !down_url_parms.nil?
+    down_url = "#{base_url}&#{down_url_parms}" if !down_url_parms.nil?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_in_by_pii:#{logtag}, up_url:#{up_url}, down_url:#{down_url}")
 
     respond_to do |format|
-      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str }  }
+      format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
       format.xml  { render :xml => meantItRels }
-      format.json { render :json => meantItRels.to_json }
+      # NOTE: in json we return  up_url_parms instead of up_url
+      format.json { 
+        meantItRels.each { |mir_elem|
+          class << mir_elem
+            attr_accessor :up_url_parms
+            attr_accessor :down_url_parms
+          end # end class << mir_elem
+          mir_elem.up_url_parms = up_url_parms
+          mir_elem.down_url_parms = down_url_parms
+        } # end meantItRels.each ...
+        render :json => meantItRels.to_json(:methods => [:up_url_parms, :down_url_parms])
+# NOTE: This produces something very ugly so for ease of debugging we avoid
+#        render :json => [:up_url => up_url, :down_url => down_url, :meant_it_rel => meantItRels ]
+      }
     end
   end # end def show_in_by_pii
 
@@ -381,47 +415,73 @@ class MeantItRelsController < ApplicationController
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, params.inspect:#{params.inspect}")
     message_type = params[Constants::MESSAGE_TYPE_INPUT]
-    last_id = params[Constants::MEANT_IT_REL_LAST_ID]
-    start_id = params[Constants::MEANT_IT_REL_START_ID]
-    page_size = params[Constants::MEANT_IT_REL_PAGE_SIZE]
+    page_size = ControllerHelper.get_param(params, Constants::MEANT_IT_REL_PAGE_SIZE, Constants::WEB_PAGE_RESULT_SIZE)
+    page_size = page_size.to_s
     find_any_input_str = "#{message_type}"
-    meantItRels = nil
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, message_type:#{message_type}")
-    if last_id.nil? and start_id.nil?
-      # Get from latest backwards if nothing specified
-      last_id ||= MeantItRel.last.id
-      last_id = last_id.to_i
-    elsif !last_id.nil? and start_id.nil?
-      # Naturally last_id is used
-      last_id = last_id.to_i
-    elsif !start_id.nil? and last_id.nil?
-      # Naturally start_id is used
-      start_id = start_id.to_i
-    elsif !start_id.nil? and !last_id.nil?
-      # The logic below will prefer the last_id
-      last_id = last_id.to_i
-      start_id = start_id.to_i
-    end # end if last_id.nil? ...
-    page_size ||= Constants::WEB_PAGE_RESULT_SIZE
-    page_size = page_size.to_i
-    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, start_id:#{start_id}, last_id:#{last_id}, page_size:#{page_size}")
-    if !last_id.nil?
-      meantItRels = MeantItRel.reverse_paginate_by_id("message_type = '#{message_type}'", last_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
-    elsif !start_id.nil?
-      meantItRels = MeantItRel.paginate_by_id("message_type = '#{message_type}'", start_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
-    end # end elsif !start_id.nil?
-    if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.up_more("message_type = '#{message_type}'", meantItRels[0].id.to_i)
-      up_url = "/meant_it_rels/show_by_message_type?#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}"
-    end # end if !meantItRels.nil? ...
-    if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.down_more("message_type = '#{message_type}'", meantItRels[meantItRels.size-1].id.to_i)
-      down_url = "/meant_it_rels/show_by_message_type?#{Constants::MEANT_IT_REL_LAST_ID}=#{meantItRels[meantItRels.size-1].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}&#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}"
-    end # end if !meantItRels.nil? ...
+    mir_hash = paginate(params, "message_type = '#{message_type}'", __method__.to_s, logtag)
+    meantItRels = mir_hash[MEANT_IT_RELS]
+    urlparms = "#{Constants::MESSAGE_TYPE_INPUT}=#{message_type}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
+    base_url = "/meant_it_rels/#{__method__.to_s}?#{urlparms}"
+    up_url_parms = mir_hash[UP_URL_PARMS]
+    down_url_parms = mir_hash[DOWN_URL_PARMS]
+#20111119    up_url = "#{base_url}&#{urlparms}"
+#20111119    down_url = "#{base_url}&#{urlparms}"
+#20111119    up_url = "#{up_url}&#{up_url_parms}" if !up_url_parms.nil?
+    up_url = "#{base_url}&#{up_url_parms}" if !up_url_parms.nil?
+#20111119    down_url = "#{down_url}&#{down_url_parms}" if !down_url_parms.nil?
+    down_url = "#{base_url}&#{down_url_parms}" if !down_url_parms.nil?
     title_str = "(any <i>#{message_type}</i> any)"
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_by_message_type:#{logtag}, meantItRels.inspect:#{meantItRels.inspect}")
 
     respond_to do |format|
       format.html { render "show_meant_it_rels_with_details", :layout => "find_any", :locals => { :meantItRels => meantItRels, :find_any_input => find_any_input_str, :title_str => title_str, :down_url => down_url, :up_url => up_url }  }
       format.xml  { render :xml => meantItRels }
+      format.json { 
+        render :json => meantItRels.to_json(:methods => [:up_url, :down_url])
+      }
     end
   end # end def show_by_message_type
+
+  private
+    def paginate(params, where_str, caller_func, logtag=nil)
+      if caller_func.nil?
+        logger.error("#{File.basename(__FILE__)}:#{self.class}:paginate:#{logtag}, caller_func must not be nil")
+        raise Exception, "#{File.basename(__FILE__)}:#{self.class}:paginate:#{logtag}, caller_func must not be nil"
+      end # end if caller_func.nil?
+      last_id = ControllerHelper.get_param(params, Constants::MEANT_IT_REL_LAST_ID)
+      start_id = ControllerHelper.get_param(params, Constants::MEANT_IT_REL_START_ID)
+      page_size = ControllerHelper.get_param(params, Constants::MEANT_IT_REL_PAGE_SIZE, Constants::WEB_PAGE_RESULT_SIZE)
+      page_size = page_size.to_i
+      meantItRels = nil
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate:#{logtag}, last_id:#{last_id}, start_id:#{start_id}, page_size:#{page_size}")
+      if last_id.nil? and start_id.nil?
+        # Get from latest backwards if nothing specified
+        last_id ||= MeantItRel.last.id
+        last_id = last_id.to_i
+      elsif !last_id.nil? and start_id.nil?
+        # Naturally last_id is used
+        last_id = last_id.to_i
+      elsif !start_id.nil? and last_id.nil?
+        # Naturally start_id is used
+        start_id = start_id.to_i
+      elsif !start_id.nil? and !last_id.nil?
+        # The logic below will prefer the last_id
+        last_id = last_id.to_i
+        start_id = start_id.to_i
+      end # end if last_id.nil? ...
+      logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate:#{logtag}, final start_id:#{start_id}, last_id:#{last_id}, page_size:#{page_size}")
+      if !last_id.nil?
+        meantItRels = MeantItRel.reverse_paginate_by_id(where_str, last_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
+      elsif !start_id.nil?
+        meantItRels = MeantItRel.paginate_by_id(where_str, start_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
+      end # end elsif !start_id.nil?
+      if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.up_more(where_str, meantItRels[0].id.to_i)
+#20111120        up_url = "/meant_it_rels/#{caller_func}?#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
+        up_url_parms = "#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}"
+      end # end if !meantItRels.nil? ...
+      if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.down_more(where_str, meantItRels[meantItRels.size-1].id.to_i)
+        down_url_parms = "#{Constants::MEANT_IT_REL_LAST_ID}=#{meantItRels[meantItRels.size-1].id}"
+      end # end if !meantItRels.nil? ...
+      { MEANT_IT_RELS => meantItRels, UP_URL_PARMS => up_url_parms, DOWN_URL_PARMS => down_url_parms }
+    end # end def paginate
 end
