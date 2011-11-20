@@ -17,9 +17,9 @@ module ModelHelper
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate_by_id:#{logtag}, start_idx:#{start_idx}, end_id:#{end_id}")
       while total_size < page_size and start_idx <= end_id
         if where_str.nil?
-          curr_res = self.where("id <= ? and id >= ?", start_idx+batch_size, start_idx)
+          curr_res = self.where("id < ? and id >= ?", start_idx+batch_size, start_idx)
         else
-          curr_res = self.where("id <= ? and id >= ? and #{where_str}", start_idx+batch_size, start_idx)
+          curr_res = self.where("id < ? and id >= ? and #{where_str}", start_idx+batch_size, start_idx)
         end # end if !where_str.nil?
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate_by_id:#{logtag}, curr_res.inspect:#{curr_res.inspect}")
         if result_container.nil?
@@ -32,10 +32,14 @@ module ModelHelper
         start_idx = start_idx+batch_size
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:paginate_by_id:#{logtag}, start_idx:#{start_idx}, total_size:#{total_size}")
       end # end while ...
-      result_container.sort! { |a,b| b.id <=> a.id }
-      # Truncate result size to page_size
-      return result_container[0,page_size]
-#      return result_container
+      truncated_result = nil
+      if !result_container.nil?
+        result_container.sort! { |a,b| b.id <=> a.id }
+        # Truncate result size to page_size, by removing the bottom, which
+        # are the higher level ids
+        truncated_result = result_container[result_container.size-page_size,result_container.size]
+      end # end if !result_container.nil?
+     return truncated_result
     end # end def paginate_by_id
 
     def reverse_paginate_by_id(where_str, last_id_inclusive, page_size = Constants::WEB_PAGE_RESULT_SIZE, batch_size = Constants::PAGINATE_BATCH_SIZE, logtag = nil)
@@ -45,9 +49,9 @@ module ModelHelper
       result_container = nil
       while total_size < page_size and last_idx >= self::FIRST_INDEX
         if where_str.nil?
-          curr_res = self.where("id <= ? and id >= ?", last_idx, last_idx-batch_size)
+          curr_res = self.where("id <= ? and id > ?", last_idx, last_idx-batch_size)
         else
-          curr_res = self.where("id <= ? and id >= ? and #{where_str}", last_idx, last_idx-batch_size)
+          curr_res = self.where("id <= ? and id > ? and #{where_str}", last_idx, last_idx-batch_size)
         end # end if !where_str.nil?
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:reverse_paginate_by_id:#{logtag}, curr_res.inspect:#{curr_res.inspect}")
         if result_container.nil?
@@ -60,10 +64,13 @@ module ModelHelper
         last_idx = last_idx-batch_size
         Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:reverse_paginate_by_id:#{logtag}, last_idx:#{last_idx}, total_size:#{total_size}")
       end # end while ...
-      result_container.sort! { |a,b| b.id <=> a.id }
-      # Truncate result size to page_size
-      return result_container[0,page_size]
-#      return result_container
+      truncated_result = nil
+      if !result_container.nil?
+        result_container.sort! { |a,b| b.id <=> a.id }
+        # Truncate result size to page_size
+        truncated_result = result_container[0,page_size]
+      end # end if !result_container.nil?
+      return truncated_result
     end # end reverse_paginate_by_id
 
     def up_more(where_str, last_id, batch_size = Constants::PAGINATE_BATCH_SIZE, logtag = nil)

@@ -477,10 +477,10 @@ class MeantItRelsController < ApplicationController
       end # end elsif !start_id.nil?
       if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.up_more(where_str, meantItRels[0].id.to_i)
 #20111120        up_url = "/meant_it_rels/#{caller_func}?#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
-        up_url_parms = "#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}"
+        up_url_parms = "#{Constants::MEANT_IT_REL_START_ID}=#{(meantItRels[0].id).to_i+1}"
       end # end if !meantItRels.nil? ...
       if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.down_more(where_str, meantItRels[meantItRels.size-1].id.to_i)
-        down_url_parms = "#{Constants::MEANT_IT_REL_LAST_ID}=#{meantItRels[meantItRels.size-1].id}"
+        down_url_parms = "#{Constants::MEANT_IT_REL_LAST_ID}=#{(meantItRels[meantItRels.size-1].id).to_i-1}"
       end # end if !meantItRels.nil? ...
       { MEANT_IT_RELS => meantItRels, UP_URL_PARMS => up_url_parms, DOWN_URL_PARMS => down_url_parms }
     end # end def paginate
