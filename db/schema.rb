@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111113063740) do
+ActiveRecord::Schema.define(:version => 20111120034833) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -196,7 +196,7 @@ ActiveRecord::Schema.define(:version => 20111113063740) do
     t.string   "short_desc"
     t.text     "long_desc"
     t.string   "notify"
-    t.integer  "threshold"
+    t.float    "threshold"
     t.integer  "pii_id"
     t.string   "avatar_file_name"
     t.string   "avatar_content_type"

@@ -34,6 +34,16 @@
       </div>
 
       <div class="field">
+        <%= f.label "Threshold currency:" %><br />
+        <%= f.text_field :currency %>
+      </div>
+
+      <div class="field">
+        <%= f.label "Threshold Value Type:" %>
+        <%= select("pii_property_set", "value_type", ValueTypeValidator::VALUE_TYPE_ENUM) %>
+      </div>
+
+      <div class="field">
         <%= f.label "Formula:" %><br />
         <%= f.text_field :formula %>
       </div>

@@ -1625,7 +1625,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     } # end msg_ok_arr.each ...
   end # end test "subtract currency in str" do
 
-  test "threshold reached" do
+  test "threshold reached value_type_value" do
     # This is ripped from email_bill_entry value_type_value
     sum_thus_far_curr_val = 0
     sum_thus_far_curr_code = nil
@@ -1646,17 +1646,24 @@ p "#AAAAAAA after body_text:#{body_text}"
     # necessary properties to make pii sellable
     hk_pii.pii_property_set = PiiPropertySet.create
     hk_pii.pii_property_set.currency = "SGD"
-    # NOTE: We set this later when we find out what is the value of
-    # email entry so that we can adjust it be exceeded after the 2nd buy
-    # The next email will value is adjusted to (sum_thus_far_curr_val + 1)
-    # so setting threshold at this will ensure it is reached
+    # NOTE: We submit inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy) 
+    # twice with the second time we increase by 1 unit currency
+    # so we adjust threshold to the sum so that 
+    # threshold is exceeded after the 2nd buy
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
     threshold = ControllerHelper.sum_currency_in_str(input_str)
-    hk_pii.pii_property_set.threshold = threshold.to_f*2.to_f+1.to_f
+    threshold_curr_code, threshold_curr_val = ControllerHelper.get_currency_code_and_val(threshold)
+    one_unit_currency = "#{threshold_curr_code}1"
+    threshold = ControllerHelper.sum_currency_in_str("#{threshold} #{threshold} #{one_unit_currency}")
+    threshold_curr_code, threshold_curr_val = ControllerHelper.get_currency_code_and_val(threshold)
+    hk_pii.pii_property_set.threshold = threshold_curr_val
+    hk_pii.pii_property_set.currency = threshold_curr_code
     hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
     hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE
     hk_pii.pii_property_set.save
     assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
-    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
     # Create a new mir by sending another mail
     assert_differences([
       ['InboundEmailLog.count', 0],
@@ -1679,14 +1686,14 @@ p "#AAAAAAA after body_text:#{body_text}"
     hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
     assert_equal(1, hk_pii_email_bill_entries.size)
     assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
     sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
     sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
     assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
     assert_equal(sum_thus_far_curr_code, hk_pii_email_bill_entries[0].currency)
     # Check threshold
-p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
-p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
-    assert(sum_thus_far_curr_val < hk_pii_email_bill_entries[0].pii_property_set.threshold)
+    assert(sum_thus_far_curr_val.to_f < hk_pii_email_bill_entries[0].pii_property_set.threshold)
     assert_nil(hk_pii_email_bill_entries[0].ready_date)
     # If a same email is resubmitted, but with different value!
     body_text = email_elem.body_text
@@ -1735,8 +1742,13 @@ p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_
     assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
     assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
     # Check threshold
-    assert(sum_thus_far_curr_code == hk_pii_email_bill_entries[0].pii_property_set.threshold)
+p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
+p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
+    assert(hk_pii_email_bill_entries[0].pii_property_set.threshold, sum_thus_far_curr_val)
     assert_nil(hk_pii_email_bill_entries[0].ready_date)
+    assert_equal(ControllerHelper.get_price_from_formula(hk_pii.pii_property_set.formula), hk_pii_email_bill_entries[0].price_final)
+    assert_equal(hk_pii.pii_property_set.threshold, hk_pii_email_bill_entries[0].threshold_final)
+    assert_equal(hk_pii.pii_property_set.currency, hk_pii_email_bill_entries[0].currency)
     # Check price_final, threshold_final
     # CODE201111 for VALUE_TYPE_VALUE, price_final is nil
 
@@ -1782,7 +1794,7 @@ p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_
 CODE20111115
     # Bill now returns nil for ONE_TIME
     # Bill now returns nil for RECUR
-  end # end test "threshold reached" do
+  end # end test "threshold reached value_type_value" do
 
   test "aaa" do
     # Test abuse of inbound_emails_200

@@ -616,11 +616,11 @@ module ControllerHelper
       else
         made_mir_count = 0
       end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
-      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date, :price => self.get_price_from_formula(pps.formula), :currency => self.get_currency_from_formula(pps.formula) }]
+      made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date, :price => self.get_price_from_formula(pps.formula), :currency => self.get_currency_from_formula(pps.formula), :threshold_currency => pps.currency }]
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
       pii_to_json = made_pii.to_json
     else
-      pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date, :price, :currency ])
+      pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date, :price, :currency, :threshold_currency ])
     end # end if piis.nil? or piis.empty?
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
     pii_to_json
@@ -1091,6 +1091,13 @@ module ControllerHelper
         return_value
       end
 
+      def threshold_currency
+        @pii_property_set_model ||= get_property_set_model
+        return_value = nil
+        return_value = @pii_property_set_model.currency if !@pii_property_set_model.nil?
+        return_value
+      end
+
       def formula
         @pii_property_set_model ||= get_property_set_model
         return_value = nil
@@ -1362,4 +1369,34 @@ module ControllerHelper
     val ||= default_value
     val
   end # end def self.get_param
+
+  # Takes into account the currency type to determine whether
+  # to prefix value with currency code and use 2 decimal points
+  # Derive the display string from +pii_property_set+ or any object that +responds_to?+ :currency and threshold
+  # +:pii_property_set:+:: pii_property_set to derive from
+  # Return +String+
+  def self.threshold_display_str_from_pps(pii_property_set, logtag=nil)
+    threshold_display_from_attr(pii_property_set.currency, pii_property_set.threshold, logtag)
+  end # end def self.threshold_display_str_from_pps
+
+  # Takes into account the currency type to determine whether
+  # to prefix value with currency code and use 2 decimal points
+  # Derive the display string from attrbutes given
+  # +:currency_code:+:: Currency code
+  # +:currency_value:+:: Currency value
+  # Return +String+
+  def self.threshold_display_str_from_attr(currency_code, currency_val, logtag=nil)
+    return_curr_code = nil
+    return_curr_val = nil
+    if currency_code.nil?
+      if currency_val.to_i == currency_val.to_f
+        return_curr_val = currency_val.to_i
+      else
+        return_curr_val = currency_val
+      end # end if currency_val.to_i == currency_val.to_f
+    else
+      return_curr_val = sprintf('%.2f', currency_val)
+      return_curr_code = currency_code
+    end # end if currency_code.nil?
+  end # end def self.threshold_display_str_from_attr
 end # end module ControllerHelper

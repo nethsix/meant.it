@@ -100,7 +100,7 @@
            Item: <%= pii_virtual.short_desc_data %>, <%= pii_virtual.currency %><%= pii_virtual.price %><br/>
            Type: <%= pii_virtual.threshold_type %><br/>
            Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
-           Target: <%= pii_virtual.mir_count %>/<%= pii_virtual.threshold %>
+           Target: <%= pii_virtual.mir_count %>/<%= ControllerHelper.threshold_display_str_from_attr(pii_virtual.threshold_currency, pii_virtual.threshold) %>
         </td>
 <%
           } # end pii_virtual_stack_arr.each ...
@@ -130,10 +130,9 @@
         <td class='span-<%= item_span %>'>
            SKU: <%= pii_virtual.pii_value %><br/>
            Item: <%= pii_virtual.short_desc_data  %>, <%= pii_virtual.currency %><%= pii_virtual.price %><br/>
-           Target: <%= pii_virtual.threshold %>
            Type: <%= pii_virtual.threshold_type %><br/>
            Date: <%= time_ago_in_words(pii_virtual.after_date) %> ago<br/>
-           Target: <%= pii_virtual.mir_count %>/<%= pii_virtual.threshold %>
+           Target: <%= pii_virtual.mir_count %>/<%= ControllerHelper.threshold_display_str_from_attr(pii_virtual.threshold_currency, pii_virtual.threshold) %>
         </td>
       </tr>
 <%

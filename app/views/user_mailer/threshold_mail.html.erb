@@ -14,4 +14,4 @@ Congratulations!<br/>
 Congratulations <%= name %>!<br/>
 <% end %>
 
-Threshold of <%= @pii.pii_property_set.threshold %> for pii:<%= @pii.pii_value %> (<%= @pii.pii_property_set.short_desc %>) reached!
+Threshold of <%= ControllerHelper.threshold_display_str_from_pps(@pii.pii_property_set) %> for pii:<%= @pii.pii_value %> (<%= @pii.pii_property_set.short_desc %>) reached!

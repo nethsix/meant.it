@@ -8,9 +8,11 @@ class UserMailer < ActionMailer::Base
     pii_value = @pii.pii_value
     short_desc = nil
     threshold = nil
+    threshold_currency = nil
     if !@pii.pii_property_set.nil?
       short_desc = @pii.pii_property_set.short_desc
       threshold = @pii.pii_property_set.threshold
+      threshold_currency = @pii.pii_property_set.currency
     end # end if !@pii.pii_property_set.nil?
     # Get email from pii_property_set
     email = nil
@@ -43,7 +45,7 @@ class UserMailer < ActionMailer::Base
       logger.warn("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:threshold_mail:#{logtag}, pii_value:#{pii_value} has no email") 
       # Don't send notification email
     else
-      mail(:to => email, :subject => "Threshold of #{threshold} for pii:#{pii_value} (#{short_desc}) reached!")
+      mail(:to => email, :subject => "Threshold of #{ControllerHelper.threshold_display_str_from_attr(threshold_currency, threshold)} for pii:#{pii_value} (#{short_desc}) reached!")
     end # end if email.nil? or email.empty?
   end # end def threshold_mail
 
