@@ -475,11 +475,15 @@ class MeantItRelsController < ApplicationController
       elsif !start_id.nil?
         meantItRels = MeantItRel.paginate_by_id(where_str, start_id, page_size, Constants::PAGINATE_BATCH_SIZE, logtag)
       end # end elsif !start_id.nil?
-      if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.up_more(where_str, meantItRels[0].id.to_i)
+      up_more_bool = MeantItRel.up_more(where_str, meantItRels[0].id.to_i)
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_endpoint_nick:#{logtag}, up_more_bool:#{up_more_bool}")
+      if !meantItRels.nil? and !meantItRels.empty? and up_more_bool
 #20111120        up_url = "/meant_it_rels/#{caller_func}?#{Constants::MEANT_IT_REL_START_ID}=#{meantItRels[0].id}&#{Constants::MEANT_IT_REL_PAGE_SIZE}=#{page_size}"
         up_url_parms = "#{Constants::MEANT_IT_REL_START_ID}=#{(meantItRels[0].id).to_i+1}"
       end # end if !meantItRels.nil? ...
-      if !meantItRels.nil? and !meantItRels.empty? and MeantItRel.down_more(where_str, meantItRels[meantItRels.size-1].id.to_i)
+      down_more_bool = MeantItRel.down_more(where_str, meantItRels[meantItRels.size-1].id.to_i-1)
+      logger.info("#{File.basename(__FILE__)}:#{self.class}:show_by_pii_endpoint_nick:#{logtag}, down_more_bool:#{down_more_bool}")
+      if !meantItRels.nil? and !meantItRels.empty? and down_more_bool
         down_url_parms = "#{Constants::MEANT_IT_REL_LAST_ID}=#{(meantItRels[meantItRels.size-1].id).to_i-1}"
       end # end if !meantItRels.nil? ...
       { MEANT_IT_RELS => meantItRels, UP_URL_PARMS => up_url_parms, DOWN_URL_PARMS => down_url_parms }

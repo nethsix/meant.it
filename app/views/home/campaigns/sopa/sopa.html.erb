@@ -7,21 +7,34 @@
   <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
   <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
-  <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<!----  <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script> ---->
+  <script src="/javascripts/jquery-1.4.2.min.js"></script>
+  <script src="/javascripts/meant_it_client_0.1.js"></script>
 <%
   # Configurable variables
   message_type = "protest"
   pii_value = "sopa"
 %>
   <script>
+    // Configurable variables
+//    var PAGE_SIZE = <%= Constants::WEB_MAIN_MAX_MEANTIT %>;
+    var PAGE_SIZE = 1;
+    // START_ID and LAST_ID is null since we just want the latest entries
+    var START_ID = null;
+    var LAST_ID = null;
+    var PII_VALUE = '<%= pii_value %>';
+    var MESSAGE_TYPE = '<%= message_type %>';
+    var LIST_ID = "memberlist";
+    var MORE_ID = "more";
     var TIMEOUT = 50000;
     var POLL_INTERVAL = 10000;
     var BACKOFF = 3;
-    function getJson()
+    // Get unique counts
+    function getJsonForCounts()
     {
       jQuery.ajax({
           type: "GET",
-          url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=<%= message_type %>&pii_value_input=<%= pii_value %>",
+          url: "/piis/show_by_message_type_uniq_sender_count.json?<%= Constants::MESSAGE_TYPE_INPUT %>="+MESSAGE_TYPE+"&<%= Constants::PII_VALUE_INPUT %>="+PII_VALUE,
           async: true, /* If set to non-async, browser shows page as "Loading.."*/
           cache: false,
           timeout:TIMEOUT, /* Timeout in ms */
@@ -48,14 +61,27 @@
           error: function(XMLHttpRequest, textStatus, errorThrown){
               alert("error", textStatus + " (" + errorThrown + ")");
               setTimeout(
-                  'getJson()', /* Try again after.. */
+                  'getJsonForCounts()', /* Try again after.. */
                   POLL_INTERVAL*BACKOFF); /* milliseconds */
           },
       });
     };
 
     jQuery(document).ready(function(){
-      getJson(); /* Start the inital request */
+      setVisibility(MORE_ID, 'hidden');
+      getJsonForCounts(); /* Request for uniq counts */
+      // Command pattern
+      var func1 = function(data) {
+                    showMirs(data, LIST_ID, null, null);
+                    elem = data[0];
+                    down_url_parms = elem.meant_it_rel.down_url_parms;
+                    if (down_url_parms != null)
+                    {
+                      var more_obj = jQuery('#'+MORE_ID);
+                      setVisibility(MORE_ID, 'visible');
+                    } // end if (down_url_parms != null)
+                  };
+      arr = getJsonForMirs(func1, PII_VALUE, MESSAGE_TYPE, PAGE_SIZE, START_ID, LAST_ID, TIMEOUT, POLL_INTERVAL, BACKOFF); /* Start the inital request */
     });
   </script>
 </head>
@@ -142,25 +168,9 @@
           <tr>
             <td>
               Latest <%= test_num %> crews:
-                <ul><li>
-                <%= render :partial => "shared/meant_it_rel", :spacer_template => "shared/li_ruler", :collection => meantItRels_limit_arr %>
-<%
-#  if meantItRels_arr.size > Constants::WEB_MAIN_MAX_MEANTIT
-  if meantItRels_arr.size > test_num
-%>
-                </li>
-                <li>
-                  <a href='/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>'>More...</a>
-                </li>
+              <ul id="memberlist">
               </ul>
-<%
-  else
-%>
-                </li></ul>
-<%
-  end # end if meantItRels_arr.size > Constants::WEB_MAIN_MAX_MEANTIT
-%>
-                </li></ul>
+              <span id='more'><a href='/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>'>More...</a></span>
             </td>
           <tr>
         </tbody>

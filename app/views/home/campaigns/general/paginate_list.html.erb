@@ -7,8 +7,12 @@
   <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
   <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
-  <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<!---  <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script> --->
+  <script src="/javascripts/jquery-1.4.2.min.js"></script>
+  <script src="/javascripts/meant_it_client_0.1.js"></script> 
 <%
+  # This needs to be provided by server when this page is accessed
+  # or just provide them as javascript variables (see below)
   message_type = params[Constants::MESSAGE_TYPE_INPUT]
   pii_value = params[Constants::PII_VALUE_INPUT]
   pg_size = params[Constants::MEANT_IT_REL_PAGE_SIZE]
@@ -22,88 +26,27 @@
     var LAST_ID = "<%= params[Constants::MEANT_IT_REL_LAST_ID] %>";
     var START_ID = "<%= params[Constants::MEANT_IT_REL_START_ID] %>";
     var THIS_PAGE_URL = "/campaigns/general/paginate_list?<%= Constants::MESSAGE_TYPE_INPUT %>="+MESSAGE_TYPE+"&<%= Constants::PII_VALUE_INPUT %>="+PII_VALUE;
-    var LIST_ID = "membership";
+    var LIST_ID = "memberlist";
     var UP_ARROW_ID = "up_arrow";
     var DOWN_ARROW_ID = "down_arrow";
     var TIMEOUT = 50000;
     var POLL_INTERVAL = 10000;
     var BACKOFF = 3;
-    // Wrap obj around <a> tags
-    function makeClickable(obj_id, url) {
-      var obj = jQuery("#"+obj_id)
-      var inner_text = obj.text();
-      var wrapped_inner_text = "<a href='"+url+"' >"+inner_text+"</a>";
-      obj.html(wrapped_inner_text);
-    } // end function setVisible
-    // Visibility can be 'hidden', 'visible'
-    function setVisibility(obj_id, visibility) {
-      jQuery("#"+obj_id).css('visibility', visibility);
-    } // end function setVisible
-    // Add li elements to ul
-    function addToList(list_id, mir_id, src, message_type, pii_value, message) {
-      var list_ul = jQuery('#'+list_id);
-      var str = mir_id+" "+src+" "+message_type+" "+pii_value;
-      if (message != null)
-      {
-        str += " saying '"+message+"'";
-      } // end if (message != null)
-      list_ul.append("<li>"+str+"</li>");
-    } // end function addToList
-    function getJson(list_id, up_arrow_id, down_arrow_id)
-    {
-      jQuery.ajax({
-          type: "GET",
-          url: "/meant_it_rels/show_in_by_pii.json?<%= Constants::MESSAGE_TYPE_INPUT %>="+MESSAGE_TYPE+"&<%= Constants::PII_VALUE_INPUT %>="+PII_VALUE+"&<%= Constants::MEANT_IT_REL_PAGE_SIZE %>="+PAGE_SIZE+"&<%= Constants::MEANT_IT_REL_START_ID %>="+START_ID+"&<%= Constants::MEANT_IT_REL_LAST_ID %>="+LAST_ID,
-          async: true, /* If set to non-async, browser shows page as "Loading.."*/
-          cache: false,
-          timeout:TIMEOUT, /* Timeout in ms */
-
-          success: function(data)
-          {
-//DEBUG              alert("data:"+data);
-              var up_url_parms;
-              var down_url_parms; 
-              jQuery.each(data, function(key, val)
-                {
-//DEBUG                  alert("key:"+key+", val:"+val);
-addToList('memberlist', val.meant_it_rel.id, val.meant_it_rel.src_endpoint_id, val.meant_it_rel.message_type, '<%= pii_value %>', val.meant_it_rel.message);
-                  up_url_parms = val.meant_it_rel.up_url_parms;
-                  down_url_parms = val.meant_it_rel.down_url_parms;
-//DEBUG                  alert('up_url_parms:'+up_url_parms);
-//DEBUG                  alert('down_url_parms:'+down_url_parms);
-                }
-              );
-              if (up_url_parms != null)
-              {
-                var up_url = THIS_PAGE_URL+"&"+up_url_parms;
-//DEBUG               alert('up_url:'+up_url);
-                setVisibility(up_arrow_id, "visible");
-                makeClickable(up_arrow_id, up_url);
-              } // end if (up_url_parms != null)
-              if (down_url_parms != null)
-              {
-                var down_url = THIS_PAGE_URL+"&"+down_url_parms;
-//DEBUG               alert('down_url:'+down_url);
-                setVisibility(down_arrow_id, "visible");
-                makeClickable(down_arrow_id, down_url);
-              } // end if (down_url_parms != null)
-            },
-          error: function(XMLHttpRequest, textStatus, errorThrown){
-              alert("error", textStatus + " (" + errorThrown + ")");
-              setTimeout(
-                  function() {
-                  'getJson(list_id, up_arrow_id, down_arrow_id)'
-                  }, /* Try again after.. */
-                  POLL_INTERVAL*BACKOFF); /* milliseconds */
-          },
-      });
-    };
 
     jQuery(document).ready(function(){
       // Hide up/down arrows
       setVisibility(UP_ARROW_ID, "hidden");
       setVisibility(DOWN_ARROW_ID, "hidden");
-      getJson(LIST_ID, UP_ARROW_ID, DOWN_ARROW_ID); /* Start the inital request */
+      // Command pattern
+      var func1 = function(data) {
+                    showMirs(data, LIST_ID, UP_ARROW_ID, DOWN_ARROW_ID);
+                    // All of them have the same up_url_parms and down_url_parms;
+                    elem = data[0];
+                    up_url_parms = elem.meant_it_rel.up_url_parms;
+                    down_url_parms = elem.meant_it_rel.down_url_parms;
+                    addPagination(THIS_PAGE_URL, UP_ARROW_ID, DOWN_ARROW_ID, up_url_parms, down_url_parms);
+                  };
+      arr = getJsonForMirs(func1, PII_VALUE, MESSAGE_TYPE, PAGE_SIZE, START_ID, LAST_ID, TIMEOUT, POLL_INTERVAL, BACKOFF); /* Start the inital request */
     });
   </script>
 </head>

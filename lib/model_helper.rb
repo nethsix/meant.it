@@ -97,9 +97,9 @@ module ModelHelper
       next_found = false
       while (last_idx >= end_id and !next_found)
         if where_str.nil?
-          curr_res = self.where("id < ? and id >= ?", last_idx, last_idx-batch_size) 
+          curr_res = self.where("id <= ? and id > ?", last_idx, last_idx-batch_size) 
         else
-          curr_res = self.where("id < ? and id >= ? and #{where_str}", last_idx, last_idx-batch_size)
+          curr_res = self.where("id <= ? and id > ? and #{where_str}", last_idx, last_idx-batch_size)
         end # end if !where_str.nil?
         next_found = true if !curr_res.nil? and curr_res.size > 0
         last_idx = last_idx-batch_size

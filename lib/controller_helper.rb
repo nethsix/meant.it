@@ -826,13 +826,17 @@ module ControllerHelper
       if !pps.nil?
         if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
           start_bill_date = pps.active_date
+          Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:THRESHOLD_TYPE_ONETIME, start_bill_date.inspect:#{start_bill_date.inspect}")
         elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
           start_bill = pps.last_bill("ready_date")
-          if !start_bill.nil?
+#20111125          if !start_bill.nil?
+          if !start_bill.nil? and !start_bill.ready_date.nil?
             start_bill_date = start_bill.ready_date
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:THRESHOLD_TYPE_RECUR, start_bill.inspect:#{start_bill.inspect}")
           else
             # No billing etc., yet so use current date
             start_bill_date = pii.pii_property_set.active_date
+            Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:THRESHOLD_TYPE_RECUR, pps.active_date.inspect:#{pps.active_date.inspect}")
           end # end if !after_date_obj.nil?
         else
            Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
@@ -846,6 +850,7 @@ module ControllerHelper
       Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, no such Pii for pii_value:#{pii_value}")
       raise ArgumentError, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, no such Pii for pii_value:#{pii_value}"
     end # end if !pii.nil? and !pii.empty?
+    Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:get_bill_dates_by_pii:#{logtag}, start_bill_date.inspect:#{start_bill_date.inspect}")
     start_bill_date
   end # end def self.get_bill_dates_by_pii
 
@@ -1376,7 +1381,7 @@ module ControllerHelper
   # +:pii_property_set:+:: pii_property_set to derive from
   # Return +String+
   def self.threshold_display_str_from_pps(pii_property_set, logtag=nil)
-    threshold_display_from_attr(pii_property_set.currency, pii_property_set.threshold, logtag)
+    self.threshold_display_str_from_attr(pii_property_set.currency, pii_property_set.threshold, logtag)
   end # end def self.threshold_display_str_from_pps
 
   # Takes into account the currency type to determine whether

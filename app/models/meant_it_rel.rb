@@ -189,10 +189,10 @@ class MeantItRel < ActiveRecord::Base
               email_bill_entry = email_bill.email_bill_entries.create(:pii_property_set_id => dst_endpoint_pii.pii_property_set.id)
               # Add this mir to email_bill_entry
               email_bill_entry.meant_it_rels << self
-              unless email_bill_entry.save
-                logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not save mir.inspect:#{mir.inspect} to email_bill_entry.inspect:#{email_bill_entry.inspect}")
-                raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not save mir.inspect:#{mir.inspect} to email_bill_entry.inspect:#{email_bill_entry.inspect}"
-              end # end unless email_bill_entry.save
+#MOVED_TO_END              unless email_bill_entry.save
+#MOVED_TO_END                logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not save mir.inspect:#{mir.inspect} to email_bill_entry.inspect:#{email_bill_entry.inspect}")
+#MOVED_TO_END                raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not save mir.inspect:#{mir.inspect} to email_bill_entry.inspect:#{email_bill_entry.inspect}"
+#MOVED_TO_END              end # end unless email_bill_entry.save
               logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, created email_bill_entry for pii_value:#{dst_endpoint_pii.pii_value} and added self.inspect:#{self.inspect}")
               email_bill_entry_qty_str = add_value_by_value_type(orig_msg, dst_endpoint_pii_pps_value_type)
               logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, email_bill_entry_qty_str:#{email_bill_entry_qty_str}")
@@ -334,6 +334,7 @@ class MeantItRel < ActiveRecord::Base
               email_bill_entry.price_final = ControllerHelper.get_price_from_formula(dst_endpoint_pii.pii_property_set.formula) if dst_endpoint_pii_pps_value_type == ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ or dst_endpoint_pii_pps_value_type == ValueTypeValidator::VALUE_TYPE_COUNT
               email_bill_entry.threshold_final = dst_endpoint_pii.pii_property_set.threshold
               logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, pii_value:#{dst_endpoint_pii.pii_value} met set threshold of #{dst_endpoint_pii.pii_property_set.threshold}")
+              logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, email_bill_entry.threshold_final:#{email_bill_entry.threshold_final}, email_bill_entry.price_final:#{email_bill_entry.price_final}")
               pps = dst_endpoint_pii.pii_property_set
               # If onetime, then set status to LIKER_STATUS_BILLED
               if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
@@ -358,6 +359,10 @@ class MeantItRel < ActiveRecord::Base
               UserMailer.threshold_mail(pii_0).deliver
             end # end if email_bill_entry.qty.to_f >= dst_endpoint_pii_pps_threshold_val.to_f
           end # end if !dst_endpoint_pii.pii_property_set.nil? and  ...
+          unless email_bill_entry.save
+            logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not email_bill_entry.errors.inspect:#{email_bill_entry.errors.inspect}")
+            raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, could not email_bill_entry.errors.inspect:#{email_bill_entry.errors.inspect}"
+           end # end unless email_bill_entry.save
         end # end if ControllerHelper.sellable_pii(dst_endpoint_pii)
       end # end if self.message_type ==  ... MEANT_IT_MESSAGE_LIKE
     end # end def check_pii_property_set_threshold_v2

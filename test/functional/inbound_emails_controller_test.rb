@@ -1625,7 +1625,11 @@ p "#AAAAAAA after body_text:#{body_text}"
     } # end msg_ok_arr.each ...
   end # end test "subtract currency in str" do
 
-  test "threshold reached value_type_value" do
+  # We use this for (VALUE_TYPE_VALUE, VALUE_TYPE_VALUE_UNIQ)
+  # and (THRESHOLD_TYPE_ONETIME, THRESHOLD_TYPE_RECUR)
+  def threshold_reached_value_type_value_xxx(value_type, threshold_type)
+    # Used to prefix sender email to change it
+    new_email_prefix = "new_"
     # This is ripped from email_bill_entry value_type_value
     sum_thus_far_curr_val = 0
     sum_thus_far_curr_code = nil
@@ -1661,7 +1665,8 @@ p "#AAAAAAA after body_text:#{body_text}"
     hk_pii.pii_property_set.threshold = threshold_curr_val
     hk_pii.pii_property_set.currency = threshold_curr_code
     hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
-    hk_pii.pii_property_set.value_type = ValueTypeValidator::VALUE_TYPE_VALUE
+    hk_pii.pii_property_set.value_type = value_type
+    hk_pii.pii_property_set.threshold_type = threshold_type
     hk_pii.pii_property_set.save
     assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
     # Create a new mir by sending another mail
@@ -1688,12 +1693,17 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
     input_str = email_elem.subject
     input_str ||= email_elem.body_text
-    sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
-    sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
-    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
-    assert_equal(sum_thus_far_curr_code, hk_pii_email_bill_entries[0].currency)
+#AAAAA    sum_thus_far_str = ControllerHelper.sum_currency_in_str(input_str)
+    first_email_curr_str = ControllerHelper.sum_currency_in_str(input_str)
+#AAAAA    sum_thus_far_curr_code, sum_thus_far_curr_val = ControllerHelper.get_currency_code_and_val(sum_thus_far_str)
+    first_email_curr_code, first_email_curr_val = ControllerHelper.get_currency_code_and_val(first_email_curr_str)
+#AAAAA    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+    assert_equal(first_email_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
+#AAAAA    assert_equal(sum_thus_far_curr_code, hk_pii_email_bill_entries[0].currency)
+    assert_equal(first_email_curr_code, hk_pii_email_bill_entries[0].currency)
     # Check threshold
-    assert(sum_thus_far_curr_val.to_f < hk_pii_email_bill_entries[0].pii_property_set.threshold)
+#AAAAA    assert(sum_thus_far_curr_val.to_f < hk_pii_email_bill_entries[0].pii_property_set.threshold)
+    assert(first_email_curr_val.to_f < hk_pii_email_bill_entries[0].pii_property_set.threshold)
     assert_nil(hk_pii_email_bill_entries[0].ready_date)
     # If a same email is resubmitted, but with different value!
     body_text = email_elem.body_text
@@ -1702,10 +1712,15 @@ p "#AAAAAAA after body_text:#{body_text}"
     pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
     curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
     # Just take one value
-    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
-    new_curr_f = new_curr_curr_val.to_f + 1.0
-    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
-    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+#AAAAA    new_curr_curr_code, new_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    prev_curr_curr_code, prev_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    second_email_curr_code = prev_curr_curr_code
+#AAAAA    new_curr_f = new_curr_curr_val.to_f + 1.0
+    second_email_curr_val = prev_curr_curr_val.to_f + 1.0
+#AAAAA    new_curr_str = "#{new_curr_curr_code}#{new_curr_f}"
+    second_email_curr_str = "#{second_email_curr_code}#{second_email_curr_val}"
+#AAAAA    email_elem.body_text = ":#{pii_str} #{new_curr_str}"
+    email_elem.body_text = ":#{pii_str} #{second_email_curr_str}"
     p "new email_elem.body_text:#{email_elem.body_text}"
     assert_differences([
       ['InboundEmailLog.count', 0],
@@ -1726,46 +1741,198 @@ p "#AAAAAAA after body_text:#{body_text}"
     hk_pii.reload
     hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
     assert_equal(1, hk_pii_email_bill_entries.size)
-    # Add one entry even tho' the sender is same 
-    # since value_type is VALUE_TYPE_VALUE
-    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
-    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
-    src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
-    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    if value_type == ValueTypeValidator::VALUE_TYPE_VALUE
+      # Add one entry even tho' the sender is same 
+      # since value_type is VALUE_TYPE_VALUE
+      assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+      src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+      src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+      # The qty should be sum of 1st+2nd email if VALUE_TYPE_VALUE,
+      sum_thus_far_curr_val = first_email_curr_val + second_email_curr_val
+    else
+      # No entry is added
+      # since value_type is VALUE_TYPE_VALUE_UNIQ
+      assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+      # Send another email
+      email_addy_hash = ControllerHelper.parse_email(email_elem.from)
+      email_addy = email_addy_hash[ControllerHelper::EMAIL_STR]
+      email_elem.from = "#{new_email_prefix}#{email_addy}"
+      src_ep_1 = email_elem.from
+p "!!!!!!!!!!!!!email_elem.attributes.inspect:#{email_elem.attributes.inspect}"
+      assert_differences([
+        ['InboundEmailLog.count', 0],
+        ['InboundEmail.count', 1],
+        ['EndPoint.count', 2], # new sender and the nick for destination
+        ['Pii.count', 1], # no new sender
+        ['Tag.count', 0], # Zero new tag, since we're using same currency tag
+        ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+        ['MeantItRel.count', 1],
+        ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+        ['EmailBillEntry.count', 0] # No new bill
+      ]) do
+        # Set the path so that the "from:" email is used
+        # otherwise sender is anonymous
+        @request.path = Constants::SENDGRID_PARSE_URL
+        post :create, :inbound_email => email_elem.attributes
+      end # end assert_differences
+      hk_pii.reload
+      hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+      # The qty should be sum of 2nd+3rd if VALUE_TYPE_VALUE_UNIQ
+      # NOTE: 3rd email is just 2nd email with from changed
+      sum_thus_far_curr_val = second_email_curr_val + second_email_curr_val
+    end # end elsif value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+    hk_pii_mirs_id_desc = hk_pii_email_bill_entries[0].meant_it_rels.order("id desc")
+#AAAAA    mir_src_pii = hk_pii_email_bill_entries[0].meant_it_rels[0].src_endpoint.pii
+    mir_src_pii = hk_pii_mirs_id_desc[0].src_endpoint.pii
     assert_equal(src_ep_1, mir_src_pii.pii_value)
-    # The sum of first email and second email value will be used
-    sum_thus_far_curr_val += new_curr_f
+#AAAAA    sum_thus_far_curr_val += new_curr_f
     assert_equal(sum_thus_far_curr_val, hk_pii_email_bill_entries[0].qty)
     # Increase in the number of mirs
     assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
     # The currency code of first email and second email value are the same
-    assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
-    assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
+#AAAAA    assert_equal(sum_thus_far_curr_code, new_curr_curr_code)
+    assert_equal(first_email_curr_code, second_email_curr_code)
+#AAAAA    assert_equal(new_curr_curr_code, hk_pii_email_bill_entries[0].currency)
+    assert_equal(second_email_curr_code, hk_pii_email_bill_entries[0].currency)
     # Check threshold
 p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
 p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
     assert(hk_pii_email_bill_entries[0].pii_property_set.threshold, sum_thus_far_curr_val)
-    assert_nil(hk_pii_email_bill_entries[0].ready_date)
-    assert_equal(ControllerHelper.get_price_from_formula(hk_pii.pii_property_set.formula), hk_pii_email_bill_entries[0].price_final)
+    assert_not_nil(hk_pii_email_bill_entries[0].ready_date)
+    # Check price_final, threshold_final
+    if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ)
+      # For VALUE_TYPE_VALUE_xxx, there is no price_final
+      assert_nil(hk_pii_email_bill_entries[0].price_final)
+    else
+      assert_equal(ControllerHelper.get_price_from_formula(hk_pii.pii_property_set.formula), hk_pii_email_bill_entries[0].price_final)
+    end # end if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_UNIQ)
     assert_equal(hk_pii.pii_property_set.threshold, hk_pii_email_bill_entries[0].threshold_final)
     assert_equal(hk_pii.pii_property_set.currency, hk_pii_email_bill_entries[0].currency)
-    # Check price_final, threshold_final
-    # CODE201111 for VALUE_TYPE_VALUE, price_final is nil
+    if threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+      # If threshold_type is onetime then pii becomes inactive
+      assert_equal(StatusTypeValidator::STATUS_INACTIVE, hk_pii.pii_property_set.status)
+      new_bill_ready_date = hk_pii.pii_property_set.email_bill_entries[0].ready_date
+      assert_not_nil(new_bill_ready_date)
+      # NOTE: For ONETIME, the active_date is <= ready_date since
+      # active_date is set only when the pii is created when active state
+      # is re-set
+      new_active_date = ControllerHelper.get_bill_dates_by_pii(hk_pii)
+      assert_not_nil(new_active_date)
+      assert(new_bill_ready_date >= new_active_date)
+      assert_in_delta(new_bill_ready_date, new_active_date, 2)
+    else
+      # If threshold_type is recur then check billing
+      # Since this is recur, status should remain active
+      assert_equal(StatusTypeValidator::STATUS_ACTIVE, hk_pii.pii_property_set.status)
+      new_bill_ready_date = hk_pii.pii_property_set.email_bill_entries[0].ready_date
+      assert_not_nil(new_bill_ready_date)
+      new_start_bill_date = ControllerHelper.get_bill_dates_by_pii(hk_pii)
+      # NOTE: For now new bill dates are created only when billed_date is
+      # set, i.e., user contacts their customers through emails
+      assert(new_bill_ready_date >= new_start_bill_date)
+      assert_in_delta(new_bill_ready_date, new_start_bill_date, 2)
+    end # end if threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+  end # end def threshold_reached_value_type_value_xxx
 
-
-
-    # If a different email is resubmitted
-    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy2)
+  # We use this for (VALUE_TYPE_COUNT, VALUE_TYPE_COUNT_UNIQ)
+  # and (THRESHOLD_TYPE_ONETIME, THRESHOLD_TYPE_RECUR)
+  def threshold_reached_value_type_count_xxx(value_type, threshold_type)
+    # Used to prefix sender email to change it
+    new_email_prefix = "new_"
+    # This is ripped from email_bill_entry value_type_value
+    sum_thus_far_curr_val = 0
+    sum_thus_far_curr_code = nil
+    sum_thus_far_str = nil
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email)
+    # Set the path so that the "from:" email is used
+    # otherwise sender is anonymous
+    @request.path = Constants::SENDGRID_PARSE_URL
+    post :create, :inbound_email => email_elem.attributes
+    # Get the new pii
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    pii_value = meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    hk_pii = Pii.find_by_pii_value(pii_value)
+    assert_equal(false, ControllerHelper.sellable_pii(hk_pii), "newly created pii is not sellable since no pii_property_set")
+    # Now create pii_propery_set and fill in the 
+    # necessary properties to make pii sellable
+    hk_pii.pii_property_set = PiiPropertySet.create
+    hk_pii.pii_property_set.currency = nil
+    # NOTE: We submit inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy) 
+    # twice with the second time we increase by 1 unit currency
+    # so we adjust threshold to the sum so that 
+    # threshold is exceeded after the 2nd buy
+    email_elem = inbound_emails(:nick_n_xxx_y_yyy_n_tags_y_currency_sender_idable_inbound_email_buy)
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    threshold = ControllerHelper.sum_currency_in_str(input_str)
+    threshold_curr_code, threshold_curr_val = ControllerHelper.get_currency_code_and_val(threshold)
+    one_unit_currency = "#{threshold_curr_code}1"
+    threshold = ControllerHelper.sum_currency_in_str("#{threshold} #{threshold} #{one_unit_currency}")
+    threshold_curr_code, threshold_curr_val = ControllerHelper.get_currency_code_and_val(threshold)
+    hk_pii.pii_property_set.threshold = 2
+    hk_pii.pii_property_set.currency = nil
+    hk_pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
+    hk_pii.pii_property_set.value_type = value_type
+    hk_pii.pii_property_set.threshold_type = threshold_type
+    hk_pii.pii_property_set.save
+    assert_equal(true, ControllerHelper.sellable_pii(hk_pii), "pii with appropriate fields filled in is sellable")
+    # Create a new mir by sending another mail
     assert_differences([
       ['InboundEmailLog.count', 0],
       ['InboundEmail.count', 1],
       ['EndPoint.count', 2], # for new sender and the nick for destination
       ['Pii.count', 1], # for new sender
-      ['Tag.count', 1], # New tag because of new currency
-      ['EndPointTagRel.count', 1],
+      ['Tag.count', 1], # New tag, i.e., each price is a new tag
+      ['EndPointTagRel.count', 1], # New tag to endpoint
       ['MeantItRel.count', 1],
       ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
-      ['EmailBillEntry.count', 0]
+      ['EmailBillEntry.count', 1]
+    ]) do
+      # Set the path so that the "from:" email is used
+      # otherwise sender is anonymous
+      @request.path = Constants::SENDGRID_PARSE_URL
+      post :create, :inbound_email => email_elem.attributes
+    end # end assert_differences
+    hk_pii.reload
+    # Check the value of email_bill_entry.qty
+    hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+    assert_equal(1, hk_pii_email_bill_entries.size)
+    assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    input_str = email_elem.subject
+    input_str ||= email_elem.body_text
+    first_email_curr_str = ControllerHelper.sum_currency_in_str(input_str) #AAAAA
+    first_email_curr_code, first_email_curr_val = ControllerHelper.get_currency_code_and_val(first_email_curr_str) #AAAAA
+    # Assert that we have now one entry
+    assert_equal(hk_pii_email_bill_entries.size, hk_pii_email_bill_entries[0].qty)
+    assert_equal(nil, hk_pii_email_bill_entries[0].currency)
+    # Check threshold
+    assert(hk_pii_email_bill_entries[0].qty < hk_pii_email_bill_entries[0].pii_property_set.threshold)
+    assert_nil(hk_pii_email_bill_entries[0].ready_date)
+    # If a same email is resubmitted, but with different value!
+    body_text = email_elem.body_text
+    # Get pii and currency
+    email_body_hash = ControllerHelper.parse_meant_it_input(body_text)
+    pii_str = email_body_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    curr_arr = ControllerHelper.get_currency_arr_from_str(body_text)
+    # Just take one value
+    prev_curr_curr_code, prev_curr_curr_val = ControllerHelper.get_currency_code_and_val(curr_arr[0])
+    second_email_curr_code = prev_curr_curr_code
+    second_email_curr_val = prev_curr_curr_val.to_f + 1.0
+    second_email_curr_str = "#{second_email_curr_code}#{second_email_curr_val}"
+    email_elem.body_text = ":#{pii_str} #{second_email_curr_str}"
+    p "new email_elem.body_text:#{email_elem.body_text}"
+    assert_differences([
+      ['InboundEmailLog.count', 0],
+      ['InboundEmail.count', 1],
+      ['EndPoint.count', 0], # no new sender and the nick for destination
+      ['Pii.count', 0], # no new sender
+      ['Tag.count', 1], # One more tag, i.e., the new curr value
+      ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+      ['MeantItRel.count', 1],
+      ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+      ['EmailBillEntry.count', 0] # No new bill
     ]) do
       # Set the path so that the "from:" email is used
       # otherwise sender is anonymous
@@ -1775,26 +1942,136 @@ p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_
     hk_pii.reload
     hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
     assert_equal(1, hk_pii_email_bill_entries.size)
-    # Increase in mirs in email_bill_entry because sender is different
-    assert_equal(3, hk_pii_email_bill_entries[0].meant_it_rels.size)
-    src_ep_hash = ControllerHelper.parse_email(email_elem.from)
-    src_ep_2 = src_ep_hash[ControllerHelper::EMAIL_STR]
-    src_ep_arr = []
-    hk_pii_email_bill_entries[0].meant_it_rels.each { |mir_elem|
-      src_ep_arr.push(mir_elem.src_endpoint.pii.pii_value)
-    } # end hk_pii_email_bill_entries[0].meant_it_rels.each ...
-    assert_equal(true, src_ep_arr.include?(src_ep_1))
-    assert_equal(true, src_ep_arr.include?(src_ep_2))
-    new_curr_2_str = ControllerHelper.sum_currency_in_str("#{email_elem.body_text}")
-    new_curr_2_curr_code, new_curr_2_curr_val = ControllerHelper.get_currency_code_and_val(new_curr_2_str)
-    sum_thus_far_curr_val += new_curr_2_curr_val
-    assert_equal(sum_thus_far_curr_val.to_f, hk_pii_email_bill_entries[0].qty)
-    assert_equal(new_curr_2_curr_code, hk_pii_email_bill_entries[0].currency)
-    # email_bill_entry.ready_date
-CODE20111115
-    # Bill now returns nil for ONE_TIME
-    # Bill now returns nil for RECUR
-  end # end test "threshold reached value_type_value" do
+    if value_type == ValueTypeValidator::VALUE_TYPE_COUNT
+      # Add one entry even tho' the sender is same 
+      # since value_type is VALUE_TYPE_VALUE
+      assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+      src_ep_hash = ControllerHelper.parse_email(email_elem.from)
+      src_ep_1 = src_ep_hash[ControllerHelper::EMAIL_STR]
+      # The qty should be sum of 1st+2nd email if VALUE_TYPE_VALUE,
+      sum_thus_far_curr_val = first_email_curr_val + second_email_curr_val
+    else
+      # No entry is added
+      # since value_type is VALUE_TYPE_VALUE_UNIQ
+      assert_equal(1, hk_pii_email_bill_entries[0].meant_it_rels.size)
+      # Send another email
+      email_addy_hash = ControllerHelper.parse_email(email_elem.from)
+      email_addy = email_addy_hash[ControllerHelper::EMAIL_STR]
+      email_elem.from = "#{new_email_prefix}#{email_addy}"
+      src_ep_1 = email_elem.from
+p "!!!!!!!!!!!!!email_elem.attributes.inspect:#{email_elem.attributes.inspect}"
+      assert_differences([
+        ['InboundEmailLog.count', 0],
+        ['InboundEmail.count', 1],
+        ['EndPoint.count', 2], # new sender and the nick for destination
+        ['Pii.count', 1], # no new sender
+        ['Tag.count', 0], # Zero new tag, since we're using same currency tag
+        ['EndPointTagRel.count', 1], # One more tag => one more EndPointTagRel
+        ['MeantItRel.count', 1],
+        ['MeantItMoodTagRel.count', 1], # We create a link from MeantItRel to Tag
+        ['EmailBillEntry.count', 0] # No new bill
+      ]) do
+        # Set the path so that the "from:" email is used
+        # otherwise sender is anonymous
+        @request.path = Constants::SENDGRID_PARSE_URL
+        post :create, :inbound_email => email_elem.attributes
+      end # end assert_differences
+      hk_pii.reload
+      hk_pii_email_bill_entries = hk_pii.pii_property_set.email_bill_entries
+      # The qty should be sum of 2nd+3rd if VALUE_TYPE_VALUE_UNIQ
+      # NOTE: 3rd email is just 2nd email with from changed
+      sum_thus_far_curr_val = second_email_curr_val + second_email_curr_val
+    end # end elsif value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+    hk_pii_mirs_id_desc = hk_pii_email_bill_entries[0].meant_it_rels.order("id desc")
+    mir_src_pii = hk_pii_mirs_id_desc[0].src_endpoint.pii
+    assert_equal(src_ep_1, mir_src_pii.pii_value)
+    assert_equal(2, hk_pii_email_bill_entries[0].qty)
+    # Increase in the number of mirs
+    assert_equal(2, hk_pii_email_bill_entries[0].meant_it_rels.size)
+    assert_equal(nil, hk_pii_email_bill_entries[0].currency)
+    # Check threshold
+p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
+p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
+    assert(hk_pii_email_bill_entries[0].pii_property_set.threshold, hk_pii_email_bill_entries[0].qty)
+    assert_not_nil(hk_pii_email_bill_entries[0].ready_date)
+    # Check price_final, threshold_final
+    if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ)
+      # For VALUE_TYPE_VALUE_xxx, there is no price_final
+      assert_nil(hk_pii_email_bill_entries[0].price_final)
+    else
+      assert_equal(ControllerHelper.get_price_from_formula(hk_pii.pii_property_set.formula), hk_pii_email_bill_entries[0].price_final)
+    end # end if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_UNIQ)
+    assert_equal(hk_pii.pii_property_set.threshold, hk_pii_email_bill_entries[0].threshold_final)
+    assert_equal(hk_pii.pii_property_set.currency, hk_pii_email_bill_entries[0].currency)
+    if threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+      # If threshold_type is onetime then pii becomes inactive
+      assert_equal(StatusTypeValidator::STATUS_INACTIVE, hk_pii.pii_property_set.status)
+      new_bill_ready_date = hk_pii.pii_property_set.email_bill_entries[0].ready_date
+      assert_not_nil(new_bill_ready_date)
+      # NOTE: For ONETIME, the active_date is <= ready_date since
+      # active_date is set only when the pii is created when active state
+      # is re-set
+      new_active_date = ControllerHelper.get_bill_dates_by_pii(hk_pii)
+      assert_not_nil(new_active_date)
+      assert(new_bill_ready_date >= new_active_date)
+      assert_in_delta(new_bill_ready_date, new_active_date, 2)
+    else
+      # If threshold_type is recur then check billing
+      # Since this is recur, status should remain active
+      assert_equal(StatusTypeValidator::STATUS_ACTIVE, hk_pii.pii_property_set.status)
+      new_bill_ready_date = hk_pii.pii_property_set.email_bill_entries[0].ready_date
+      assert_not_nil(new_bill_ready_date)
+      new_start_bill_date = ControllerHelper.get_bill_dates_by_pii(hk_pii)
+      # NOTE: For now new bill dates are created only when billed_date is
+      # set, i.e., user contacts their customers through emails
+      assert(new_bill_ready_date >= new_start_bill_date)
+      assert_in_delta(new_bill_ready_date, new_start_bill_date, 2)
+    end # end if threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
+  end # end def threshold_reached_value_type_count_xxx
+
+  test "threshold reached value_type_value recur" do
+    threshold_reached_value_type_value_xxx(ValueTypeValidator::VALUE_TYPE_VALUE, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR)
+  end # end test "threshold reached value_type_value recur" do
+
+  test "threshold reached value_type_value_uniq recur" do
+    threshold_reached_value_type_value_xxx(ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR)
+  end # end test "threshold reached value_type_value_uniq recur" do
+
+  test "threshold reached value_type_value onetime" do
+    threshold_reached_value_type_value_xxx(ValueTypeValidator::VALUE_TYPE_VALUE, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME)
+  end # end test "threshold reached value_type_value onetime" do
+
+  test "threshold reached value_type_value_uniq onetime" do
+    threshold_reached_value_type_value_xxx(ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME)
+  end # end test "threshold reached value_type_value_uniq onetime" do
+
+  test "threshold reached value_type_count recur" do
+    threshold_reached_value_type_count_xxx(ValueTypeValidator::VALUE_TYPE_COUNT, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR)
+  end # end test "threshold reached value_type_count recur" do
+
+  test "threshold reached value_type_count_uniq recur" do
+    threshold_reached_value_type_count_xxx(ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR)
+  end # end test "threshold reached value_type_count_uniq recur" do
+
+  test "threshold reached value_type_count onetime" do
+    threshold_reached_value_type_count_xxx(ValueTypeValidator::VALUE_TYPE_COUNT, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME)
+  end # end test "threshold reached value_type_count onetime" do
+
+  test "threshold reached value_type_count_uniq onetime" do
+    threshold_reached_value_type_count_xxx(ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ, PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME)
+  end # end test "threshold reached value_type_count_uniq onetime" do
+
+  test "get_bill_dates after billing for threshold_type recur" do
+#CODE2011...
+# Simulate clicking on contact to bill users and check that billing date
+# has changed for THRESHOLD_TYPE_RECUR
+  end # end test "get_bill_dates after billing" do
+
+  test "get_bill_dates after reactivation threshold_type onetime" do
+#CODE2011...
+# Change status from inactive to active for pii_property set 
+# that has threhold_type onetime
+  end # end test "get_bill_dates after billing" do
 
   test "aaa" do
     # Test abuse of inbound_emails_200
