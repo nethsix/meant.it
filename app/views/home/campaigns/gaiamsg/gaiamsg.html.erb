@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>stop SOPA</title>
+  <title>Gaia Messenger</title>
   <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
   <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
 <!--[if lt IE 8]>
@@ -12,22 +12,71 @@
   <script src="/javascripts/meant_it_client_0.1.js"></script>
 <%
   # Configurable variables
-  message_type = "protest"
-  pii_value = "sopa"
+  message_type = "cheer"
+  pii_value = "gaiamsg"
+  if request.port != 80
+    meant_it_hostname = "#{request.domain}:#{request.port}"
+  else
+    meant_it_hostname = request.domain
+  end # else if request.port == 80
 %>
   <script>
+    // Create a hidden input type to:
+    // - Store the value of 'subject' which is the message
+    // - Set the action url of the form
+    // Params:
+    // - form_id: The id of the form to setup
+    // - opt_message_id: The id of the input that holds the user message
+    // - pii_value: The pii_value which the message is directed to
+    // - action_url: The action url of the form
+    function setUpForm(form_id, opt_message_id, pii_value, action_url)
+    {
+      var composed_str;
+      var opt_message_obj = jQuery("#"+opt_message_id);
+      var text_msg = opt_message_obj.val();
+      if (text_msg != null && text_msg != '')
+      {
+        composed_str = ":"+pii_value+" ;"+opt_message_obj.val()+";";
+      }
+      else
+      {
+        composed_str = ":"+pii_value;
+      } // end if (text_msg != null)
+//DEBUG alert("composed_str:"+composed_str);
+      var form_obj = jQuery("#"+form_id);
+      // Add the subject
+      var subject_obj_str = "<input id='subject' name='subject' type='hidden' value='"+composed_str+"' />";
+      form_obj.prepend(subject_obj_str);
+      // Change the action url to include return_url
+      form_obj.attr('action', action_url);
+    } // end function setUpForm
+
+
     // Configurable variables
+    // The host where you store this page
+    var YOUR_HOSTNAME = "localhost:3000";
+    // The url to return to after message submission
+    var YOUR_RETURN_URL = "http://"+YOUR_HOSTNAME+"/campaigns/gaiamsg";
+    // The server you submit the message to
+    var MEANT_IT_HOSTNAME = "<%= meant_it_hostname %>"
     var PAGE_SIZE = <%= Constants::WEB_MAIN_MAX_MEANTIT %>;
     // START_ID and LAST_ID is null since we just want the latest entries
     var START_ID = null;
     var LAST_ID = null;
+    // The id that identifies you to the world
     var PII_VALUE = '<%= pii_value %>';
+    // What type of message you are submitting
     var MESSAGE_TYPE = '<%= message_type %>';
+    // The html element it where latest messages will be displayed
     var LIST_ID = "memberlist";
+    // The html element it users click to see more messages
     var MORE_ID = "more";
     var TIMEOUT = 50000;
     var POLL_INTERVAL = 10000;
     var BACKOFF = 3;
+    // Don't configure these
+    var action_url = "http://"+MEANT_IT_HOSTNAME+"/send_inbound_emails?<%= Constants::RETURN_URL_INPUT %>="+escape(YOUR_RETURN_URL);
+//DEBUG alert("action_url:"+action_url);
 
     jQuery(document).ready(function(){
       setVisibility(MORE_ID, 'hidden');
@@ -35,20 +84,13 @@
                     jQuery.each(data, function(key, val)
                     {
 //DEBUG                  alert("key:"+key+", val:"+val);
-//DEBUG                  alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
-                         var mir_count = val.pii.mir_count;
-                         var thumbnail_url_data = val.pii.thumbnail_url_data;
-                         var short_desc_data = val.pii.short_desc_data;
-                         var pii_value = val.pii.pii_value;
-//DEBUG                  alert("mir_count:"+mir_count);
-//DEBUG                  alert("thumbnail_url_data:"+thumbnail_url_data);
-//DEBUG                  alert("short_desc_data:"+short_desc_data);
+                         var mir_count = val;
                          var group_size_span = jQuery('#group_size');
                          group_size_span.text(mir_count);
                        } // end jQuery.each ...
                     );
                   };
-      getJsonForUniqCounts(func0, PII_VALUE, MESSAGE_TYPE, TIMEOUT, POLL_INTERVAL, BACKOFF); /* Request for uniq counts */
+      getJsonForCounts(func0, PII_VALUE, MESSAGE_TYPE, TIMEOUT, POLL_INTERVAL, BACKOFF); /* Request for uniq counts */
       // Command pattern
       var func1 = function(data) {
                     showMirs(data, LIST_ID, null, null);
@@ -66,8 +108,8 @@
 </head>
 <body>
   <div class="container">
-    <div class="span-18 superduperlarge">
-      stop SOPA!
+    <div class="span-18 superlarge">
+      Gaia Messenger: Cheer the Earth!
     </div>
     <div class="span-3 small">
       <a href='/policy.html'>Site Policy</a>
@@ -76,12 +118,12 @@
       <a href='http://getsatisfaction.com/meant_it'>Discuss/Help</a>
     </div>
     <div class="span-24 large">
-      Don't let big corporations censor the internet.<br/>
-      1. Unite in numbers -> 2. Show your strength -> 3. Co-ordinate.<br/>
+      Focusing on needs of humanity<br/>
+      1. Voice your support -> 2. Show your strength
     </div>
     <div class="span-24">
       <div class="large background-ddd">
-      &nbsp; 1. Unite in numbers
+      &nbsp; 1. Voice your support
       </div>
       <table class="no-zebra" border="0" cellspacing="0" cellpadding"0">
         <tbody class="medium">
@@ -95,7 +137,7 @@
               Send email using QR code
             </td>
             <td>
-              <img width='80' height='80' src='/images/<%= pii_value %>.png' />
+              <img width='80' height='80' src='/images/<%= pii_value %>_qr.png' />
             </td>
           </tr>
           <tr>
@@ -111,14 +153,37 @@
               Send email to <strong><%= message_type %>@meant.it</strong> with subject<br/>
             </td>
             <td class="verbatim-font">
-              <strong>:<%= pii_value %> ;</strong><em>your customized message</em><strong>;</strong> <em>zipcode</em> <em>state</em>
+              <strong>:<%= pii_value %> ;</strong><em>optional message</em><strong>;</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align:center">
+              <strong>-OR-</strong>
+            </td>
+            <td>
+              &nbsp;
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Fill in optional message and click here!
+            </td>
+            <td>
+              <form id="gaiaclick_form" onsubmit="setUpForm('gaiaclick_form', 'opt_message', PII_VALUE, action_url)" method="post" action="" >
+                Message (<i>optional</i>) : <input type="text" name="opt_message" id="opt_message" value="" />
+                <input type='submit' value='Cheer!'/>
+                <input type="hidden" name="from" id="from" value="anonymous@pii.meant.it"/>
+                <input type="hidden" name="to" id="to" value="cheer@meant.it"/>
+                <input type="hidden" name="envelope" id="envelope" value="meant_it_index"/>
+                <input type="hidden" name="headers" id="envelope" value="meant_it_index"/>
+                <input type="hidden" name="attachment_count" id="attachment_count" value="0"/>
+              </form>
             </td>
           </tr>
           <tr>
             <td class="small">
               <strong>NOTE:</strong><br/>
-              <strong>#1:</strong> <span class="verbatim-font">;<em>your customized message</em>; <em>zipcode</em> <em>state</em></span> tags are optional<br/>
-              <strong>#2:</strong> Include the colon, semi-colons (if you provide a customized message)
+              <strong>#1:</strong> Include the colon, semi-colons (if you provide optional message)
             </td>
           </tr>
         </tbody>
@@ -146,22 +211,14 @@
 %>
           <tr>
             <td>
-              Latest <%= test_num %> crews:
+              Latest <%= test_num %> messages:
               <ul id="memberlist">
               </ul>
-              <span id='more'><a href='/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>'>More...</a></span>
+              <span id='more'><a href='http://<%= meant_it_hostname %>/campaigns/general/paginate_list?<%= Constants::PII_VALUE_INPUT %>=<%= pii_value %>&<%= Constants::MESSAGE_TYPE_INPUT %>=<%= message_type %>&<%= Constants::TITLE_STR %>=Gaia%20Messager'>More...</a></span>
             </td>
           <tr>
         </tbody>
       </table>
-      <div class="large background-ddd">
-      &nbsp; 3. Co-ordinate
-      </div>
-      <span class="medium">
-      Contact <img src='/images/nethseven_meant_it.png' /> to email everybody with a co-ordinated action.
-      </span>
-      <br/>
-      <br/>
     </div>
   </div>
 </body>

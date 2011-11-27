@@ -38,6 +38,7 @@ MeantIt::Application.routes.draw do
   resources :meant_it_rels do
     collection do
       get 'show_out_by_pii'
+      get 'count_in_mirs'
       get 'show_in_by_pii'
       get 'show_out_by_endpoint_nick/:nick/(:message_type)', :action => 'show_out_by_endpoint_nick'
       get 'show_in_by_endpoint_nick/:nick/(:message_type)', :action => 'show_in_by_endpoint_nick'

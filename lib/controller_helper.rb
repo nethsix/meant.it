@@ -1368,7 +1368,7 @@ module ControllerHelper
   # +:use_default_for_empty:+:: if nil then use default value
   def self.get_param(params, key, default_value=nil, use_default_for_nil=true, use_default_for_empty=true)
     val = params[key]
-    if use_default_for_empty
+    if !val.nil? and use_default_for_empty
       val = nil if val.empty?
     end # end if use_default_for_empty
     val ||= default_value

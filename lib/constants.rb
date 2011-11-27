@@ -13,6 +13,7 @@ class Constants
 
   TITLE_STR = "title_str"
   EMAIL_VALUE_INPUT = "email"
+  RETURN_URL_INPUT = "return_url"
   PII_VALUE_INPUT = "pii_value_input"
   BILL_ENTRY_ID_VALUE_INPUT = "bill_entry_id_value_input"
   MESSAGE_TYPE_INPUT= "message_type_input"

@@ -52,11 +52,15 @@ Rails.logger.level = Logger::DEBUG
   def create
 # puts "request.inspect:#{request.inspect}"
     logtag = ControllerHelper.gen_logtag
-     # Stores objs that causes problem except inbound_email
-     # which is handled by different error handler in :action => new
-     # view
-     @error_obj_arr = []
+    # Stores objs that causes problem except inbound_email
+    # which is handled by different error handler in :action => new
+    # view
+    @error_obj_arr = []
 puts "InboundEmail, create:#{params[:inbound_email].inspect}"
+    # The user is redirected to a different return_url if provided
+    # else the standard page is rendered
+    return_url = params[Constants::RETURN_URL_INPUT]
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: return_url:#{return_url}")
     # If the inbound_email was created using the interface then
     # it will keys like "commit", etc and the hash for the inbound_email
     # is stored using :inbound_email key
@@ -557,7 +561,11 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{receiver_pii_pii_value_str}"
         logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_pii.inspect:#{@receiver_pii.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
 #20111017        render "/find_any/show_pii_pii_with_message_type.html.erb", :layout => "find_any", :locals => { :notice => nil, :sender_pii => @sender_pii, :receiver_pii => @receiver_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
-        render "/home/index", :layout => "find_any", :locals => { :notice => nil }
+        if return_url.nil?
+          render "/home/index", :layout => "find_any", :locals => { :notice => nil }
+        else
+          redirect_to(return_url)
+        end # end if return_url.nil?
       elsif !@sender_pii.nil? and @receiver_pii.nil? and !@receiver_endPoint.nil?
         sender_pii_pii_value_str = @sender_pii.pii_value
         if !@sender_pii.pii_value.scan(' ').empty?
@@ -566,7 +574,11 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
         find_any_input_str = "#{sender_pii_pii_value_str} #{message_type_str} #{@receiver_endPoint.nick}"
         logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}: @sender_pii.inspect:#{@sender_pii.inspect}, @receiver_endPoint.inspect#{@receiver_endPoint.inspect}, message_type_str:#{message_type_str}, find_any_input_str:#{find_any_input_str}")
 #20111017        render "/find_any/show_endpoints_pii_with_message_type", :layout => "find_any", :locals => { :notice => nil, :endPoints => [@receiver_endPoint], :pii => @sender_pii, :message_type => message_type_str, :find_any_input => find_any_input_str }
-        render "/home/index", :layout => "find_any", :locals => { :notice => nil }
+        if return_url.nil?
+          render "/home/index", :layout => "find_any", :locals => { :notice => nil }
+        else
+          redirect_to(return_url)
+        end # end if params[Constants::RETURN_URL_INPUT].nil?
       end # end if !@sender_pii.nil? ...
       return
     end # end if self.request.path.match(/send_inbound_emails/)

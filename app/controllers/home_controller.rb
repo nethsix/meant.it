@@ -32,10 +32,13 @@ class HomeController < ApplicationController
   end
 
   def campaigns
-# Use this eventually when we have APIs for everything, i.e., call the
-# API from the page using JSON
-#CODE20111116    render "public/campaigns/#{params[:name]}", :layout => false
-p "!!!!!!params[:name]:#{params[:name]}!!!!!"
+   # Use this eventually when we have APIs for everything, i.e., call the
+   # API from the page using JSON
+   # As of 20111126, we will leave this here since if we move it out
+   # to public directory then we need to sync things such as url parm names
+   # instead of being able to use <%= Constants::MESSAGE_TYPE_INPUT %>, etc.
+   # Instead, to re-use the page, users can just 'show/display source' and
+   # use the code there.
     if !params[:predir].nil?
       render "/home/campaigns/#{params[:predir]}/#{params[:name]}", :layout => false
     else

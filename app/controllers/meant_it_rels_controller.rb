@@ -4,7 +4,7 @@ class MeantItRelsController < ApplicationController
   MEANT_IT_RELS = "mirs"
   UP_URL_PARMS = "up_url_parms"
   DOWN_URL_PARMS = "down_url_parms"
-  before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type, :show_by_message_type_uniq_sender_count ]
+  before_filter :authorize, :except => [:index, :show, :show_by_pii_endpoint_nick, :show_by_endpoint_nick_pii, :show_by_pii_pii, :show_out_by_endpoint_id, :show_by_endpoint_endpoint_nick, :show_by_endpoint_endpoint_id, :show_in_by_endpoint_nick, :show_in_by_endpoint_id, :show_out_by_pii, :show_out_by_endpoint_nick, :show_in_by_pii, :show_by_message_type, :show_by_message_type_uniq_sender_count, :count_in_mirs ]
 
   # GET /meant_it_rels
   # GET /meant_it_rels.xml
@@ -441,6 +441,33 @@ class MeantItRelsController < ApplicationController
       }
     end
   end # end def show_by_message_type
+
+  def count_in_mirs
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:count_in_mirs:#{logtag}, params.inspect:#{params.inspect}")
+    pii_str = params[Constants::PII_VALUE_INPUT]
+    message_type = params[Constants::MESSAGE_TYPE_INPUT]
+    find_any_input_str = "#{message_type} #{pii_str}"
+    meantItRels = nil
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:count_in_mirs:#{logtag}, pii_str:#{pii_str}, message_type:#{message_type}")
+    pii = Pii.find_by_pii_value(pii_str)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:count_in_mirs:#{logtag}, pii.inspect:#{pii.inspect}")
+    endPoints = pii.endPoints if !pii.nil?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:count_in_mirs:#{logtag}, endPoints.inspect:#{endPoints.inspect}")
+    endPoints_str = endPoints.collect { |ep_elem| ep_elem.id }.join(",")
+    result_count = nil
+    if message_type.nil? or message_type.empty?
+      result_count = MeantItRel.count(:conditions => "dst_endpoint_id in (#{endPoints_str}")
+    else
+      result_count = MeantItRel.count(:conditions => "dst_endpoint_id in (#{endPoints_str}) and message_type = '#{message_type}'")
+    end # end if message_type.nil? or message_type.empty?
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:count_in_mirs:#{logtag}, result_count:#{result_count}")
+    result_count_hash = { "count" => result_count }
+    respond_to do |format|
+      format.xml  { render :xml => result_count_hash.to_xml}
+      format.json { render :json => result_count_hash.to_json}
+    end # end respond_to ...
+  end # end def count_in_mirs
 
   private
     def paginate(params, where_str, caller_func, logtag=nil)
