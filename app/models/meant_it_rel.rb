@@ -9,6 +9,7 @@ class MeantItRel < ActiveRecord::Base
 
   has_many :meantItMoodTagRels
   has_many :tags, :through => :meantItMoodTagRels
+  has_many :payments
 #  belongs_to :srcEndPoint, :class_name => "EndPoint"
   belongs_to :src_endpoint, :class_name => "EndPoint"
 #  belongs_to :dstEndPoint, :class_name => "EndPoint"

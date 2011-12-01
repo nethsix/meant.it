@@ -1,0 +1,55 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Mir:</b>
+  <%= @payment.mir_id %>
+</p>
+
+<p>
+  <b>Invoice no:</b>
+  <%= @payment.invoice_no %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @payment.status %>
+</p>
+
+<p>
+  <b>Message:</b>
+  <%= @payment.message %>
+</p>
+
+<p>
+  <b>Return code:</b>
+  <%= @payment.return_code %>
+</p>
+
+<p>
+  <b>Amount:</b>
+  <%= @payment.amount %>
+</p>
+
+<p>
+  <b>Shipping:</b>
+  <%= @payment.shipping %>
+</p>
+
+<p>
+  <b>Tax1:</b>
+  <%= @payment.tax1 %>
+</p>
+
+<p>
+  <b>Tax2:</b>
+  <%= @payment.tax2 %>
+</p>
+
+<p>
+  <b>Total:</b>
+  <%= @payment.total %>
+</p>
+
+
+<%= link_to 'Edit', edit_payment_path(@payment) %> |
+<%= link_to 'Back', payments_path %>

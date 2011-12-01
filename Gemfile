@@ -38,3 +38,4 @@ gem 'bcrypt-ruby', :require => 'bcrypt'
 gem "recaptcha", :require => "recaptcha/rails"
 gem "rmagick", :require => 'RMagick'
 gem "paperclip", "~> 2.3"
+gem "activemerchant"

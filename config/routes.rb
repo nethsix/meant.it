@@ -1,7 +1,11 @@
 MeantIt::Application.routes.draw do
 
+  resources :payments
+
   get "/shops/:id" => "shops#show"
-  get "/payments/:pay_id" => "payments#show"
+  get "/payments/pay/invoice_no/:invoice_no" => "payments#pay"
+  get "/payments/invoice_no/:invoice_no" => "payments#show"
+  get "/payments/cancel/invoice_no/:invoice_no" => "payments#cancel"
 
 #  get "sessions/new"
   get "log_in" => "sessions#new", :as => "log_in"  

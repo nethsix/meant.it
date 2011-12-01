@@ -1,0 +1,40 @@
+<% require 'constants' %>
+find_any_input ||= nil
+show_new_user ||= nil
+show_pword ||= nil
+error_msg ||= nil
+%>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Meant.It</title>
+  <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
+  <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="/stylesheets/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+  <link rel="stylesheet" href="/stylesheets/meant_it.css" type="text/css">
+  <%= javascript_include_tag :defaults %>
+  <%= csrf_meta_tag %>
+</head>
+<body>
+    <div class="container">
+      <%= render :partial => "shared/top_menu", :locals => { :show_new_user => show_new_user, :show_pword => show_pword, :error_msg => error_msg }%>
+      <div class="span-20">
+        <p>
+          <% why_elem = Constants.random_why %>
+          <span class="medium">
+            <b>Why Meant.It?</b> <%= why_elem[0] %> - <i><%= why_elem[1] %></i> (<%= link_to "More", url_for("/why") %>)
+          </span>
+        </p>
+      </div>
+    </div>
+
+<%= yield %>
+
+    <div class="container">
+      <%= render :partial => "shared/bottom_menu" %>
+    </div>
+</body>
+</html>
