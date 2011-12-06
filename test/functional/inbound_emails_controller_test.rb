@@ -2077,7 +2077,7 @@ p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_
     # Test abuse of inbound_emails_200
     # i.e., REMOTE_ADDR don't match
  
-    # Test ib not inbound_emails_200, and logged in with id
+    # Test if not inbound_emails_200, and logged in with id
     # meantItRel created should have pii as logged in id
 
     # Test find_any relationship

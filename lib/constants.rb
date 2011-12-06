@@ -11,6 +11,8 @@ class Constants
   CONTRACT_NO_LEN = 8 # in chars
   CONTRACT_DELIM = '-'
 
+  LOGIN_NAME_INPUT = "login_name"
+  PASSWORD_INPUT = "password"
   TITLE_STR = "title_str"
   EMAIL_VALUE_INPUT = "email"
   RETURN_URL_INPUT = "return_url"
@@ -33,6 +35,9 @@ class Constants
   SORT_FIELD_INPUT = "sort_field"
   SORT_ORDER_INPUT = "sort_order"
   LAYOUT_INPUT = "layout"
+
+  LOGGED_OUT_NOTICE = "Logged out!"
+  LOGGED_IN_NOTICE = "Logged in!"
 
   PAGINATE_BATCH_SIZE = 5
   MIN_PASSWORD_LEN = 6

@@ -357,7 +357,15 @@ class MeantItRel < ActiveRecord::Base
                 raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, setting dst_endpoint_pii.pii_property_set.ready to true failed, dst_endpoint_pii.pii_property_set.errors.inspect:#{dst_endpoint_pii.pii_property_set.errors.inspect}"
               end # end unless dst_endpoint_pii.pii_property_set.save
               # Send email
-              UserMailer.threshold_mail(pii_0).deliver
+              begin
+                UserMailer.threshold_mail(pii_0).deliver
+              rescue Exception => e
+                # Just keep a record, since we have no other way of contacting
+                # entity, we hope he'll check back or we can look for 
+                # this mesage in the log and periodically call the owners
+                logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, threshold_mail delivery error, e.inspect:#{e.inspect}")
+                logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, threshold_mail delivery error trace, e.backtrace:#{e.backtrace.join("\n")}")
+              end # end catch mail errors
             end # end if email_bill_entry.qty.to_f >= dst_endpoint_pii_pps_threshold_val.to_f
           end # end if !dst_endpoint_pii.pii_property_set.nil? and  ...
           unless email_bill_entry.save

@@ -16,6 +16,7 @@ MeantIt::Application.routes.draw do
   get "send_liker_emails" => "sessions#send_liker_emails"
 #20111108  get "bill" => "sessions#bill", :as => "bill"
   get "bill" => "sessions#bill_2", :as => "bill_2"
+  get "bills/error" => "sessions#bills_error"
 
   devise_for :users, :controllers => { :confirmations => "meant_it_confirmations" }
 

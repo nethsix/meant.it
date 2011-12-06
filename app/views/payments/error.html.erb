@@ -1,0 +1,12 @@
+<b>Payment Error</b>
+<p>
+  Please report error to <img height='20' src='/images/nethseven_meant_it.png' /> or get help <a href='http://getsatisfaction.com/meant_it'>here</a>
+</p>
+
+<b>Summary</b>
+<p>Mir id: <%= @mir.id %></p>
+<p>Bill id: <%= @mir.email_bill_entry.id %></p>
+
+<b>Details</b>
+<p>Error: <%= @error.inspect %></p>
+<p>Mir: <%= @mir.inspect %></p>

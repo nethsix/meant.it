@@ -4,3 +4,9 @@ good_entity:
   password_hash: p_hash
   password_salt: p_salt
   status: active
+admin_entity:
+  id: 2
+  login_name: nethsix@gmail.com
+  password_hash: $2a$10$SfOORYU36dlqhTi26hXZ/utmP6WcQRGGRXm5ywgGj2v7zDUaZaDGa
+  password_salt: $2a$10$SfOORYU36dlqhTi26hXZ/u
+  status: active

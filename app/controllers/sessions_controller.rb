@@ -1,4 +1,5 @@
 require 'constants'
+require 'errors'
 class SessionsController < ApplicationController
 
   before_filter :logged_in, :only => [:manage, :bill, :send_liker_emails]
@@ -26,13 +27,14 @@ class SessionsController < ApplicationController
   def create  
     logtag = ControllerHelper.gen_logtag
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, session.inspect:#{session.inspect}")
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, params.inspect:#{params.inspect}")
     login_name = params[:session][:login_name]
     pword = params[:session][:password]
     entity = Entity.authenticate(login_name, pword)  
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, login_name:#{login_name}, entity.inspect:#{entity.inspect}")
     new_entity = nil
     if entity
-      notice_str = "Logged in!"
+      notice_str = Constants::LOGGED_IN_NOTICE
       session[Constants::SESSION_ENTITY_ID] = entity.id
       logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:create:#{logtag}, session.inspect:#{session.inspect}")
       # Check if there's outstanding confirmed pii that we need to link
@@ -70,7 +72,7 @@ class SessionsController < ApplicationController
 
   def destroy  
     session[Constants::SESSION_ENTITY_ID] = nil  
-    redirect_to root_url, :notice => "Logged out!"  
+    redirect_to root_url, :notice => Constants::LOGGED_OUT_NOTICE
   end 
 
   def resend_confirmation
@@ -127,8 +129,26 @@ class SessionsController < ApplicationController
                     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}, send email contract to liker_email:#{liker_email}")
 #DEBUG                    UserMailer.contract_mail(pii_value, liker_email, ep_elem).deliver if liker_email.match(/aimless/)
 #20111106                    UserMailer.contract_mail(pii_value, liker_email, ep_elem).deliver
-                    UserMailer.contract_mail(pii_value, mir_elem).deliver
-                    email_count += 1
+                    begin
+                      UserMailer.contract_mail(pii_value, mir_elem).deliver
+                      email_count += 1
+                    rescue Exception => e
+                      logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails, contract_mail delivery error, e.inspect:#{e.inspect}")
+                      logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails, contract_mail delivery error trace, e.backtrace:#{e.backtrace.join("\n")}")
+#20111204 We just log the error but continue to send other mails
+#20111204 Later the user can see how many emails failed, etc.
+#20111204                      if e.instance_of?(PaymentException)
+#20111204                        @mir = mir_elem
+#20111204                        @error = e
+#20111204                        render "/bills/error", :layout => "payment"
+#20111204                      else
+#20111204                        # NOTE: For now we also show these errors so that
+#20111204                        # users can maybe report error to us
+#20111204                        @mir = mir_elem
+#20111204                        @error = e
+#20111204                        render "/bills/error", :layout => "payment"
+#20111204                      end # end if e.instance_of?(PaymentException)
+                    end # end catch mail errors
                   else
                     logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}, ep_elem's does not have pii.pii_value, liker_person.inspect:#{liker_person.inspect}")
                   end # end if liker_email.nil? or liker_email.empty?

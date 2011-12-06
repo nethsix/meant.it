@@ -39,3 +39,4 @@ gem "recaptcha", :require => "recaptcha/rails"
 gem "rmagick", :require => 'RMagick'
 gem "paperclip", "~> 2.3"
 gem "activemerchant"
+gem "capybara"

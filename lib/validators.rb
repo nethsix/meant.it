@@ -21,6 +21,20 @@ class LikerStatusTypeValidator < ActiveModel::EachValidator
   end # end def validate_each
 end # end class LikerStatusTypeValidator
 
+class PaymentStatusTypeValidator < ActiveModel::EachValidator
+  # Initial state
+  PAYMENT_STATUS_ACTIVE = "active"
+  # User click cancel while going through payment procedure
+  PAYMENT_STATUS_CANCELLED = "cancelled"
+  # We (admin) can set this
+  PAYMENT_STATUS_INACTIVE = "inactive"
+  PAYMENT_STATUS_DONE = "done"
+  PAYMENT_STATUS_ENUM = [ PAYMENT_STATUS_ACTIVE, PAYMENT_STATUS_CANCELLED, PAYMENT_STATUS_INACTIVE, PAYMENT_STATUS_DONE ]
+  def validate_each(record, attribute, value)
+    record.errors[attribute] << "permits only '#{PAYMENT_STATUS_ENUM.join('\', \'').strip}'" if value.nil? or PAYMENT_STATUS_ENUM.index(value.downcase).nil?
+  end # end def validate_each
+end # end class PaymentStatusTypeValidator
+
 class StatusTypeValidator < ActiveModel::EachValidator
   STATUS_ACTIVE = "active"
   STATUS_INACTIVE = "inactive"

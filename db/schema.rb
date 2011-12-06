@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111127131942) do
+ActiveRecord::Schema.define(:version => 20111203060419) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -187,17 +187,31 @@ ActiveRecord::Schema.define(:version => 20111127131942) do
 
   create_table "payments", :force => true do |t|
     t.integer  "mir_id"
-    t.string   "invoice_no"
-    t.string   "status"
+    t.string   "invoice_no",       :null => false
+    t.string   "status",           :null => false
     t.text     "message"
     t.string   "return_code"
-    t.float    "amount"
-    t.float    "shipping"
+    t.float    "amount",           :null => false
     t.float    "tax1"
     t.float    "tax2"
     t.float    "total"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "item_name"
+    t.string   "item_no",          :null => false
+    t.float    "unit_weight"
+    t.float    "quantity"
+    t.float    "discount_amount1"
+    t.float    "discount_amount2"
+    t.float    "discount_rate1"
+    t.float    "discount_rate2"
+    t.float    "tax_rate1"
+    t.float    "tax_rate2"
+    t.float    "shipping1"
+    t.float    "shipping2"
+    t.string   "currency_code"
+    t.string   "country"
+    t.string   "payee"
   end
 
   create_table "physicians", :force => true do |t|
