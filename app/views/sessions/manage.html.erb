@@ -109,13 +109,23 @@
           </tr>
         </thead>
         <tbody>
+<% Rails.logger.debug("manage.html.erb, current_entity.object_id:#{current_entity.object_id}") %>
+<% Rails.logger.debug("manage.html.erb, current_entity.inspect:#{current_entity.inspect}") %>
+<% Rails.logger.debug("manage.html.erb, current_entity.endPoints.inspect:#{current_entity.endPoints.inspect}") %>
+<% 
+  all_endpoints = EndPoint.all
+  Rails.logger.debug("manage.html.erb, all_endpoints.inspect:#{all_endpoints.inspect}")
+  all_eepr = EntityEndPointRel.all
+  Rails.logger.debug("manage.html.erb, all_eepr.inspect:#{all_eepr.inspect}")
+ %>
 <% if !current_entity.endPoints.nil? and !current_entity.endPoints.empty? %>
   <%          current_entity.endPoints.each do |endpoint_elem| %>
             <tr>
               <td>
                 <%= link_to "#{endpoint_elem.pii.pii_value}", url_for("/piis/show_by_pii_value?#{Constants::PII_VALUE_INPUT}=#{endpoint_elem.pii.pii_value}") %>
                 <% 
-                  if !endpoint_elem.pii.pii_property_set.nil? and (!endpoint_elem.pii.pii_property_set.short_desc.nil? or !endpoint_elem.pii.pii_property_set.short_desc.empty?)
+                  Rails.logger.debug("manage.html.erb, endpoint_elem.pii.pii_property_set.inspect:#{endpoint_elem.pii.pii_property_set.inspect}")
+                  if !endpoint_elem.pii.pii_property_set.nil? and (!endpoint_elem.pii.pii_property_set.short_desc.nil? and !endpoint_elem.pii.pii_property_set.short_desc.empty?)
                 %>
                   (<%= endpoint_elem.pii.pii_property_set.short_desc %>)
                 <% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111203060419) do
+ActiveRecord::Schema.define(:version => 20111211105012) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -186,7 +186,7 @@ ActiveRecord::Schema.define(:version => 20111203060419) do
   end
 
   create_table "payments", :force => true do |t|
-    t.integer  "mir_id"
+    t.integer  "meant_it_rel_id"
     t.string   "invoice_no",       :null => false
     t.string   "status",           :null => false
     t.text     "message"

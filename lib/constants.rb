@@ -77,4 +77,12 @@ class Constants
   def self.random_why
     why_str = WHY_ENUM[rand(WHY_ENUM.size)]
   end # end def random_why
+
+  # Display table column numbers
+  EMAIL_BILL_EMAIL_REGISTERED_COL_NO = 2
+  EMAIL_BILL_EMAIL_SENT_COL_NO = 3
+  EMAIL_BILL_COST_COL_NO = 5
+  EMAIL_BILL_READY_COL_NO = 7
+  EMAIL_BILL_BILLED_COL_NO = 8
+  EMAIL_BILL_ACTIONS_COL_NO = 9
 end # end class Constants

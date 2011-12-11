@@ -42,10 +42,11 @@ class ActiveSupport::TestCase
   # +:pps_threshold_type:+:: threshold_type in pii_property_set created
   # +:pps_status:+:: status of pii_property_set created
   # +:pps_value_type:+:: value_type in pii_property_set created
+  # +:pps_notify:+:: value_type in pii_property_set created
   # Return +Pii+
-  def setup_pps_by_pii_value(pii_value, pps_currency, pps_threshold, pps_threshold_type,  pps_status, value_type, logtag=nil)
+  def setup_pps_by_pii_value(pii_value, pps_currency, pps_threshold, pps_threshold_type,  pps_status, pps_value_type, pps_notify=nil, logtag=nil)
     pii = Pii.find_by_pii_value(pii_value)
-    setup_pps_by_pii(pii, pps_currency, pps_threshold, pps_threshold_type,  pps_status, value_type, logtag=nil)
+    setup_pps_by_pii(pii, pps_currency, pps_threshold, pps_threshold_type,  pps_status, pps_value_type, pps_notify, logtag)
     pii
   end # end def setup_pps_by_pii_value
     
@@ -56,13 +57,16 @@ class ActiveSupport::TestCase
   # +:pps_threshold_type:+:: threshold_type in pii_property_set created
   # +:pps_status:+:: status of pii_property_set created
   # +:pps_value_type:+:: value_type in pii_property_set created
-  def setup_pps_by_pii(pii, pps_currency, pps_threshold, pps_threshold_type,  pps_status, value_type, logtag=nil)
+  # +:pps_notify:+:: value_type in pii_property_set created
+  # Return +Pii+
+  def setup_pps_by_pii(pii, pps_currency, pps_threshold, pps_threshold_type,  pps_status, pps_value_type, pps_notify=nil, logtag=nil)
     pii.pii_property_set = PiiPropertySet.create
     pii.pii_property_set.threshold = pps_threshold
     pii.pii_property_set.currency = pps_currency
     pii.pii_property_set.status = StatusTypeValidator::STATUS_ACTIVE
-    pii.pii_property_set.value_type = value_type
+    pii.pii_property_set.value_type = pps_value_type
     pii.pii_property_set.threshold_type = pps_threshold_type
+    pii.pii_property_set.notify = pps_notify if !pps_notify.nil?
     unless pii.pii_property_set.save
       Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:setup_pps_by_pii:#{logtag}, save error, pii.property_set.errors.inspect:#{pii.property_set.errors.inspect}")
       raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:setup_pps_by_pii:#{logtag}, save error, pii.property_set.errors.inspect:#{pii.property_set.errors.inspect}"
@@ -132,4 +136,15 @@ class ActiveSupport::TestCase
 #      sess.https!(false)
     end
   end # end def login
+
+  # Run this to add Capybara common selectors
+  def capybara_common_selectors
+    Capybara.add_selector(:row) do
+      xpath { |num| ".//tbody/tr[#{num}]" }
+    end
+    # NOTE: :row_col must be used in 'within(:row, num) do'
+    Capybara.add_selector(:row_col) do
+      xpath { |num| "./td[#{num}]" }
+    end
+  end # end def capybara_common_selectors
 end

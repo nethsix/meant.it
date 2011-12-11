@@ -1,8 +1,8 @@
 good_entity:
   id: 1
   login_name: hello_kitty
-  password_hash: p_hash
-  password_salt: p_salt
+  password_hash: $2a$10$SfOORYU36dlqhTi26hXZ/utmP6WcQRGGRXm5ywgGj2v7zDUaZaDGa
+  password_salt: $2a$10$SfOORYU36dlqhTi26hXZ/u
   status: active
 admin_entity:
   id: 2

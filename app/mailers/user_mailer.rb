@@ -82,7 +82,7 @@ class UserMailer < ActionMailer::Base
       if value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
         item_qty = 1
         amount_str = ControllerHelper.sum_currency_in_str(input_str)
-        amount_curr_code, amount_curr_val = ControllerHelper.get_currency_code_andval(amount_str)
+        amount_curr_code, amount_curr_val = ControllerHelper.get_currency_code_and_val(amount_str)
         # Double-check that currency type matches
         if amount_curr_code != threshold_currency
           logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send_liker_emails:#{logtag}: amount_curr_code:#{amount_curr_code} does not match threshold_currency:#{threshold_currency}")
@@ -101,7 +101,7 @@ class UserMailer < ActionMailer::Base
       # Create payment object
       # CODE!!!! In future create a function to calculate this
       total = amount_curr_val
-      payment = Payment.create(:item_no => likee_pii_value, :quantity => item_qty,  :item_name => short_desc, :amount => amount_curr_val, :currency_code => amount_curr_code, :total => total)
+      payment = Payment.create(:item_no => likee_pii_value, :quantity => item_qty,  :item_name => short_desc, :amount => amount_curr_val, :currency_code => amount_curr_code, :total => total, :invoice_no => @contract_no, :meant_it_rel_id => mir_elem.id)
       if payment.errors.any?
         logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:payment creation error, payment.errors.inspect:#{payment.errors.inspect}")
         raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:payment creation error, payment.errors.inspect:#{payment.errors.inspect}"
@@ -111,8 +111,7 @@ class UserMailer < ActionMailer::Base
     rescue Exception => e
       logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:contract_mail delivery error, e.inspect:#{e.inspect}")
       logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:contract_mail delivery error trace, e.backtrace:#{e.backtrace.join("\n")}")
-      pay_error = PaymentException.new
-      pay_error.invoice_no = @contract_no
+      pay_error = PaymentException.new(@contract_no)
       raise pay_error, "Payment error for @contract_no:#{@contract_no}, e.inspect:#{e.inspect}"
     end # end contral_mail delivery error
   end # end def contract_mail

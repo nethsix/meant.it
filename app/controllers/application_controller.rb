@@ -36,8 +36,16 @@ class ApplicationController < ActionController::Base
   end
 
   private
-  def current_entity
-    @current_entity ||= Entity.find(session[Constants::SESSION_ENTITY_ID]) if session[Constants::SESSION_ENTITY_ID]
+  def current_entity(logtag=nil)
+    session_entity_id = session[Constants::SESSION_ENTITY_ID]
+    Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}, current_entity:#{logtag}, session_entity_id:#{session_entity_id}")
+    @current_entity = Entity.find(session_entity_id) if session_entity_id
+    if !@current_entity.nil?
+      @current_entity.reload
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}, current_entity:#{logtag}, @current_entity.inspect:#{@current_entity.inspect}")
+      Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}current_entity:#{logtag}, @current_entity.endPoints.inspect:#{@current_entity.endPoints.inspect}")
+    end # end if !@current_entity.nil?
+    @current_entity
   end
 
   def logged_in

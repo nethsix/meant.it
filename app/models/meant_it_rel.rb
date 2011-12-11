@@ -283,7 +283,7 @@ class MeantItRel < ActiveRecord::Base
             dst_endpoint_pii_pps_threshold_currency = dst_endpoint_pii.pii_property_set.currency
             dst_endpoint_pii_pps_threshold_val = dst_endpoint_pii.pii_property_set.threshold
             logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, email_bill_entry.qty:#{email_bill_entry.qty}, dst_endpoint_pii_pps_threshold_val:#{dst_endpoint_pii_pps_threshold_val}, dst_endpoint_pii_pps_threshold_currency:#{dst_endpoint_pii_pps_threshold_currency}")
-            if email_bill_entry.currency != dst_endpoint_pii_pps_threshold_currency
+            if ControllerHelper.get_default_value(email_bill_entry.currency) != ControllerHelper.get_default_value(dst_endpoint_pii_pps_threshold_currency)
               logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, email_bill_entry.currency:#{email_bill_entry.currency}, dst_endpoint_pii_pps_threshold_currency:#{dst_endpoint_pii_pps_threshold_currency} does not match!")
               raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, email_bill_entry.currency:#{email_bill_entry.currency}, dst_endpoint_pii_pps_threshold_currency:#{dst_endpoint_pii_pps_threshold_currency} does not match!"
             end # end if email_bill_entry.currency != dst_endpoint_pii_pps_threshold_currency

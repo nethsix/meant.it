@@ -780,7 +780,7 @@ module ControllerHelper
     salt = entity.password_salt
     combo_str = pii_value.to_s+liker_endpoint_id.to_s
 #20111106    contract_no = BCrypt::Engine.hash_secret(combo_str, salt)
-    contract_no = mir_elem.id + Constants::CONTRACT_DELIM + Digest::SHA1.hexdigest(combo_str+salt)[SHA1_LEN-(CONTRACT_NO_LEN*2)..SHA1_LEN]
+    contract_no = "#{mir_elem.id}#{Constants::CONTRACT_DELIM}#{Digest::SHA1.hexdigest(combo_str+salt)[Constants::SHA1_LEN-(Constants::CONTRACT_NO_LEN*2)..Constants::SHA1_LEN]}"
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:gen_contract_no:#{logtag}, pii_value:#{pii_value}, liker_endpoint_id:#{liker_endpoint_id}, contract_no:#{contract_no}")
     contract_no
   end # end def self.gen_contract_no(pii_value, mir)
@@ -1364,16 +1364,27 @@ module ControllerHelper
   # then params[:a] is "" not nil
   # This is a problem, especially if we try to replace default value
   # using our_a = params[:a] followed by our_a ||= DEFAULT_A
+  # +:default_value:+:: the default value to use
   # +:use_default_for_nil:+:: if nil then use default value
   # +:use_default_for_empty:+:: if nil then use default value
   def self.get_param(params, key, default_value=nil, use_default_for_nil=true, use_default_for_empty=true)
     val = params[key]
+    return_val = ControllerHelper.get_default_value(val, default_value, use_default_for_nil, use_default_for_empty)
+    return_val
+  end # end def self.get_param
+
+  # Replace with default value if value matches certain preset value,
+  # e.g., replacing "" with nil
+  # +:default_value:+:: the default value to use
+  # +:use_default_for_nil:+:: if nil then use default value
+  # +:use_default_for_empty:+:: if nil then use default value
+  def self.get_default_value(val, default_value=nil, use_default_for_nil=true, use_default_for_empty=true)
     if !val.nil? and use_default_for_empty
       val = nil if val.empty?
     end # end if use_default_for_empty
     val ||= default_value
     val
-  end # end def self.get_param
+  end # end def self.get_default_value
 
   # Takes into account the currency type to determine whether
   # to prefix value with currency code and use 2 decimal points
@@ -1393,7 +1404,7 @@ module ControllerHelper
   def self.threshold_display_str_from_attr(currency_code, currency_val, logtag=nil)
     return_curr_code = nil
     return_curr_val = nil
-    if currency_code.nil?
+    if currency_code.nil? or currency_code.empty?
       if currency_val.to_i == currency_val.to_f
         return_curr_val = currency_val.to_i
       else
@@ -1403,5 +1414,6 @@ module ControllerHelper
       return_curr_val = sprintf('%.2f', currency_val)
       return_curr_code = currency_code
     end # end if currency_code.nil?
+    return "#{return_curr_code}#{return_curr_val}"
   end # end def self.threshold_display_str_from_attr
 end # end module ControllerHelper
