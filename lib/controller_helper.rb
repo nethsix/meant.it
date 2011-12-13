@@ -545,7 +545,7 @@ module ControllerHelper
   # +return+ +Pii+ array, after_date
   # NOTE: after_date is when deal was started which is calculated
   # by considering threshold_type (ONE_TIME, RECUR)
-  def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil, old_ver=true)
+  def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil, old_ver=false)
     pii_virtual = nil
     after_date = nil
     if !pii_value.nil? and !pii_value.empty?
@@ -618,7 +618,7 @@ module ControllerHelper
   # +show_like_pii_value_uniq_sender_count_after_last_bill+
   # +return+ JSON
 #20111212  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil)
-  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil, old_ver=true)
+  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil, old_ver=false)
 #20111212    piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
     piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
     self.add_virtual_methods_to_pii(piis[0], pii_value)

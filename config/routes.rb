@@ -147,7 +147,10 @@ MeantIt::Application.routes.draw do
   match "/group.html" => "home#group"
   # 20111212: Take care of new piis where email_bill_entry is immediately
   # created
-  match "/group_2.html" => "home#group_2"
+  # match "/group_2.html" => "home#group_2"
+  # 20111213: For old piis whose email_bill_entry is NOT created upon
+  # inbound_email
+  match "/group_old.html" => "home#group_old"
   match "/group_diy.html" => "home#group_diy"
   match "/like.html" => "home#like"
   match "/platform.html" => "home#platform"

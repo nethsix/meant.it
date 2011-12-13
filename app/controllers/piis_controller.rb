@@ -158,7 +158,7 @@ class PiisController < ApplicationController
 #20111103    end # end if pii_to_json.nil? or pii_to_json.empty?
 #20111212    pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
 #20111212 : Start
-    old_ver = params[Constants::OLD_VERSION_INPUT] == "false" ? false : true
+    old_ver = params[Constants::OLD_VERSION_INPUT] == "true" ? true : false
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_ver:#{old_ver}")
 #20111212 : End
     pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)

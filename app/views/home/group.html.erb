@@ -14,157 +14,123 @@ to communicate with meant.it using REST --->
 %>
 <html>
   <head>
-    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<!----    <script src="http://code.jquery.com/jquery-1.4.2.min.js"></script> ---->
+    <script src="/javascripts/jquery-1.4.2.min.js"></script>
+    <script src="/javascripts/meant_it_client_0.1.js"></script>
     <script>
-      var TIMEOUT = 50000
-      var POLL_INTERVAL = 10000
-      var BACKOFF = 3
-      function waitForMsg()
-      {
-        jQuery.ajax({
-            type: "GET",
-//            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=25%3d%3d%3dlabutan",
-//            url: "/piis/show_by_message_type_uniq_sender_count.json?message_type_input=like&pii_value_input=<%= group_pii_val %>",
-            url: "/piis/show_like_pii_value_uniq_sender_count_after_last_bill.json?message_type_input=like&pii_value_input=<%= group_pii_val %>",
-
-            async: true, /* If set to non-async, browser shows page as "Loading.."*/
-            cache: false,
-            timeout:TIMEOUT, /* Timeout in ms */
-
-            success: function(data)
-            {
+    var TIMEOUT = 50000;
+    var POLL_INTERVAL = 10000;
+    var BACKOFF = 3;
+    var PII_VALUE = "<%= group_pii_val %>";
+    var MESSAGE_TYPE = "like"
+    jQuery(document).ready(function(){
+      var func0 = function(data) {
+                    jQuery.each(data, function(key, val)
+                    {
 //DEBUG                  alert("data:"+data);
-              if (data == null)
-              {
-                jQuery('#closed').css('display','inline');
-              }
-              else
-              {
-                jQuery.each(data, function(key, val)
-                  {
+                      if (data == null)
+                      {
+                        jQuery('#closed').css('display','inline');
+                      }
+                      else
+                      {
+                        jQuery.each(data, function(key, val)
+                          {
 //DEBUG                    alert("key:"+key+", val:"+val);
 //DEBUG                    alert("key:"+key+", val.pii.pii_value:"+val.pii.pii_value);
-                    var mir_count = val.pii.mir_count;
-                    var thumbnail_url_data = val.pii.thumbnail_url_data;
-                    if (thumbnail_url_data == null || thumbnail_url_data == '')
-                    {
-                      thumbnail_url_data = "/images/unknown.jpg";
-                    }
-                    jQuery('#prod_img').attr('src', thumbnail_url_data);
-                    jQuery('#desiredItem').attr('src', thumbnail_url_data);
-                    var short_desc_data = val.pii.short_desc_data;
-                    if (short_desc_data == null)
-                    {
-                      short_desc_data = 'Unknown';
-                    }
-                    {
-                      jQuery('#headline').text("Bulk buy '"+short_desc_data+"'!");
-                    }
-                    var threshold = val.pii.threshold;
-                    var threshold_type = val.pii.threshold_type;
-                    if (threshold_type != null)
-                    {
-                      jQuery('#threshold_type').text(threshold_type);
-                    }
-                    if (mir_count >= threshold)
-                    {
-                      jQuery('#closed').css('display','inline');
-                    }
-                    else
-                    {
-                      jQuery('#closed').css('display','none');
-                    }
-                    x_axis_1_str = (1*threshold/3).toString();
-                    x_axis_2_str = (2*threshold/3).toString();
-                    jQuery('#x_axis_1').text(x_axis_1_str.substring(0,3));
-                    jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
-                    jQuery('#x_axis_3').text(threshold);
-                    var formula = val.pii.formula;
-                    var currency = val.pii.currency;
-                    var price = val.pii.price;
-                    if (price != null)
-                    {
-                      jQuery('#cost_axis_3').text(currency+price);
-                    } // end if (price != null)
-                    var qr = val.pii.thumbnail_qr_data;
-//DEBUG alert('qr:'+qr);
-                    // missing.png is the default url provided by paperclip
-                    // when no image is set
-                    if (qr == null || qr == '' || qr.match(/missing\.png/))
-                    {
-                      jQuery('#qr_img').css('display', 'none');
-                      jQuery('#meant_it_str').css('display', 'inline');
-                      jQuery('#meant_it_str').html("Send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
-                      jQuery('#instruction').html("Send order email");
-                    }
-                    else
-                    {
-                      jQuery('#instruction').html("Send order email using QR code<br/><i>OR</i> send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
-                      jQuery('#meant_it_str').css('display', 'none');
-                      jQuery('#qr_img').css('display', 'inline');
-                      jQuery('#qr_img').attr('src', qr);
-                    } // end if (qr == null || qr = '')
-//DEBUG                    alert("mir_count:"+mir_count);
-//DEBUG                    alert("threshold:"+threshold);
-//DEBUG                    alert("threshold_type:"+threshold_type);
-//DEBUG                    alert("formula:"+formula);
-//DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
-//DEBUG                    alert("short_desc_data:"+short_desc_data);
-                    var TOTAL_WIDTH = 560;
-                    var hpos = mir_count * (TOTAL_WIDTH/threshold);
-//DEBUG                    alert("hpos:"+hpos);
-                    if (hpos > TOTAL_WIDTH)
-                    {
-                      hpos = TOTAL_WIDTH;
-                    }
-//                    document.getElementById('desiredItem').style.position="relative";
-                    jQuery('#desiredItem').css('position','relative');
-//                    document.getElementById('desiredItem').style.left=+hpos;
-                    jQuery('#desiredItem').attr('src', thumbnail_url_data);
-                    jQuery('#desiredItem').css('left', hpos);
-                    jQuery('#liketag').css('position','relative');
-                    jQuery('#liketag').css('left', hpos-3);
-                    jQuery('#liketag').css('top', -11);
-                    jQuery('#liketag').html(mir_count.toString()+"<span>"+short_desc_data+"</span>");
-                  }
-                );
-                setTimeout(
-                    'waitForMsg()', /* Request next message */
-                    POLL_INTERVAL /* ..after 1 seconds */
-              );
-              } /* end else if (data == null) */
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown){
-                alert("error", textStatus + " (" + errorThrown + ")");
-                setTimeout(
-                    'waitForMsg()', /* Try again after.. */
-                    POLL_INTERVAL*BACKOFF); /* milliseconds */
-            },
-        });
-    };
-
+                            var mir_count = val.pii.mir_count;
+                            var thumbnail_url_data = val.pii.thumbnail_url_data;
+                            if (thumbnail_url_data == null || thumbnail_url_data == '')
+                            {
+                              thumbnail_url_data = "/images/unknown.jpg";
+                            }
+                            jQuery('#prod_img').attr('src', thumbnail_url_data);
+                            jQuery('#desiredItem').attr('src', thumbnail_url_data);
+                            var short_desc_data = val.pii.short_desc_data;
+                            if (short_desc_data == null)
+                            {
+                              short_desc_data = 'Unknown';
+                            }
+                            else
+                            {
+                              jQuery('#headline').text("Bulk buy '"+short_desc_data+"'!");
+                            }
+                            var threshold = val.pii.threshold;
+                            var threshold_type = val.pii.threshold_type;
+                            if (threshold_type != null)
+                            {
+                              jQuery('#threshold_type').text(threshold_type);
+                            }
+                            if (mir_count >= threshold)
+                            {
+                              jQuery('#closed').css('display','inline');
+                            }
+                            else
+                            {
+                              jQuery('#closed').css('display','none');
+                            }
+                            x_axis_1_str = (1*threshold/3).toString();
+                            x_axis_2_str = (2*threshold/3).toString();
+                            jQuery('#x_axis_1').text(x_axis_1_str.substring(0,3));
+                            jQuery('#x_axis_2').text(x_axis_2_str.substring(0,3));
+                            jQuery('#x_axis_3').text(threshold);
+                            var formula = val.pii.formula;
+                            var currency = val.pii.currency;
+                            var price = val.pii.price;
+                            if (price != null)
+                            {
+                              jQuery('#cost_axis_3').text(currency+price);
+                            } // end if (price != null)
+                            var qr = val.pii.thumbnail_qr_data;
+        //DEBUG alert('qr:'+qr);
+                            // missing.png is the default url provided by paperclip
+                            // when no image is set
+                            if (qr == null || qr == '' || qr.match(/missing\.png/))
+                            {
+                              jQuery('#qr_img').css('display', 'none');
+                              jQuery('#meant_it_str').css('display', 'inline');
+                              jQuery('#meant_it_str').html("Send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
+                              jQuery('#instruction').html("Send order email");
+                            }
+                            else
+                            {
+                              jQuery('#instruction').html("Send order email using QR code<br/><i>OR</i> send <b>:"+val.pii.pii_value+"</b> to like@meant.it");
+                              jQuery('#meant_it_str').css('display', 'none');
+                              jQuery('#qr_img').css('display', 'inline');
+                              jQuery('#qr_img').attr('src', qr);
+                            } // end if (qr == null || qr = '')
+        //DEBUG                    alert("mir_count:"+mir_count);
+        //DEBUG                    alert("threshold:"+threshold);
+        //DEBUG                    alert("threshold_type:"+threshold_type);
+        //DEBUG                    alert("formula:"+formula);
+        //DEBUG                    alert("thumbnail_url_data:"+thumbnail_url_data);
+        //DEBUG                    alert("short_desc_data:"+short_desc_data);
+                            var TOTAL_WIDTH = 560;
+                            var hpos = mir_count * (TOTAL_WIDTH/threshold);
+        //DEBUG                    alert("hpos:"+hpos);
+                            if (hpos > TOTAL_WIDTH)
+                            {
+                              hpos = TOTAL_WIDTH;
+                            }
+        //                    document.getElementById('desiredItem').style.position="relative";
+                            jQuery('#desiredItem').css('position','relative');
+        //                    document.getElementById('desiredItem').style.left=+hpos;
+                            jQuery('#desiredItem').attr('src', thumbnail_url_data);
+                            jQuery('#desiredItem').css('left', hpos);
+                            jQuery('#liketag').css('position','relative');
+                            jQuery('#liketag').css('left', hpos-3);
+                            jQuery('#liketag').css('top', -11);
+                            jQuery('#liketag').html(mir_count.toString()+"<span>"+short_desc_data+"</span>");
+                          }
+                        ) // end jQuery.each ...
+                      } // end if (data == null)
+                    } // end jQuery.each ...
+                  )
+                } // end func0 = function ...
+          getJsonForUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+        } // end jQuery(document).ready
+      ) // end jQuery(document).ready
     </script>
-  </head>
-  <body>
-<%
-# if !pii.pii_property_set.nil? and ((pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME and pii.pii_property_set.status == LikerStatusTypeValidator::LIKER_STATUS_ACTIVE) or (pii.pii_property_set.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR))
-%>
-    <script>
-      jQuery(document).ready(function(){
-        waitForMsg(); /* Start the inital request */
-      });
-    </script>
-<%
-#  else
-%>
-<!---    <script>
-      jQuery(document).ready(function(){
-        jQuery('#closed').css('display','inline');
-      });
-    </script> --->
-<%
-#  end
-%>
   <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">
   <link rel="stylesheet" href="/stylesheets/blueprint/print.css" type="text/css" media="print">
 <!--[if lt IE 8]>
