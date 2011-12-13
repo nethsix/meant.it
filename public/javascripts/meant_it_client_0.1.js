@@ -126,7 +126,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
           error: function(XMLHttpRequest, textStatus, errorThrown){
               alert("error", textStatus + " (" + errorThrown + ")");
               setTimeout(
-                  'getJsonForUniqCounts()', /* Try again after.. */
+                  'getJsonBase()', /* Try again after.. */
                   poll_interval*backoff); /* milliseconds */
           },
       });

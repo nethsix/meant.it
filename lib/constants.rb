@@ -35,6 +35,7 @@ class Constants
   SORT_FIELD_INPUT = "sort_field"
   SORT_ORDER_INPUT = "sort_order"
   LAYOUT_INPUT = "layout"
+  OLD_VERSION_INPUT = "old_ver"
 
   LOGGED_OUT_NOTICE = "Logged out!"
   LOGGED_IN_NOTICE = "Logged in!"

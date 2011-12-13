@@ -5,3 +5,5 @@ Your order (invoice #:<%= @contract_no %>) for a pii:<%= @likee_pii.pii_value %>
 
 Ordered items: <%= @value_type_input_str %>
 <% end # end if !@value_type_obj.nil? %>
+
+Please click <a href='/payments/pay/invoice_no/<%= CGI::escape(@contract_no) %>'>here</a> to pay!

@@ -145,6 +145,9 @@ MeantIt::Application.routes.draw do
   match "/learn_send" => "home#learn_send"
   match "/tutorial_1" => "home#tutorial_1"
   match "/group.html" => "home#group"
+  # 20111212: Take care of new piis where email_bill_entry is immediately
+  # created
+  match "/group_2.html" => "home#group_2"
   match "/group_diy.html" => "home#group_diy"
   match "/like.html" => "home#like"
   match "/platform.html" => "home#platform"

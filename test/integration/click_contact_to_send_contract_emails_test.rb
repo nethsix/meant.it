@@ -75,6 +75,8 @@ class ClickContactToSendContractEmailsTest < ActionDispatch::IntegrationTest
     from_email_arr.push(email_str)
     from_email2 = "something_new@somewhere.com"
     from_email_arr.push(from_email2)
+    # Insert input_str of emails so that we can check later
+    input_str_arr = Array.new
     # Set the path so that the "from:" email is used
     # otherwise sender is anonymous
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send contract email for two mir with valid emails:#{logtag}, page.inspect:#{page.inspect}")
@@ -95,6 +97,8 @@ class ClickContactToSendContractEmailsTest < ActionDispatch::IntegrationTest
 #20111210 click_button('Create Inbound email')
     input_str = email_elem.subject
     input_str ||= email_elem.body_text
+    # Insert input_str for comparison later
+    input_str_arr.push(input_str)
     sum_curr_val = ControllerHelper.sum_currency_in_str(input_str)
     start_curr_code, start_curr_val = ControllerHelper.get_currency_code_and_val(sum_curr_val)
     assert_equal(pps_currency, start_curr_code)
@@ -117,6 +121,13 @@ class ClickContactToSendContractEmailsTest < ActionDispatch::IntegrationTest
     email_elem2 = email_elem.dup
     email_elem2.from = from_email2
     pii_value, email_elem2_curr_val = change_value(email_elem2, inc_curr_val)
+    # Insert input_str for comparison later
+    input_str_email_elem1 = email_elem1.subject
+    input_str_email_elem1 ||= email_elem1.body_text
+    input_str_arr.push(input_str_email_elem1)
+    input_str_email_elem2 = email_elem2.subject
+    input_str_email_elem2 ||= email_elem2.body_text
+    input_str_arr.push(input_str_email_elem2)
 p "!!!!!!email_elem1_curr_val:#{email_elem1_curr_val}, email_elem2_curr_val:#{email_elem2_curr_val}"
 #20111206ABC    sess.post_via_redirect "/inbound_emails_200", email_elem1.attributes
     post_via_redirect "#{Constants::SENDGRID_PARSE_URL}", email_elem1.attributes
@@ -270,7 +281,8 @@ p "!!!!!!email_elem1_curr_val:#{email_elem1_curr_val}, email_elem2_curr_val:#{em
       contract_email_elem = ActionMailer::Base.deliveries[idx]
       assert_match(/pii:#{pii_value}.*ready/, contract_email_elem.subject)
       assert_equal from_email_arr[idx], contract_email_elem.to[0]
-      assert_match(/Congratulations.*Your order.*invoice #:#{payment_objs_arr[idx].invoice_no}.*pii:#{pii_value}.*succeed/m, contract_email_elem.body)
+      assert_match(/Congratulations.*Your order.*invoice #:#{payment_objs_arr[idx].invoice_no}.*pii:#{pii_value}.*succeed.*items:.*#{input_str_arr[idx]}/m, contract_email_elem.body)
+      assert_match(/<a href=.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body)
     } # end contract_emails = ActionMailer::Base.deliveries.each ...
   end # end  test "send contract email for two mir with valid emails" do
 end
