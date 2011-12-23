@@ -3,7 +3,7 @@ module Crypto42
     def initialize(data, logtag=nil)
       base_dir = nil
       if Rails.env == "production"
-        base_dir = "~"
+        base_dir = "."
       else
         base_dir = Dir.getwd
       end # end else Rails.env != "production"
