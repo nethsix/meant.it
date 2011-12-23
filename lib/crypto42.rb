@@ -15,6 +15,8 @@ module Crypto42
         paypal_cert_file = base_dir + "/certs/sandbox_paypal_cert.pem"
       end # end if Rails.env == "production"
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using paypal_cert_file:#{paypal_cert_file}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using my_cert_file:#{my_cert_file}")
+p "/usr/bin/openssl version"
 
       IO.popen("/usr/bin/openssl smime -sign -signer #{my_cert_file} -inkey #{my_key_file} -outform der -nodetach -binary | /usr/bin/openssl smime -encrypt -des3 -binary -outform pem #{paypal_cert_file}", 'r+') do |pipe|
         data.each { |x,y| pipe << "#{x}=#{y}\n" }
