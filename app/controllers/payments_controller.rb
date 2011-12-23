@@ -257,6 +257,7 @@ class PaymentsController < ApplicationController
 #DEBUG      "return" => "http://meant.it"
     } # end decrypted
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:fetch_decrypted:#{logtag}, decrypted.inspect:#{decrypted.inspect}")
+p "decrypted.inspect:#{decrypted.inspect}")
      
     @encrypted_basic = Crypto42::Button.from_hash(decrypted).get_encrypted_text
 
