@@ -6,4 +6,17 @@ Your order (invoice #:<%= @contract_no %>) for a pii:<%= @likee_pii.pii_value %>
 Ordered items: <%= @value_type_input_str %>
 <% end # end if !@value_type_obj.nil? %>
 
+<% 
+  default_host = ActionMailer::Base.default_url_options[:host]
+  if default_host.nil? or default_host.empty?
+    # Use relative url (only happens in testing environment!!!)
+%>
 Please click <a href='/payments/pay/invoice_no/<%= CGI::escape(@contract_no) %>'>here</a> to pay!
+<%
+  else
+    # Use absolute url
+%>
+Please click <a href='http://<%= ActionMailer::Base.default_url_options[:host] %>/payments/pay/invoice_no/<%= CGI::escape(@contract_no) %>'>here</a> to pay!
+<%
+  end # end if default_host.nil? or default_host.empty?
+%>

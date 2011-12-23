@@ -95,8 +95,8 @@ class UserMailer < ActionMailer::Base
         # counted as 1. In future, we may allow more than 1 count, i.e.,
         # the message may have "qty=xx"
         item_qty = 1
-        amount_curr_code = ControllerHelper.get_currency_from_formula(mir.email_bill_entry.pii_property_set.formula)
-        amount_curr_val = ControllerHelper.get_price_from_formula(mir.email_bill_entry.pii_property_set.formula)
+        amount_curr_code = ControllerHelper.get_currency_from_formula(mir_elem.email_bill_entry.pii_property_set.formula)
+        amount_curr_val = ControllerHelper.get_price_from_formula(mir_elem.email_bill_entry.pii_property_set.formula)
       end # end if value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
       # Create payment object
       # CODE!!!! In future create a function to calculate this

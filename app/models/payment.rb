@@ -1,5 +1,6 @@
 class Payment < ActiveRecord::Base
   belongs_to :meant_it_rel
+  serialize :pp_ipn_parms
 
   validates :status, :presence => true, :payment_status_type => true
   validates :item_no, :presence => true

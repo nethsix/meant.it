@@ -1,6 +1,6 @@
 module Crypto42
   class Button
-    def initialize(data)
+    def initialize(data, logtag=nil)
       my_cert_file = Dir.getwd + "/certs/meant_it_pubcert.pem"
       my_key_file = Dir.getwd + "/certs/meant_it_prvkey.pem"
       if Rails.env == "production"
@@ -8,6 +8,7 @@ module Crypto42
       else
         paypal_cert_file = Dir.getwd + "/certs/sandbox_paypal_cert.pem"
       end # end if Rails.env == "production"
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using paypal_cert_file:#{paypal_cert_file}")
 
       IO.popen("/usr/bin/openssl smime -sign -signer #{my_cert_file} -inkey #{my_key_file} -outform der -nodetach -binary | /usr/bin/openssl smime -encrypt -des3 -binary -outform pem #{paypal_cert_file}", 'r+') do |pipe|
         data.each { |x,y| pipe << "#{x}=#{y}\n" }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111211105012) do
+ActiveRecord::Schema.define(:version => 20111223033021) do
 
   create_table "appointments", :force => true do |t|
     t.datetime "app_date"
@@ -212,6 +212,9 @@ ActiveRecord::Schema.define(:version => 20111211105012) do
     t.string   "currency_code"
     t.string   "country"
     t.string   "payee"
+    t.text     "pp_ipn_parms"
+    t.string   "pp_trans_id"
+    t.string   "pp_status"
   end
 
   create_table "physicians", :force => true do |t|

@@ -4,6 +4,7 @@ require 'constants'
 require 'controller_helper'
 require 'capybara/rails'
 require 'date'
+require 'rexml/document'
 
 # PATCH : Start
 # Needed otherwise Capybara is in a different transaction group
@@ -277,12 +278,57 @@ p "!!!!!!email_elem1_curr_val:#{email_elem1_curr_val}, email_elem2_curr_val:#{em
     # creates the object so payment is nil
     assert_equal(3, payment_objs_arr.size)
     assert_nil(payment_objs_arr[0])
-    contract_emails = (1..2).each { |idx|
+    (1..2).each { |idx|
       contract_email_elem = ActionMailer::Base.deliveries[idx]
       assert_match(/pii:#{pii_value}.*ready/, contract_email_elem.subject)
       assert_equal from_email_arr[idx], contract_email_elem.to[0]
       assert_match(/Congratulations.*Your order.*invoice #:#{payment_objs_arr[idx].invoice_no}.*pii:#{pii_value}.*succeed.*items:.*#{input_str_arr[idx]}/m, contract_email_elem.body)
+#20111222 NOTE: We cannot use absolute url (http://.*) match since
+#20111222 in testing we have not fix port so we cannot create absolute url
+#20111222      assert_match(/<a href=.*http:\/\/.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body)
       assert_match(/<a href=.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body)
-    } # end contract_emails = ActionMailer::Base.deliveries.each ...
+    } # end (1..2).each ...
+    # Simulate user attempting to pay
+    user_sess = Capybara::Session.new(:selenium, Capybara.app)
+    # NOTE: 0 is the email to create the object not email to purchase
+    contract_email_1 = ActionMailer::Base.deliveries[1]
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send contract email for two mir with valid emails:#{logtag}, contract_email_1.body.inspect:#{contract_email_1.body.inspect}")
+    # Use REXML to parse the contract email html since we do 
+    # simple parsing only
+    rexml_doc = REXML::Document.new(contract_email_1.body.raw_source)
+    a_elems = rexml_doc.elements.to_a("//a")
+    # NOTE: To check on paypal page b'cos for 'Buy Now'
+    # to succeed, we need to login using Selenium as well, which
+    # requires us to login to Paypal 
+    # HOWEVER, clicking on Test Account will open another page making
+    # the entire process diff and fragile
+#20111223     visit("http://developer.paypal.com")
+#20111223     fill_in('login_email', :with => 'xxxx@yyyy.com')
+#20111223     fill_in('login_password', :with => 'hahaha')
+#20111223     click_button('Log In')
+    # We expect only one a element
+    assert_equal(1, a_elems.size)
+    payment_link = a_elems[0].attribute('href')
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send contract email for two mir with valid emails:#{logtag}, payment_link:#{payment_link}")
+    user_sess.visit(payment_link)
+    assert(user_sess.has_content?("Invoice No.: #{payment_objs_arr[1].invoice_no}"))
+    assert(user_sess.has_content?("Name: #{payment_objs_arr[1].item_name}"))
+    assert(user_sess.has_content?("Item No.: #{payment_objs_arr[1].item_no}"))
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send contract email for two mir with valid emails:#{logtag}, payment_objs_arr[1].quantity:#{payment_objs_arr[1].quantity}")
+    assert(user_sess.has_content?("Qty: #{payment_objs_arr[1].quantity}"))
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:send contract email for two mir with valid emails:#{logtag}, payment_objs_arr[1].amount:#{payment_objs_arr[1].amount}")
+    amount_display_str = ControllerHelper.threshold_display_str_from_attr(payment_objs_arr[1].currency_code, payment_objs_arr[1].amount, logtag)
+    assert(user_sess.has_content?("Amount: #{amount_display_str}"))
+    buynow_btn_elem = user_sess.find("#buynow_btn")
+    buynow_btn_elem.click
   end # end  test "send contract email for two mir with valid emails" do
+
+  test "invalid invoice number" do
+    Capybara.default_driver = :rack_test
+    payment_link = "/payments/pay/invoice_no/12345"
+    visit(payment_link)
+    assert(page.has_content?("Illegal invoice"))
+    buynow_btn = find('#buynow_btn')
+    assert_equal("true", buynow_btn[:disabled])
+  end # end test "invalid invoice number" do
 end
