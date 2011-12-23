@@ -1,12 +1,18 @@
 module Crypto42
   class Button
     def initialize(data, logtag=nil)
-      my_cert_file = Dir.getwd + "/certs/meant_it_pubcert.pem"
-      my_key_file = Dir.getwd + "/certs/meant_it_prvkey.pem"
+      base_dir = nil
       if Rails.env == "production"
-        paypal_cert_file = Dir.getwd + "/certs/paypal_cert.pem"
+        base_dir = ""
       else
-        paypal_cert_file = Dir.getwd + "/certs/sandbox_paypal_cert.pem"
+        base_dir = Dir.getwd
+      end # end else Rails.env != "production"
+      my_cert_file = base_dir + "/certs/meant_it_pubcert.pem"
+      my_key_file = base_dir + "/certs/meant_it_prvkey.pem"
+      if Rails.env == "production"
+        paypal_cert_file = base_dir + "/certs/paypal_cert.pem"
+      else
+        paypal_cert_file = base_dir + "/certs/sandbox_paypal_cert.pem"
       end # end if Rails.env == "production"
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using paypal_cert_file:#{paypal_cert_file}")
 

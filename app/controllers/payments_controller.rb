@@ -11,7 +11,8 @@ class PaymentsController < ApplicationController
   PP_PRODUCTION_CERT_ID = "RCPX3HG4PLNLE"
   PP_SANDBOX_CERT_ID = "8EJUTFDCDWUFY"
   # Paypal account
-  PP_BUSINESS = "pp2_1320488148_biz@yahoo.co.jp"
+  PP_SANDBOX_BUSINESS = "pp2_1320488148_biz@yahoo.co.jp"
+  PP_PRODUCTION_BUSINESS = "neth_12345@yahoo.com"
   # Billing country
   PP_COUNTRY = "US"
   # These API endpoints are from: 
@@ -213,7 +214,7 @@ class PaymentsController < ApplicationController
   # +:job:+:: is the payment we want to make
   def fetch_decrypted(payment=nil, logtag=nil)
     # Update payment with information such as payee, country, etc.
-    payment.payee = PP_BUSINESS
+    payment.payee = pp_business_type
     payment.country = PP_COUNTRY
     unless payment.save
       logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:fetch_decrypted:#{logtag}, payment modification failed, payment.errors.inspect:#{payment.errors.inspect}")
@@ -228,12 +229,12 @@ class PaymentsController < ApplicationController
     # these extra fields on the paypal payment page
     # return is the url the user will be redirected to by 
     # paypal when the transaction is completed.
-#CODE201112    cert_id = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_CERT_ID : PP_SANDBOX_CERT_ID
-    cert_id = PP_SANDBOX_CERT_ID
+    cert_id = cert_id_type
+    pp_business = pp_business_type
     decrypted = {
       "cert_id" => cert_id,
       "cmd" => "_xclick",
-      "business" => PP_BUSINESS,
+      "business" => pp_business,
       "item_name" => payment.item_name,
       "item_number" => payment.item_no, 
       "custom" =>"something to pass to IPN",
@@ -259,8 +260,25 @@ class PaymentsController < ApplicationController
      
     @encrypted_basic = Crypto42::Button.from_hash(decrypted).get_encrypted_text
 
-#CODE201112    @action_url = ENV['RAILS_ENV'] == "production" ? PAYPAL_PRODUCTION_URL : PAYPAL_SANDBOX_URL
-    @action_url = PAYPAL_SANDBOX_URL
+    @action_url = action_url_type
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:fetch_decrypted:#{logtag}, @action_url:#{@action_url}")
   end # end def fetch_decrypted
+
+  def cert_id_type
+#CODE201112    cert_id = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_CERT_ID : PP_SANDBOX_CERT_ID
+    cert_id = PP_SANDBOX_CERT_ID
+    cert_id
+  end # end def cert_id_type
+
+  def action_url_type
+#CODE201112    action_url = ENV['RAILS_ENV'] == "production" ? PAYPAL_PRODUCTION_URL : PAYPAL_SANDBOX_URL
+    action_url = PAYPAL_SANDBOX_URL
+    action_url
+  end # end def action_url_type
+
+  def pp_business_type
+#20111223    pp_business = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_BUSINESS : PP_SANDBOX_BUSINESS
+    pp_business = PP_SANDBOX_BUSINESS
+    pp_business
+  end # end def pp_business_type
 end
