@@ -258,6 +258,8 @@ p "ipn, notify.inspect:#{notify.inspect}"
       "invoice" => payment.invoice_no, 
       "return" => "http://#{request.domain}#{RELATIVE_RETURN_URL_BASE}#{Constants::INVOICE_NO_INPUT}/#{payment.invoice_no}",
 #DEBUG      "return" => "http://meant.it"
+      # Call return URL using GET. Somehow Paypal is using POST.
+      "rm" => 1,
     } # end decrypted
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:fetch_decrypted:#{logtag}, decrypted.inspect:#{decrypted.inspect}")
 p "decrypted.inspect:#{decrypted.inspect}"
