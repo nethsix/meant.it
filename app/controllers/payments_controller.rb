@@ -1,10 +1,11 @@
 require 'constants'
 require 'validators'
-require 'crypto42'
-require 'money
 
 class PaymentsController < ApplicationController
   include ActiveMerchant::Billing::Integrations
+  require 'crypto42'
+  require 'money
+
   TRAN_CHARGE = 0.01
   FAILED_INVOICE_NO = 0
 
