@@ -75,10 +75,13 @@ class PaymentsController < ApplicationController
   end # end def pay
 
   def ipn
-    logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ipn:#{logtag}, params.inspect:#{params.inspect}")
+    logtag = ControllerHelper.gen_logtag
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ipn:#{logtag}, params.inspect:#{params.inspect}")
+p "ipn, params.inspect:#{params.inspect}"
     # Create a notify object we must
     notify = Paypal::Notification.new(request.raw_post)
-    logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ipn:#{logtag}, notify.inspect:#{notify.inspect}")
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:ipn:#{logtag}, notify.inspect:#{notify.inspect}")
+p "ipn, notify.inspect:#{notify.inspect}"
 
     # Save ipn response
     invoice_no = params[:invoice]
