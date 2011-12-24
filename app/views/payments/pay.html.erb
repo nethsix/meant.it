@@ -7,14 +7,21 @@
     <b>Item No.:</b> <%= item_no %><br/>
     <b>Qty:</b> <%= quantity %><br/>
     <b>Amount:</b> <%= amount %><br/>
-<% payment_date_str = payment_date.nil? ? "Unpaid" : payment_date %>
-    <b>Payment Date:</b> <%= payment_date_str %><br/>
+    <b>Status:</b> <%= payment_status %><br/>
+<%
+  trans_id_str = trans_id.nil? ? "NA" : trans_id
+  payment_created_at_str = payment_created_at.nil? ? "NA" : payment_created_at
+  payment_updated_at_str = payment_updated_at.nil? ? "NA" : payment_updated_at
+%>
+    <b>Trans. Id:</b> <%= trans_id_str %><br/>
+    <b>Initiated:</b> <%= payment_created_at_str %><br/>
+    <b>Updated:</b> <%= payment_updated_at_str %><br/>
     </p>
 
     <form action="<%= @action_url %>" method="post">
       <input type="hidden" name="cmd" value="_s-xclick" /><br/>
       <input type="hidden" name="encrypted" value="<%= @encrypted_basic %>" /><br/>
-<% if error_msg.nil? and payment_date.nil? %>
+<% if error_msg.nil? and payment_status == Constants::PAYPAL_STATUS_UNPAID  %>
       <input id="buynow_btn" type="image" src="/images/x-click-but23.gif" name="submit" alt=""><br/>
 <% else %>
       <input id="buynow_btn" class="opaque40" type="image" disabled="true" src="/images/x-click-but23.gif" name="submit" alt=""><br/>

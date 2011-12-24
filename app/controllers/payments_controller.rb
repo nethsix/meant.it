@@ -53,11 +53,11 @@ class PaymentsController < ApplicationController
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:pay:#{logtag}, payment.inspect:#{payment.inspect}")
     if !payment.nil?
       amount_display_str = ControllerHelper.threshold_display_str_from_attr(payment.currency_code, payment.amount, logtag)
-      if payment.pp_status == PAYPAL_STATUS_COMPLETED
+      if !payment.pp_status.nil? and !payment.pp_status.empty?
         respond_to do |format|
           format.html {
             # CODE: We need a better payment date instead of last_modified
-            render "pay", :layout => "payment", :locals => { :error_msg => nil, :notice => nil, :invoice_no => invoice_no, :item_name => payment.item_name, :item_no => payment.item_no, :quantity => payment.quantity, :amount => amount_display_str, :payment_date => payment.last_modified }
+            render "pay", :layout => "payment", :locals => { :error_msg => nil, :notice => nil, :invoice_no => invoice_no, :item_name => payment.item_name, :item_no => payment.item_no, :quantity => payment.quantity, :amount => amount_display_str, :payment_updated_at => payment.updated_at, :payment_created_at => payment.created_at, :payment_status => payment.pp_status, :trans_id => payment.pp_trans_id }
           } # end format.html
         end # end respond_to do |format|
       else
@@ -65,7 +65,7 @@ class PaymentsController < ApplicationController
         fetch_decrypted(payment, logtag)
         respond_to do |format|
           format.html {
-            render "pay", :layout => "payment", :locals => { :error_msg => nil, :notice => nil, :invoice_no => invoice_no, :item_name => payment.item_name, :item_no => payment.item_no, :quantity => payment.quantity, :amount => amount_display_str, :payment_date => nil }
+            render "pay", :layout => "payment", :locals => { :error_msg => nil, :notice => nil, :invoice_no => invoice_no, :item_name => payment.item_name, :item_no => payment.item_no, :quantity => payment.quantity, :amount => amount_display_str, :payment_updated_at => nil, :payment_created_at => nil, :payment_status => Constants::PAYPAL_STATUS_UNPAID, :trans_id => nil }
           } # end format.html
         end # end respond_to do |format|
       end # end else payment.pp_status != PAYPAL_STATUS_COMPLETED

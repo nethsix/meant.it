@@ -6,6 +6,9 @@ class Constants
   CURRENCY_REGEX2 = "\\d+\\.*\\d*"
   CURREG2 = CURRENCY_REGEX2
 
+  # Paypal stuff
+  PAYPAL_STATUS_UNPAID = "Unpaid"
+
   # Contract/Payment parms
   SHA1_LEN = 48
   CONTRACT_NO_LEN = 8 # in chars
