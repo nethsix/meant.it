@@ -10,13 +10,27 @@ module Crypto42
       my_cert_file = base_dir + "/certs/meant_it_pubcert.pem"
       my_key_file = base_dir + "/certs/meant_it_prvkey.pem"
       if Rails.env == "production"
+#20111223PP        paypal_cert_file = base_dir + "/certs/paypal_cert.pem"
         paypal_cert_file = base_dir + "/certs/paypal_cert.pem"
       else
         paypal_cert_file = base_dir + "/certs/sandbox_paypal_cert.pem"
       end # end if Rails.env == "production"
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using paypal_cert_file:#{paypal_cert_file}")
+#HEROKU DEBUG f = File.new(paypal_cert_file) 
+#HEROKU DEBUG f.each { |e|
+#HEROKU DEBUG  p e
+#HEROKU DEBUG }
       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using my_cert_file:#{my_cert_file}")
-p "/usr/bin/openssl version"
+#HEROKU DEBUG f = File.new(my_cert_file) 
+#HEROKU DEBUG f.each { |e|
+#HEROKU DEBUG  p e
+#HEROKU DEBUG }
+#HEROKU DEBUG       Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:initialize:#{logtag}, using my_other_file:#{my_key_file}")
+#HEROKU DEBUG f = File.new(my_key_file) 
+#HEROKU DEBUG f.each { |e|
+#HEROKU DEBUG  p e
+#HEROKU DEBUG }
+#HEROKU DEBUG p `/usr/bin/openssl version`
 
       IO.popen("/usr/bin/openssl smime -sign -signer #{my_cert_file} -inkey #{my_key_file} -outform der -nodetach -binary | /usr/bin/openssl smime -encrypt -des3 -binary -outform pem #{paypal_cert_file}", 'r+') do |pipe|
         data.each { |x,y| pipe << "#{x}=#{y}\n" }

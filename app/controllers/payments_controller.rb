@@ -266,19 +266,19 @@ p "decrypted.inspect:#{decrypted.inspect}"
   end # end def fetch_decrypted
 
   def cert_id_type
-#CODE201112    cert_id = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_CERT_ID : PP_SANDBOX_CERT_ID
+#20111223PP    cert_id = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_CERT_ID : PP_SANDBOX_CERT_ID
     cert_id = PP_SANDBOX_CERT_ID
     cert_id
   end # end def cert_id_type
 
   def action_url_type
-#CODE201112    action_url = ENV['RAILS_ENV'] == "production" ? PAYPAL_PRODUCTION_URL : PAYPAL_SANDBOX_URL
+#20111223PP    action_url = ENV['RAILS_ENV'] == "production" ? PAYPAL_PRODUCTION_URL : PAYPAL_SANDBOX_URL
     action_url = PAYPAL_SANDBOX_URL
     action_url
   end # end def action_url_type
 
   def pp_business_type
-#20111223    pp_business = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_BUSINESS : PP_SANDBOX_BUSINESS
+#20111223PP    pp_business = ENV['RAILS_ENV'] == "production" ? PP_PRODUCTION_BUSINESS : PP_SANDBOX_BUSINESS
     pp_business = PP_SANDBOX_BUSINESS
     pp_business
   end # end def pp_business_type
