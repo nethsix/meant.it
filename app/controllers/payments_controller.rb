@@ -1,8 +1,8 @@
 require 'constants'
 require 'validators'
-require 'active_merchant'
+#require 'active_merchant'
 require 'crypto42'
-require 'money
+#require 'money
 
 class PaymentsController < ApplicationController
 #  include ActiveMerchant::Billing::Integrations
