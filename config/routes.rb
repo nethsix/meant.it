@@ -1,7 +1,7 @@
 MeantIt::Application.routes.draw do
 
   get "/shops/:id" => "shops#show"
-  get "/payments/ipn" => "payments#ipn"
+  post "/payments/ipn" => "payments#ipn"
   get "/payments/pay/invoice_no/:invoice_no" => "payments#pay"
   get "/payments/invoice_no/:invoice_no" => "payments#show"
   get "/payments/cancel/invoice_no/:invoice_no" => "payments#cancel"
