@@ -11,7 +11,7 @@ module Crypto42
       my_key_file = base_dir + "/certs/meant_it_prvkey.pem"
       if Rails.env == "production"
 #20111223PP        paypal_cert_file = base_dir + "/certs/paypal_cert.pem"
-        paypal_cert_file = base_dir + "/certs/paypal_cert.pem"
+        paypal_cert_file = base_dir + "/certs/sandbox_paypal_cert.pem"
       else
         paypal_cert_file = base_dir + "/certs/sandbox_paypal_cert.pem"
       end # end if Rails.env == "production"
