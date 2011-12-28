@@ -2,7 +2,7 @@ require 'controller_helper'
 
 class PiisController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
-  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill ]
+  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill, :show_like_pii_value_non_uniq_sender_count_after_last_bill ]
 
   # GET /piis
   # GET /piis.xml
@@ -161,7 +161,8 @@ class PiisController < ApplicationController
     old_ver = params[Constants::OLD_VERSION_INPUT] == "true" ? true : false
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_ver:#{old_ver}")
 #20111212 : End
-    pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
+#20111227    pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
+    pii_to_json = ControllerHelper.get_json_like_pii_value_sender_count_after_last_bill(pii_value, true, logtag, old_ver)
     logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
 
     respond_to do |format|
@@ -170,6 +171,23 @@ class PiisController < ApplicationController
       format.json { render :json => pii_to_json }
     end
   end # end def show_like_pii_value_uniq_sender_count_after_last_bill
+
+  def show_like_pii_value_non_uniq_sender_count_after_last_bill
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_non_uniq_sender_count_after_last_bill:#{logtag}, params.inspect:#{params.inspect}")
+    pii_value = params[Constants::PII_VALUE_INPUT]
+    old_ver = params[Constants::OLD_VERSION_INPUT] == "true" ? true : false
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_ver:#{old_ver}")
+#20111227    pii_to_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
+    pii_to_json = ControllerHelper.get_json_like_pii_value_sender_count_after_last_bill(pii_value, false, logtag, old_ver)
+    logger.debug("#{File.basename(__FILE__)}:#{self.class}:show_like_pii_value_non_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
+
+    respond_to do |format|
+#      format.html { render "show_pii_details", :layout => "find_any", :locals => { :find_any_input => find_any_input } }
+#20111103      format.xml  { render :xml => @pii }
+      format.json { render :json => pii_to_json }
+    end
+  end # end def show_like_pii_value_non_uniq_sender_count_after_last_bill
 
   def show_by_message_type_uniq_sender_count
     logtag = ControllerHelper.gen_logtag

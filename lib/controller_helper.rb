@@ -545,18 +545,30 @@ module ControllerHelper
   # +return+ +Pii+ array, after_date
   # NOTE: after_date is when deal was started which is calculated
   # by considering threshold_type (ONE_TIME, RECUR)
-  def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil, old_ver=false)
+#20111227  def self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag = nil, old_ver=false)
+  def self.find_like_pii_value_sender_count_after_last_bill(pii_value, uniq_type=true, logtag=nil, old_ver=false)
     pii_virtual = nil
     after_date = nil
     if !pii_value.nil? and !pii_value.empty?
       desired_pii = nil
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_ver:#{old_ver}")
+#20111227      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_ver:#{old_ver}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, uniq_type:#{uniq_type}, old_ver:#{old_ver}")
       if old_ver
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_versioning")
-        desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+#20111227        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, old_versioning")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, old_versioning")
+        if uniq_type
+          desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+        else
+          desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).select("piis.pii_value, piis.status, piis.pii_hide, count(meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+        end # end if uniq_type
       else
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, new_versioning")
-        desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").joins("JOIN email_bill_entries on email_bill_entries.id = meant_it_rels.email_bill_entry_id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).where(:email_bill_entries => { :ready_date => nil }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+#20111227        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, new_versioning")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, new_versioning")
+        if uniq_type
+          desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").joins("JOIN email_bill_entries on email_bill_entries.id = meant_it_rels.email_bill_entry_id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).where(:email_bill_entries => { :ready_date => nil }).select("piis.pii_value, piis.status, piis.pii_hide, count(distinct meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+        else
+          desired_piis = Pii.joins("JOIN end_points on piis.id = end_points.pii_id").joins("JOIN meant_it_rels on meant_it_rels.dst_endpoint_id = end_points.id").joins("JOIN email_bill_entries on email_bill_entries.id = meant_it_rels.email_bill_entry_id").where(:meant_it_rels => { :message_type => MeantItMessageTypeValidator::MEANT_IT_MESSAGE_LIKE}).where(:piis => { :pii_value => pii_value }).where(:email_bill_entries => { :ready_date => nil }).select("piis.pii_value, piis.status, piis.pii_hide, count(meant_it_rels.src_endpoint_id) as mir_count").group("piis.pii_value, piis.status, piis.pii_hide")
+        end # end if uniq_type
       end # end if old_ver
       # Get the last bill date
       after_date = self.get_bill_dates_by_pii_value(pii_value)
@@ -582,7 +594,8 @@ module ControllerHelper
 #YYYY           Rails.logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system")
 #YYYY          raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pps.threshold_type:#{pps.threshold_type} not supported by billing system"
 #YYYY        end # end if pps.threshold_type
-        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
+#20111227        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
+        Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, after_date:#{after_date}")
         after_date = ControllerHelper.validate_date(after_date.to_s)
         pii_virtual = nil
         if old_ver
@@ -598,8 +611,10 @@ module ControllerHelper
         end # end if old_ver
 #YYYY      end # end if !pii.pii_property_set.nil? ...
 #DEBUG      ControllerHelper.set_options_str(options, :conditions, "meant_it_rels.created_at > '2011-08-05 11:12:20'") if after_date.nil?
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, setting pii_virtual with after_date.inspect:#{after_date.inspect}")
+#20111227      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+#20111227      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, setting pii_virtual with after_date.inspect:#{after_date.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, setting pii_virtual with after_date.inspect:#{after_date.inspect}")
       # We expect only one
       pii_virtual.each { |pii_elem|
         class << pii_elem
@@ -607,10 +622,12 @@ module ControllerHelper
         end
         pii_elem.after_date = after_date
       } # end pii_virtual.each ...
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+#20111227      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:find_like_pii_value_sender_count_after_last_bill:#{logtag}, pii_virtual.inspect:#{pii_virtual.inspect}")
     end # end if !pii_value.nil? and !pii_value.empty?
     [pii_virtual, after_date]
-  end # end def self.find_like_pii_value_uniq_sender_count_after_last_bill
+#20111227  end # end def self.find_like_pii_value_uniq_sender_count_after_last_bill
+  end # end def self.find_like_pii_value_sender_count_after_last_bill
 
   # This methods is used by group.html 'cos it takes additional steps
   # to populate the pii when it's inactive, nil, etc.
@@ -618,11 +635,14 @@ module ControllerHelper
   # +show_like_pii_value_uniq_sender_count_after_last_bill+
   # +return+ JSON
 #20111212  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil)
-  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil, old_ver=false)
+#20111227  def self.get_json_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag=nil, old_ver=false)
+  def self.get_json_like_pii_value_sender_count_after_last_bill(pii_value, uniq_type=true, logtag=nil, old_ver=false)
 #20111212    piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag)
-    piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
+#20111227    piis, after_date = self.find_like_pii_value_uniq_sender_count_after_last_bill(pii_value, logtag, old_ver)
+    piis, after_date = self.find_like_pii_value_sender_count_after_last_bill(pii_value, uniq_type, logtag, old_ver)
     self.add_virtual_methods_to_pii(piis[0], pii_value)
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, piis.inspect:#{piis.inspect}")
+#20111227    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, piis.inspect:#{piis.inspect}")
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_sender_count_after_last_bill:#{logtag}, piis.inspect:#{piis.inspect}")
     if piis.nil? or piis.empty?
       pii = Pii.find_by_pii_value(pii_value)
       pps = pii.pii_property_set
@@ -633,14 +653,17 @@ module ControllerHelper
         made_mir_count = 0
       end # end if pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_ONETIME
       made_pii = [:pii => { :pii_value => pii_value, :threshold => pps.threshold, :formula => pps.formula, :short_desc_data => pps.short_desc, :mir_count => made_mir_count, :thumbnail_url_data => pps.avatar.url(:thumb), :thumbnail_qr_data => pps.qr.url(:thumb), :threshold_type => pps.threshold_type, :after_date => after_date, :price => self.get_price_from_formula(pps.formula), :currency => self.get_currency_from_formula(pps.formula), :threshold_currency => pps.currency }]
-      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
+#20111227      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
+      Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_sender_count_after_last_bill:#{logtag}, made_pii.inspect:#{made_pii.inspect}")
       pii_to_json = made_pii.to_json
     else
       pii_to_json = piis.to_json(:methods => [:threshold, :formula, :short_desc_data, :long_desc_data, :thumbnail_url_data, :thumbnail_qr_data, :threshold_type, :after_date, :price, :currency, :threshold_currency ])
     end # end if piis.nil? or piis.empty?
-    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
+#20111227    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_uniq_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
+    Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:get_json_like_pii_value_sender_count_after_last_bill:#{logtag}, pii_to_json:#{pii_to_json}")
     pii_to_json
-  end # end def self.get_json_like_pii_value_uniq_sender_count_after_last_bill
+#20111227  end # end def self.get_json_like_pii_value_uniq_sender_count_after_last_bill
+  end # end def self.get_json_like_pii_value_sender_count_after_last_bill
 
   def self.find_pii_by_message_type_uniq_sender_count(pii_value, message_type, limit = nil, order = nil, logtag = nil)
     limit = ControllerHelper.validate_number(limit, Constants::LIKEBOARD_REC_LIMIT)

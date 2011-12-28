@@ -27,7 +27,7 @@ class PaymentsController < ApplicationController
   RELATIVE_RETURN_URL_BASE = "/payments/pay/"
   RELATIVE_ERROR_URL_BASE = "/payments/error/"
   RELATIVE_CANCEL_URL_BASE = "/payments/pay/"
-  RELATIVE_NOTIFY_URL = "/payments/ipn"
+  RELATIVE_NOTIFY_URL = "/payments/ipn_pp_20111224"
 
   # Paypal status
   PAYPAL_STATUS_COMPLETED = "Completed"

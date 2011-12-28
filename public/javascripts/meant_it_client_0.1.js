@@ -185,6 +185,32 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
     }; // end function getJsonForUniqCountsAfterLastBill
 
+    // Execute a function when we get count of 
+    // non-uniq senders for a pii_value after last bill from server
+    // asynchronously.
+    // Params:
+    // - func1: function to execute when ajax calls return with count
+    // - pii_value: value of pii
+    // - message_type: type of message
+    // - timeout: how long to wait for conn (ms)
+    // - poll_interval: how long to wait before retry (ms)
+    // - backoff: this can be increased to increase retry
+    // Returns:
+    // - nil
+    // IMPT: We don't return the results because when the function
+    // finishes, asynchronous ajax call may not be done yet so nothing to
+    // return.  Instead accept a function and execute the function
+    // when ajax call returns
+    function getJsonForNonUniqCountsAfterLastBill(func1, pii_value, timeout, poll_interval, backoff)
+    {
+      var normalized_timeout = setDefault(timeout, null, TIMEOUT);
+      var normalized_poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
+      var normalized_backoff = setDefault(backoff, null, BACKOFF);
+      var normalized_message_type = "like";
+      var normalized_pii_value = setDefault(pii_value, null, '');
+      var request_url = "/piis/show_like_pii_value_non_uniq_sender_count_after_last_bill.json?"+MESSAGE_TYPE_INPUT+"="+normalized_message_type+"&"+PII_VALUE_INPUT+"="+normalized_pii_value;
+      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
+    }; // end function getJsonForNonUniqCountsAfterLastBill
 
     // Execute a function when we get count of 
     // uniq senders for a pii_value from server

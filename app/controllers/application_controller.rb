@@ -64,9 +64,10 @@ class ApplicationController < ActionController::Base
 
 if Rails.env.production?
 #  ENV['GROUP_PII'] = '9%3d%3d%3dlabutan'
-  ENV['GROUP_PII'] = '9%3d%3d%3dcrocs'
+#  ENV['GROUP_PII'] = '9%3d%3d%3dcrocs'
+  ENV['GROUP_PII'] = '9%3d%3d%3dwatari'
 else
-  ENV['GROUP_PII'] = '25%3d%3d%3dlabutan'
+  ENV['GROUP_PII'] = '28%3d%3d%3dwatari'
 end
 
 end

@@ -43,7 +43,13 @@
     # Remove non-sellable items
     entity_sellable_endPoints = entity_endPoints.select { |ep| ControllerHelper.sellable_pii(ep.pii) }
     entity_sellable_pii_virtuals = entity_sellable_endPoints.collect { |ep| 
-      pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(ep.pii.pii_value)
+      if ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_COUNT or ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_VALUE
+#20111227        pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(ep.pii.pii_value)
+        pii_json = ControllerHelper.get_json_like_pii_value_sender_count_after_last_bill(ep.pii.pii_value, false)
+      elsif ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ or ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
+#20111227        pii_json = ControllerHelper.get_json_like_pii_value_uniq_sender_count_after_last_bill(ep.pii.pii_value)
+        pii_json = ControllerHelper.get_json_like_pii_value_sender_count_after_last_bill(ep.pii.pii_value, true)
+      end # end if ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_COUNT or ep.pii.pii_property_set.value_type == ValueTypeValidator::VALUE_TYPE_VALUE
       pii_virtuals = JSON.parse(pii_json)
       # We expect only one
       pii_virtual_hash = pii_virtuals[0]["pii"] if pii_virtuals.size > 0

@@ -1,3 +1,4 @@
+require 'fake_aws'
 require 'validators'
 class PiiPropertySet < ActiveRecord::Base
   # IMPT: formula field contains mix of positional and named parms

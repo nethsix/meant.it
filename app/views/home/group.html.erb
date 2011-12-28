@@ -27,7 +27,7 @@ to communicate with meant.it using REST --->
       var func0 = function(data) {
                     jQuery.each(data, function(key, val)
                     {
-//DEBUG                  alert("data:"+data);
+                  alert("data:"+data);
                       if (data == null)
                       {
                         jQuery('#closed').css('display','inline');
@@ -123,6 +123,11 @@ to communicate with meant.it using REST --->
                             jQuery('#liketag').html(mir_count.toString()+"<span>"+short_desc_data+"</span>");
                           }
                         ) // end jQuery.each ...
+//alert("setTimeout");
+//                        setTimeout(
+//                                   'func0()', /* Request next message */
+//                                   POLL_INTERVAL /* ..after 1 seconds */
+//                        );
                       } // end if (data == null)
                     } // end jQuery.each ...
                   )
