@@ -4,6 +4,28 @@ class PiisController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
   before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill, :show_like_pii_value_non_uniq_sender_count_after_last_bill ]
 
+  before_filter :logged_in, :except => [:pii_property_set]
+
+  # Create a limited pii_property_set since some information
+  # is private
+  def create_pps_limited(pii_value, pps, logtag=nil)
+    new_pps = [:pii_property_set=> { pii_value => pii_value, :threshold => pps.threshold, :short_desc_data => pps.short_desc, :price => ControllerHelper.get_price_from_formula(pps.formula), :currency => ControllerHelper.get_currency_from_formula(pps.formula), :threshold_currency => pps.currency, :value_type => pps.value_type }]
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:create_pps_limited:#{logtag}, new_pps.inspect:#{new_pps.inspect}")
+    new_pps
+  end # end def create_pps_limited
+
+  def pii_property_set_limited
+    logtag = ControllerHelper.gen_logtag
+    logger.info("#{File.basename(__FILE__)}:#{self.class}:pii_property_set_limited:#{logtag}, params.inspect:#{params.inspect}")
+    pii_value = params[:pii_value]
+    pii = Pii.find_by_pii_value(pii_value)
+    @pps = create_pps_limited(pii_value, pii.pii_property_set)
+    respond_to do |format|
+      format.json { render :json=> @pps }
+      format.xml { render :xml=> @pps }
+    end # end respond_to ...
+  end # end def pii_property_set_limited
+
   # GET /piis
   # GET /piis.xml
   def index

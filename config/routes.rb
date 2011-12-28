@@ -74,6 +74,8 @@ MeantIt::Application.routes.draw do
 
   resources :entities
 
+  get 'piis/pii_property_set_limited/:pii_value' => "piis#pii_property_set_limited"
+
   resources :piis do
     collection do
       get 'find_by_pii_value'
@@ -82,6 +84,7 @@ MeantIt::Application.routes.draw do
       get 'show_by_pii_value_debug'
       get 'show_by_message_type_uniq_sender_count'
       get 'show_like_pii_value_uniq_sender_count_after_last_bill'
+      get 'show_like_pii_value_non_uniq_sender_count_after_last_bill'
     end
   end
 

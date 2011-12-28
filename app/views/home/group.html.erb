@@ -27,7 +27,7 @@ to communicate with meant.it using REST --->
       var func0 = function(data) {
                     jQuery.each(data, function(key, val)
                     {
-                  alert("data:"+data);
+//DEBUG alert("data:"+data);
                       if (data == null)
                       {
                         jQuery('#closed').css('display','inline');
@@ -132,7 +132,18 @@ to communicate with meant.it using REST --->
                     } // end jQuery.each ...
                   )
                 } // end func0 = function ...
-          getJsonForUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+          var pps = getJsonForPps(null, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF, false);
+//DEBUG alert("pps:"+pps);
+          pps_value_type = pps[0].pii_property_set.value_type;
+//DEBUG alert("pps_value_type:"+pps_value_type);
+          if ((pps_value_type == VALUE_TYPE_COUNT) || (pps_value_type == VALUE_TYPE_COUNT))
+          {
+            getJsonForNonUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+          }
+          else if ((pps_value_type == VALUE_TYPE_COUNT_UNIQ) || (pps_value_type == VALUE_TYPE_COUNT_UNIQ))
+          {
+            getJsonForUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+          } // if ((pps_value_type == VALUE_TYPE_COUNT) || (pps_value_type == VALUE_TYPE_COUNT))
         } // end jQuery(document).ready
       ) // end jQuery(document).ready
     </script>

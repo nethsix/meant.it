@@ -8,6 +8,10 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     var MEANT_IT_REL_PAGE_SIZE = "pg_size";
     var MEANT_IT_REL_LAST_ID = "last_id";
     var MEANT_IT_REL_START_ID = "start_id";
+    var VALUE_TYPE_COUNT = "count";
+    var VALUE_TYPE_COUNT_UNIQ = "count_uniq";
+    var VALUE_TYPE_VALUE = "value";
+    var VALUE_TYPE_VALUE_UNIQ = "value_uniq";
 
     // Configurable variables
     var TIMEOUT = 50000;
@@ -106,22 +110,29 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     // finishes, asynchronous ajax call may not be done yet so nothing to
     // return.  Instead accept a function and execute the function
     // when ajax call returns
-    function getJsonBase(request_url, func1, poll_interval, backoff)
+    function getJsonBase(request_url, func1, timeout, poll_interval, backoff, async_mode)
     {
+//DEBUG alert("getJsonBase, before async_mode:"+async_mode);
+      async_mode = setDefault(async_mode, null, true);
+//DEBUG alert("getJsonBase, async_mode:"+async_mode);
       var timeout = setDefault(timeout, null, TIMEOUT);
       var poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
       var backoff = setDefault(timeout, null, BACKOFF);
+      var return_data;
       jQuery.ajax({
           type: "GET",
           url: request_url,
-          async: true, /* If set to non-async, browser shows page as "Loading.."*/
+          async: async_mode, /* If set to non-async, browser shows page as "Loading.."*/
           cache: false,
           timeout:timeout, /* Timeout in ms */
 
           success: function(data)
           {
-//DEBUG              alert("data:"+data);
-            func1(data);
+            if (func1 != null)
+            {
+              func1(data);
+            }
+            return_data = data;
           },
           error: function(XMLHttpRequest, textStatus, errorThrown){
               alert("error", textStatus + " (" + errorThrown + ")");
@@ -130,6 +141,8 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
                   poll_interval*backoff); /* milliseconds */
           },
       });
+//DEBUG alert("getJsonBase, return_data:"+return_data);
+      return return_data;
     } // end function getJsonBase
 
     // Execute a function when we get count of 
@@ -270,6 +283,34 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       var request_url =  "/meant_it_rels/show_in_by_pii.json?"+MESSAGE_TYPE_INPUT+"="+normalized_message_type+"&"+PII_VALUE_INPUT+"="+normalized_pii_value+"&"+MEANT_IT_REL_PAGE_SIZE+"="+normalized_page_size+"&"+MEANT_IT_REL_START_ID+"="+normalized_start_id+"&"+MEANT_IT_REL_LAST_ID+"="+normalized_last_id;
       getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
     } // end function getJsonForMirs
+
+    // Execute a function when we get list of pii_property_set in
+    // asynchronous mode or just return with value in synchronous mode.
+    // Params:
+    // - func1: function to execute when ajax calls return 
+    //          with pii_property_set
+    // - pii_value: value of pii
+    // - timeout: how long to wait for conn (ms)
+    // - poll_interval: how long to wait before retry (ms)
+    // - backoff: this can be increased to increase retry
+    // Returns:
+    // - pii_property_set in json
+    function getJsonForPps(func1, pii_value, timeout, poll_interval, backoff, async_mode)
+    {
+//DEBUG alert("getJsonForPps, before async_mode:"+async_mode);
+      async_mode = setDefault(async_mode, null, true);
+//DEBUG alert("getJsonForPps, async_mode:"+async_mode);
+      var normalized_timeout = setDefault(timeout, null, TIMEOUT);
+      var normalized_poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
+      var normalized_backoff = setDefault(backoff, null, BACKOFF);
+      var normalized_pii_value = setDefault(pii_value, null, '');
+      var request_url =  "/piis/pii_property_set_limited/"+unescape(pii_value)+".json";
+//DEBUG alert("request_url:"+request_url);
+//DEBUG alert("getJsonForPps just before, async_mode:"+async_mode);
+      var return_data = getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff, async_mode);
+//DEBUG alert("return_data:"+return_data);
+      return return_data;
+    } // end function getJsonForPps
 
     // Show the contents of Array containing meant_it_rels
     // Params:

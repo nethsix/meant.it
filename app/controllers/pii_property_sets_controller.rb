@@ -1,6 +1,16 @@
 require 'controller_helper'
 
 class PiiPropertySetsController < ApplicationController
+  # GET /pii_property_sets
+  # GET /pii_property_sets.xml
+  def index
+    @pii_property_sets = PiiPropertySet.all
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @pii_property_sets }
+    end
+  end
 
   # GET /pii_property_sets/new
   # GET /pii_property_sets/new.xml
