@@ -16,7 +16,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     // Configurable variables
     var TIMEOUT = 50000;
     var POLL_INTERVAL = 10000;
-    var BACKOFF = 3;
+    var BACKOFF = 1;
 
     // Set defaults if matches given value
     // E.g., if null then set to ""
@@ -94,6 +94,51 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       list_ul.append("<li>"+str+"</li>");
     } // end function addToList
 
+    function waitForMsg(request_url, func1, timeout, poll_interval, backoff, async_mode, repeat)
+    {
+//20111228: Start
+      var return_data;
+//20111228: End
+      jQuery.ajax({
+          type: "GET",
+          url: request_url,
+          async: async_mode, /* If set to non-async, browser shows page as "Loading.."*/
+          cache: false,
+          timeout:timeout, /* Timeout in ms */
+
+          success: function(data)
+          {
+            if (func1 != null)
+            {
+              func1(data);
+            }
+            return_data = data;
+//DEBUG alert('return_data:'+return_data);
+//DEBUG alert('setTimeout');
+            if (repeat == true)
+            {
+              setTimeout(
+//20111228                  'waitForMsg()', /* Try again after.. */
+                    function(){waitForMsg(request_url, func1, timeout, poll_interval, backoff, async_mode, repeat)},
+//20111228                  normalized_poll_interval*normalized_backoff /* milliseconds */
+                    poll_interval*backoff /* milliseconds */
+              );
+            } // end if (repeat == true)
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+              alert("error", textStatus + " (" + errorThrown + ")");
+              setTimeout(
+                  'getJsonBase()', /* Try again after.. */
+//20111228                  normalized_poll_interval*normalized_backoff /* milliseconds */
+                  poll_interval*backoff /* milliseconds */
+              ); /* milliseconds */
+          },
+      });
+//20111228 : Start
+      return return_data;
+//20111228 : End
+    } // end function waitForMsg
+
     // Execute a function when we get count of 
     // all senders (non unique) for a pii_value from server
     // Params:
@@ -110,37 +155,19 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     // finishes, asynchronous ajax call may not be done yet so nothing to
     // return.  Instead accept a function and execute the function
     // when ajax call returns
-    function getJsonBase(request_url, func1, timeout, poll_interval, backoff, async_mode)
+    function getJsonBase(request_url, func1, timeout, poll_interval, backoff, async_mode, repeat)
     {
 //DEBUG alert("getJsonBase, before async_mode:"+async_mode);
       async_mode = setDefault(async_mode, null, true);
+      repeat = setDefault(repeat, null, false);
 //DEBUG alert("getJsonBase, async_mode:"+async_mode);
-      var timeout = setDefault(timeout, null, TIMEOUT);
-      var poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
-      var backoff = setDefault(timeout, null, BACKOFF);
+      var normalized_timeout = setDefault(timeout, null, TIMEOUT);
+      var normalized_poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
+      var normalized_backoff = setDefault(backoff, null, BACKOFF);
+alert('normalized_poll_interval:'+normalized_poll_interval);
+alert('normalized_backoff:'+normalized_backoff);
       var return_data;
-      jQuery.ajax({
-          type: "GET",
-          url: request_url,
-          async: async_mode, /* If set to non-async, browser shows page as "Loading.."*/
-          cache: false,
-          timeout:timeout, /* Timeout in ms */
-
-          success: function(data)
-          {
-            if (func1 != null)
-            {
-              func1(data);
-            }
-            return_data = data;
-          },
-          error: function(XMLHttpRequest, textStatus, errorThrown){
-              alert("error", textStatus + " (" + errorThrown + ")");
-              setTimeout(
-                  'getJsonBase()', /* Try again after.. */
-                  poll_interval*backoff); /* milliseconds */
-          },
-      });
+      return_data = waitForMsg(request_url, func1, timeout, poll_interval, backoff, async_mode, repeat);
 //DEBUG alert("getJsonBase, return_data:"+return_data);
       return return_data;
     } // end function getJsonBase
@@ -168,7 +195,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       var normalized_message_type = setDefault(message_type, null, '');
       var normalized_pii_value = setDefault(pii_value, null, '');
       var request_url = "/meant_it_rels/count_in_mirs.json?"+PII_VALUE_INPUT+"="+normalized_pii_value+"&"+MESSAGE_TYPE_INPUT+"="+normalized_message_type;
-      getJsonBase(request_url, func1, timeout, poll_interval, backoff);
+      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
     } // end function getJsonForCounts
     
     // Execute a function when we get count of 
@@ -187,7 +214,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     // finishes, asynchronous ajax call may not be done yet so nothing to
     // return.  Instead accept a function and execute the function
     // when ajax call returns
-    function getJsonForUniqCountsAfterLastBill(func1, pii_value, timeout, poll_interval, backoff)
+    function getJsonForUniqCountsAfterLastBill(func1, pii_value, timeout, poll_interval, backoff, async_mode, repeat)
     {
       var normalized_timeout = setDefault(timeout, null, TIMEOUT);
       var normalized_poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
@@ -195,7 +222,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       var normalized_message_type = "like";
       var normalized_pii_value = setDefault(pii_value, null, '');
       var request_url = "/piis/show_like_pii_value_uniq_sender_count_after_last_bill.json?"+MESSAGE_TYPE_INPUT+"="+normalized_message_type+"&"+PII_VALUE_INPUT+"="+normalized_pii_value;
-      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
+      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff, async_mode, repeat);
     }; // end function getJsonForUniqCountsAfterLastBill
 
     // Execute a function when we get count of 
@@ -214,7 +241,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
     // finishes, asynchronous ajax call may not be done yet so nothing to
     // return.  Instead accept a function and execute the function
     // when ajax call returns
-    function getJsonForNonUniqCountsAfterLastBill(func1, pii_value, timeout, poll_interval, backoff)
+    function getJsonForNonUniqCountsAfterLastBill(func1, pii_value, timeout, poll_interval, backoff, async_mode, repeat)
     {
       var normalized_timeout = setDefault(timeout, null, TIMEOUT);
       var normalized_poll_interval = setDefault(poll_interval, null, POLL_INTERVAL);
@@ -222,7 +249,7 @@ jQuery.getScript("/javascripts/jquery.timeago.js");
       var normalized_message_type = "like";
       var normalized_pii_value = setDefault(pii_value, null, '');
       var request_url = "/piis/show_like_pii_value_non_uniq_sender_count_after_last_bill.json?"+MESSAGE_TYPE_INPUT+"="+normalized_message_type+"&"+PII_VALUE_INPUT+"="+normalized_pii_value;
-      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff);
+      getJsonBase(request_url, func1, normalized_timeout, normalized_poll_interval, normalized_backoff, async_mode, repeat);
     }; // end function getJsonForNonUniqCountsAfterLastBill
 
     // Execute a function when we get count of 

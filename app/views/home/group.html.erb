@@ -20,7 +20,7 @@ to communicate with meant.it using REST --->
     <script>
     var TIMEOUT = 50000;
     var POLL_INTERVAL = 10000;
-    var BACKOFF = 3;
+    var BACKOFF = 1;
     var PII_VALUE = "<%= group_pii_val %>";
     var MESSAGE_TYPE = "like"
     jQuery(document).ready(function(){
@@ -138,13 +138,13 @@ to communicate with meant.it using REST --->
 //DEBUG alert("pps_value_type:"+pps_value_type);
           if ((pps_value_type == VALUE_TYPE_COUNT) || (pps_value_type == VALUE_TYPE_COUNT))
           {
-            getJsonForNonUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+            getJsonForNonUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF, true, true);
           }
           else if ((pps_value_type == VALUE_TYPE_COUNT_UNIQ) || (pps_value_type == VALUE_TYPE_COUNT_UNIQ))
           {
-            getJsonForUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF);
+            getJsonForUniqCountsAfterLastBill(func0, PII_VALUE, TIMEOUT, POLL_INTERVAL, BACKOFF, true, true);
           } // if ((pps_value_type == VALUE_TYPE_COUNT) || (pps_value_type == VALUE_TYPE_COUNT))
-        } // end jQuery(document).ready
+        } // end jQuery(document).ready function()
       ) // end jQuery(document).ready
     </script>
   <link rel="stylesheet" href="/stylesheets/blueprint/screen.css" type="text/css" media=" screen, projection">

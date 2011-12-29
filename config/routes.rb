@@ -74,7 +74,7 @@ MeantIt::Application.routes.draw do
 
   resources :entities
 
-  get 'piis/pii_property_set_limited/:pii_value' => "piis#pii_property_set_limited"
+  get 'piis/pii_property_set_limited/:pii_value_input' => "piis#pii_property_set_limited"
 
   resources :piis do
     collection do

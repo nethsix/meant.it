@@ -55,6 +55,21 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def is_pii_value_owner?
+    pii_value = params[Constants::PII_VALUE_INPUT]
+    is_owner = false
+    pii = Pii.find_by_pii_value(pii_value)
+    pii_sender_endPoint = ControllerHelper.get_sender_endPoint_from_endPoints(pii.endPoints)
+    entities = pii_sender_endPoint.entities
+    if entities.include?(current_entity)
+      is_owner = true
+    end # end if entities.include?(current_entity)
+    unless is_owner
+      flash[:error] = "Unauthorized access"
+      redirect_to url_for("/")
+    end
+  end # end def is_pii_owner?
+
 #20111023SOLN#2  def redirect_not_logged_in(redirect_url)
 #20111023SOLN#2    unless current_entity
 #20111023SOLN#2      # CODE: base64 encode redirect_url

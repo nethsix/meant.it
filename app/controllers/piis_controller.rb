@@ -2,9 +2,7 @@ require 'controller_helper'
 
 class PiisController < ApplicationController
 #  before_filter :authorize, :except => [:index, :show, :create, :show_by_pii_value ]
-  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill, :show_like_pii_value_non_uniq_sender_count_after_last_bill ]
-
-  before_filter :logged_in, :except => [:pii_property_set]
+  before_filter :authorize, :except => [:create, :show_by_pii_value, :show_by_message_type_uniq_sender_count, :show_like_pii_value_uniq_sender_count_after_last_bill, :show_like_pii_value_non_uniq_sender_count_after_last_bill, :pii_property_set_limited ]
 
   # Create a limited pii_property_set since some information
   # is private
@@ -17,7 +15,7 @@ class PiisController < ApplicationController
   def pii_property_set_limited
     logtag = ControllerHelper.gen_logtag
     logger.info("#{File.basename(__FILE__)}:#{self.class}:pii_property_set_limited:#{logtag}, params.inspect:#{params.inspect}")
-    pii_value = params[:pii_value]
+    pii_value = params[Constants::PII_VALUE_INPUT]
     pii = Pii.find_by_pii_value(pii_value)
     @pps = create_pps_limited(pii_value, pii.pii_property_set)
     respond_to do |format|
