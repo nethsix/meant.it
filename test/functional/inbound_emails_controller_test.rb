@@ -509,12 +509,12 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     final_receiver_pii = Pii.find_by_pii_value(receiver_pii_str)
     assert_equal 2, final_receiver_pii.endPoints.size
     kitty_pii = Pii.find_by_pii_value(first_inbound_email.from)
-    assert 1, kitty_pii.endPoints.size
+    assert_equal(1, kitty_pii.endPoints.size)
     kitty_ep = kitty_pii.endPoints[0]
     kitty_receiver_ep = EndPoint.find_by_nick_and_creator_endpoint_id(receiver_nick_str, kitty_ep.id)
     assert_not_nil final_receiver_pii.endPoints.index(kitty_receiver_ep)
     kuromi_pii = Pii.find_by_pii_value(kuromi_sender_pii_str)
-    assert 1, kuromi_pii.endPoints.size
+    assert_equal(1, kuromi_pii.endPoints.size)
     kuromi_ep = kuromi_pii.endPoints[0]
     kuromi_receiver_ep = EndPoint.find_by_nick_and_creator_endpoint_id(receiver_nick_str, kitty_ep.id)
     assert_not_nil final_receiver_pii.endPoints.index(kuromi_receiver_ep)
@@ -545,9 +545,9 @@ p "#AAAAA MeantItMoodTagRel.all:#{MeantItMoodTagRel.all.inspect}"
     sender_email_hash = ControllerHelper.parse_email(sender_email_str)
     sender_pii_str = sender_email_hash[ControllerHelper::EMAIL_STR]
     kitty_pii = Pii.find_by_pii_value(sender_pii_str)
-    assert 1, kitty_pii.endPoints.size
+    assert_equal(1, kitty_pii.endPoints.size)
     kitty_ep = kitty_pii.endPoints[0]
-    assert 1, kitty_ep.srcMeantItRels.size
+    assert_equal(1, kitty_ep.srcMeantItRels.size)
     receiver_ep = kitty_ep.srcMeantItRels[0].dst_endpoint
     assert receiver_nick_str, receiver_ep.nick
 
@@ -599,9 +599,9 @@ p "#### first_inbound_email:#{first_inbound_email.inspect}"
     end
     assert_response :success
     inbound_email_log_last = InboundEmailLog.last
-    assert_match /#{first_inbound_email.to}/, inbound_email_log_last.params_txt
-    assert_match /#{first_inbound_email.from}/, inbound_email_log_last.params_txt
-    assert_match /#{first_inbound_email.body_text}/, inbound_email_log_last.params_txt
+    assert_match /#{first_inbound_email.to}/, inbound_email_log_last.params_txt['inbound_email']['to']
+    assert_match /#{first_inbound_email.from}/, inbound_email_log_last.params_txt['inbound_email']['from']
+    assert_match /#{first_inbound_email.body_text}/, inbound_email_log_last.params_txt['inbound_email']['body_text']
     assert_match /attachment/, inbound_email_log_last.error_msgs
     assert_match /attachment/, inbound_email_log_last.error_objs
   end # end test "should generate inbound_email_log but response success" do
@@ -646,7 +646,7 @@ p "#AAAAAAA after body_text:#{body_text}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_msgs}"
     p "#### inbound_email_last #2:#{InboundEmail.last.error_objs}"
     assert_match /already has pii_value '#{receiver_pii_str}/, inbound_email_last.error_msgs
-    assert_match /OrderedHash/, inbound_email_last.error_objs
+    assert_match /\{\}/, inbound_email_last.error_objs
   end # end test "should generate error field in inbound_email but response success" do
 
   test "should populate error field in inbound_email" do
@@ -1797,7 +1797,7 @@ p "!!!!!!!!!!!!!email_elem.attributes.inspect:#{email_elem.attributes.inspect}"
     # Check threshold
 p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
 p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
-    assert(hk_pii_email_bill_entries[0].pii_property_set.threshold, sum_thus_far_curr_val)
+    assert(hk_pii_email_bill_entries[0].pii_property_set.threshold <= sum_thus_far_curr_val)
     assert_not_nil(hk_pii_email_bill_entries[0].ready_date)
     # Check price_final, threshold_final
     if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ)
@@ -1992,7 +1992,7 @@ p "!!!!!!!!!!!!!email_elem.attributes.inspect:#{email_elem.attributes.inspect}"
     # Check threshold
 p "!!!!!!sum_thus_far_curr_val:#{sum_thus_far_curr_val}"
 p "!!!!!!hk_pii_email_bill_entries[0].pii_property_set.threshold:#{hk_pii_email_bill_entries[0].pii_property_set.threshold}"
-    assert(hk_pii_email_bill_entries[0].pii_property_set.threshold, hk_pii_email_bill_entries[0].qty)
+    assert_equal(hk_pii_email_bill_entries[0].pii_property_set.threshold, hk_pii_email_bill_entries[0].qty)
     assert_not_nil(hk_pii_email_bill_entries[0].ready_date)
     # Check price_final, threshold_final
     if (value_type == ValueTypeValidator::VALUE_TYPE_VALUE or value_type == ValueTypeValidator::VALUE_TYPE_COUNT_UNIQ)

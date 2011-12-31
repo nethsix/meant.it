@@ -625,7 +625,7 @@ p "### our_receiver_pii_endPoints:#{our_receiver_pii_endPoints.inspect}"
           # Problem with inbound_email saving, this is the fault
           # automated sender.  Only automated sender uses inbound_emails_200
           # Record this error
-          @inbound_email_logs = InboundEmailLog.create(:params_txt => params.inspect.to_s, :error_msgs => message, :error_objs => @inbound_email.errors.inspect.to_s)
+          @inbound_email_logs = InboundEmailLog.create(:params_txt => params, :error_msgs => message, :error_objs => @inbound_email.errors.inspect.to_s)
           logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:error_display:#{logtag}: created InboundEmailLog, @inbound_email_logs.inspect:#{@inbound_email_logs.inspect}")
         else
           # We don't worry cause user will see error message
