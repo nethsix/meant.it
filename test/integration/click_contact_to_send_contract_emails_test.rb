@@ -282,11 +282,11 @@ p "!!!!!!email_elem1_curr_val:#{email_elem1_curr_val}, email_elem2_curr_val:#{em
       contract_email_elem = ActionMailer::Base.deliveries[idx]
       assert_match(/pii:#{pii_value}.*ready/, contract_email_elem.subject)
       assert_equal from_email_arr[idx], contract_email_elem.to[0]
-      assert_match(/Congratulations.*Your order.*invoice #:#{payment_objs_arr[idx].invoice_no}.*pii:#{pii_value}.*succeed.*items:.*#{input_str_arr[idx]}/m, contract_email_elem.body)
+      assert_match(/Congratulations.*Your order.*invoice #:#{payment_objs_arr[idx].invoice_no}.*pii:#{pii_value}.*succeed.*items:.*#{input_str_arr[idx]}/m, contract_email_elem.body.inspect.to_s)
 #20111222 NOTE: We cannot use absolute url (http://.*) match since
 #20111222 in testing we have not fix port so we cannot create absolute url
 #20111222      assert_match(/<a href=.*http:\/\/.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body)
-      assert_match(/<a href=.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body)
+      assert_match(/<a href=.*\/payments\/pay\/invoice_no\/#{CGI::escape(payment_objs_arr[idx].invoice_no)}.*here<\/a>/m, contract_email_elem.body.inspect.to_s)
     } # end (1..2).each ...
     # Simulate user attempting to pay
     user_sess = Capybara::Session.new(:selenium, Capybara.app)

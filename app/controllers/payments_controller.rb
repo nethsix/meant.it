@@ -73,7 +73,7 @@ class PaymentsController < ApplicationController
       respond_to do |format|
         format.html {
           error_msg = "Illegal invoice number"
-          render "pay", :layout => "payment", :locals => { :error => error_msg , :error_msg => error_msg,  :invoice_no => "NA", :item_name => "NA", :item_no => "NA", :quantity => "NA", :amount => "NA", :payment_date => nil }
+          render "pay", :layout => "payment", :locals => { :error => error_msg , :error_msg => error_msg,  :invoice_no => "NA", :item_name => "NA", :item_no => "NA", :quantity => "NA", :amount => "NA", :payment_updated_at => "NA", :payment_created_at => "NA", :payment_status => "NA", :trans_id => "NA" }
         } # end format.html
       end # end respond_to do |format|
     end # end if !payment.nil?
