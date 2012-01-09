@@ -1,4 +1,44 @@
 <% require 'constants' %>
+<script>
+  function warn(event)
+  {
+    // Check if ready_date is available
+    var ready_date_elem = jQuery("#ready_date");
+    var ready_date_str = ready_date_elem.text();
+    var confirm_rval = true;
+    var percent;
+    var percentFloat;
+    // If it's a percentage then obviously, it's not ready
+    var percent_target_arr = ready_date_str.match(/([0-9.]+)%/)
+    if (percent_target_arr != null)
+    {
+      // Get the percent without % sign
+      percent = percent_target_arr[1];
+      percentFloat = parseFloat(percent);
+      if (percentFloat > 100.0)
+      {
+        confirm_rval = ("Target exceeded 100%.  This could be due to lowering of threshold value. Proceed anyway?");
+      } // end if (percentFloat > 100.0)
+      else
+      {
+        confirm_rval = confirm("Target threshold not reached yet. Proceed anyway?");
+      } // end else if (percentFloat > 100.0)
+      if (confirm_rval == true)
+      {
+      } // end if (confirm_rval == true)
+      else
+      {
+         event.preventDefault();
+      } // end else if (confirm_rval == true)
+    } // end if ready_date_elem 
+    else
+    {
+      // If it is not a percentage then target has been reached
+      // billing has been done so no problem.
+    } // end else if ready_data_elem
+    return confirm_rval;
+  } // end function warn
+</script>
 <div class='container'>
   <%= render :partial => "shared/top_menu" %>
   <div class='span-24'>
@@ -68,7 +108,7 @@
             </td>
             <td>
               <% if email_bill_entry.billed_date.nil? %>
-                <%= link_to "Contact", "/send_liker_emails?#{Constants::BILL_ENTRY_ID_VALUE_INPUT}=#{email_bill_entry.id}" %>
+                <%= link_to "Contact", "/send_liker_emails?#{Constants::BILL_ENTRY_ID_VALUE_INPUT}=#{email_bill_entry.id}", :onclick => 'warn(event)' %>
               <% else %>
                 Billed
               <% end # end if email_bill_entry.billed_date.nil? %>
