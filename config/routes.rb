@@ -1,5 +1,7 @@
 MeantIt::Application.routes.draw do
 
+  get "/group/:pii_value_input" => "home#group"
+
   get "/shops/:id" => "shops#show"
   post "/payments/ipn_pp_20111224" => "payments#ipn"
   get "/payments/pay/invoice_no/:invoice_no" => "payments#pay"
