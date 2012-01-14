@@ -85,6 +85,7 @@
           <td width="<%= item_width_percent %>%" >
              <a href='<%= ControllerHelper.get_named_parm_from_formula(entity_pii_virtual.formula, PiiPropertySet::NAME_PARM_URL, "") %>'><img height='<%= img_height %>' width='<%= img_width %>' src='<%= entity_pii_virtual.thumbnail_url_data %>' /></a>
              <img height='<%= img_height %>' width='<%= img_width %>' src='<%= entity_pii_virtual.thumbnail_qr_data %>' />
+             <span class="large">Target:<%= ControllerHelper.threshold_display_str_from_attr(entity_pii_virtual.threshold_currency, entity_pii_virtual.threshold) %></span>
            </td>
 <%
         if item_no_row == 0

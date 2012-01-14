@@ -19,6 +19,10 @@ class HomeController < ApplicationController
     render "message_types", :layout => true
   end
 
+  def cafeshopping
+    render "cafeshopping", :layout => true
+  end
+
   def group
     render "group", :layout => false
   end

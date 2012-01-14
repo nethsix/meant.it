@@ -158,6 +158,7 @@ MeantIt::Application.routes.draw do
   # inbound_email
   match "/group_old.html" => "home#group_old"
   match "/group_diy.html" => "home#group_diy"
+  match "/cafeshopping.html" => "home#cafeshopping"
   match "/like.html" => "home#like"
   match "/platform.html" => "home#platform"
   match "/apis.html" => "home#apis"
