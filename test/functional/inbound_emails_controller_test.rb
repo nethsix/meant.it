@@ -599,6 +599,7 @@ p "#### first_inbound_email:#{first_inbound_email.inspect}"
     end
     assert_response :success
     inbound_email_log_last = InboundEmailLog.last
+p "!!!!inbound_email_log_last:#{inbound_email_log_last.params_txt.inspect}"
     assert_match /#{first_inbound_email.to}/, inbound_email_log_last.params_txt['inbound_email']['to']
     assert_match /#{first_inbound_email.from}/, inbound_email_log_last.params_txt['inbound_email']['from']
     assert_match /#{first_inbound_email.body_text}/, inbound_email_log_last.params_txt['inbound_email']['body_text']
@@ -802,14 +803,25 @@ p "#AAAAAAA after body_text:#{body_text}"
     assert_equal "kuromi@sanrio.com", email
   end # end test "parse email to get nick and email
 
-  test "pick up pii without colon" do
+  test "pick up self-associating pii without colon" do
+    receiver_pii_str = "1===playcat"
+    receiver_nick_str = "playkitten"
+    input_str = "#{receiver_pii_str} #{receiver_nick_str} lawson12 hakusan12 ;you're evil!;"
+    meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
+    assert_equal receiver_pii_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
+    # IMPT: for pick-up of self-associating pii without ":" the
+    # nick is the pii_value itself
+    assert_equal receiver_pii_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
+  end # end test "pick up self-associating pii without colon" do
+
+  test "pick up email pii without colon" do
     receiver_pii_str = "kuromi@sanrio.com"
     receiver_nick_str = "kurochan"
     input_str = "#{receiver_pii_str} #{receiver_nick_str} lawson12 hakusan12 ;you're evil!;"
     meantItRel_hash = ControllerHelper.parse_meant_it_input(input_str)
     assert_equal receiver_pii_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_PII]
     assert_equal receiver_nick_str, meantItRel_hash[ControllerHelper::MEANT_IT_INPUT_RECEIVER_NICK]
-  end # end test "pick up pii without colon" do
+  end # end test "pick up email pii without colon" do
 
   test "send meant.it from webpage results in sender anon or login id" do
     email_elem = inbound_emails(:nick_y_xxx_y_yyy_y_tags_y_sender_idable_inbound_email)

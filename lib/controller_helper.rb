@@ -153,6 +153,14 @@ module ControllerHelper
     Rails.logger.debug("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:parse_meant_it_input:#{logtag}, stripped input_str_arr.inspect:#{input_str_arr.inspect}")
     result_hash[MEANT_IT_INPUT_TAGS_ARR] = input_str_arr.clone + tag_str_arr.clone
     if receiver_pii_str.nil?
+      # Check for self-associating pii on the remaining input_str
+      receiver_pii_arr = input_str_arr.find_all { |str| str.match(/(\d+#{Constants::ENTITY_DOMAIN_MARKER}.*)/) }
+      receiver_pii_str = receiver_pii_arr[0] if !receiver_pii_arr.empty?
+      receiver_pii_arr.each { |rec_pii_elem|
+        input_str_arr.delete(rec_pii_elem)
+      } # end receiver_pii_arr.each ...
+    end # end if receiver_pii_str.nil?
+    if receiver_pii_str.nil?
       # Check for an email on the remaining input_str
       receiver_pii_arr = input_str_arr.find_all { |str| str.match(/.+@.+\..+/) }
       receiver_pii_str = receiver_pii_arr[0] if !receiver_pii_arr.empty?
@@ -172,7 +180,8 @@ module ControllerHelper
     receiver_pii_hide = receiver_pii_str_hash[ControllerHelper::PII_HIDE]
     if !receiver_pii_value_str.nil?
       if self.validate_email(receiver_pii_value_str)
-        # If receiver_pii is email then the nick is the next keyword
+        # If receiver_pii is email or is self-associating pii_value
+        # then the nick is the next keyword
         # NOTE: email is has pii_hide true so we need a nick
         receiver_nick_str = input_str_arr.shift
         receiver_nick_str.strip! if !receiver_nick_str.nil?
