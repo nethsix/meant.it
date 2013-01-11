@@ -39,6 +39,7 @@ class Constants
   SORT_ORDER_INPUT = "sort_order"
   LAYOUT_INPUT = "layout"
   OLD_VERSION_INPUT = "old_ver"
+  FORCE_PARM = "force"
 
   LOGGED_OUT_NOTICE = "Logged out!"
   LOGGED_IN_NOTICE = "Logged in!"
@@ -89,4 +90,10 @@ class Constants
   EMAIL_BILL_READY_COL_NO = 7
   EMAIL_BILL_BILLED_COL_NO = 8
   EMAIL_BILL_ACTIONS_COL_NO = 9
+
+
+  # Messages (TODO: Move to i18n soon)
+  MSG_CONFIRM_PREMATURE_CONTACT_EXCEED = "Target exceeded 100%.  This could be due to lowering of threshold value. Proceed anyway?";
+  MSG_CONFIRM_PREMATURE_CONTACT = "Target threshold not reached yet. Proceed anyway?";
+  MSG_BILLED = "Billed"
 end # end class Constants

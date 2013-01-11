@@ -17,11 +17,11 @@
       percentFloat = parseFloat(percent);
       if (percentFloat > 100.0)
       {
-        confirm_rval = ("Target exceeded 100%.  This could be due to lowering of threshold value. Proceed anyway?");
+        confirm_rval = ("<%= Constants::CONFIRM_PREMATURE_CONTACT_EXCEED %>");
       } // end if (percentFloat > 100.0)
       else
       {
-        confirm_rval = confirm("Target threshold not reached yet. Proceed anyway?");
+        confirm_rval = confirm("<%= Constants::CONFIRM_PREMATURE_CONTACT %>");
       } // end else if (percentFloat > 100.0)
       if (confirm_rval == true)
       {

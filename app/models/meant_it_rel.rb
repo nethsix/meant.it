@@ -233,9 +233,9 @@ class MeantItRel < ActiveRecord::Base
                     email_bill_entry_qty_str = ControllerHelper.subtract_currency_in_str(subtractee_str, subtractor_str, 0)
                     email_bill_entry.currency, email_bill_entry.qty = ControllerHelper.get_currency_code_and_val(email_bill_entry_qty_str)
                   else
-                     logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, COND: !email_bill_entry.nil?, dst_endpoint_pii_pps_value_type is of VALUE_TYPE_xxx_UNIQ, similar_mir.size > 0 and OVERRIDE_MIR, VALUE_TYPE_COUNT_UNIQ, replace mir, but count doesn't change so no qty update")
-                     # We replace the mir but the count remains same
-                     # i.e., we remove old one and add new one
+                    logger.info("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, COND: !email_bill_entry.nil?, dst_endpoint_pii_pps_value_type is of VALUE_TYPE_xxx_UNIQ, similar_mir.size > 0 and OVERRIDE_MIR, VALUE_TYPE_COUNT_UNIQ, replace mir, but count doesn't change so no qty update")
+                    # We replace the mir but the count remains same
+                    # i.e., we remove old one and add new one
                   end # end if dst_endpoint_pii_pps_value_type == ValueTypeValidator::VALUE_TYPE_VALUE_UNIQ
                 else
                   # Use the old mir so do nothing
@@ -342,7 +342,7 @@ class MeantItRel < ActiveRecord::Base
                 pps.status = StatusTypeValidator::STATUS_INACTIVE
                 unless pps.save
                   logger.error("#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, failed to change pii_value:#{pii_value} pps status to #{StatusTypeValidator::STATUS_INACTIVE}")
-                  raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, failed to change pii_value:#{pii_value} pps status to #{StatusTypeValidator::STATUS_ACTIVE}"
+                  raise Exception, "#{File.basename(__FILE__)}:#{self.class}:#{Time.now}:check_pii_property_set_threshold_v2, failed to change pii_value:#{pii_value} pps status to #{StatusTypeValidator::STATUS_INACTIVE}"
                 end # end unless pps.save
               elsif pps.threshold_type == PiiPropertySetThresholdTypeValidator::THRESHOLD_TYPE_RECUR
                 # Don't need to do anything
