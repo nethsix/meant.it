@@ -1,1 +1,3 @@
-This is my first-ever attempt at Ruby/Rails + Bootstrap project. From a Ruby/Rails standpoint the code can definitely be improved with more Ruby-specific idioms/patterns. However, given that I've done software development before, I was comfortable with things like database model design, code modularity, and abstraction, which makes the platform flexible, and easily extensible without requiring code-rewrites.
+This is my first-ever attempt at Ruby/Rails + Bootstrap project so please kindly don't judge my coding skills based on this codebase.
+
+From a Ruby/Rails standpoint the code can definitely be improved with more Ruby-specific idioms/patterns. However, given that I've done software development before, I was comfortable with things like database model design, code modularity, and abstraction, which makes the platform flexible, and easily extensible without requiring code-rewrites.
